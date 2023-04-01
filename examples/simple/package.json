@@ -1,0 +1,15 @@
+{
+  "name": "simple",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "tsx ./index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "@xn-sakina/mental": "^4.0.2",
+    "mahiro": "workspace:*",
+    "tsx": "^3.12.6",
+    "typescript": "^5.0.3"
+  }
+}
