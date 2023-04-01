@@ -1,5 +1,4 @@
 import {
-  DEFAULT_PORT,
   IApiSendFriendMessage,
   IApiSendGroupMessage,
   ICallbacks,
@@ -13,6 +12,7 @@ import {
   CancelListener,
   IMahiroAdvancedOptions,
   DEFAULT_ADANCED_OPTIONS,
+  DEFAULT_NETWORK
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -86,8 +86,8 @@ export class Mahiro {
     }
     const schema = z.union([
       z.object({
-        host: z.string(),
-        port: z.number().default(DEFAULT_PORT),
+        host: z.string().default(DEFAULT_NETWORK.host),
+        port: z.number().default(DEFAULT_NETWORK.port),
         ...sharedSchema,
       }),
       z.object({

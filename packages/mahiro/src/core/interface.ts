@@ -17,15 +17,19 @@ export interface IMahiroInitBase {
   advancedOptions?: IMahiroAdvancedOptions
 }
 
-export const DEFAULT_PORT = 8086
+export const DEFAULT_NETWORK = {
+  host: '0.0.0.0',
+  port: 8086,
+}
 export const DEFAULT_ADANCED_OPTIONS: Required<IMahiroAdvancedOptions> = {
   ignoreMyself: true,
 }
 export interface IMahiroInitWithSimple extends IMahiroInitBase {
   /**
+   * @default 0.0.0.0
    * @example 100.0.0.1
    */
-  host: string
+  host?: string
   /**
    * @default 8086
    */
