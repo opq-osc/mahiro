@@ -12,7 +12,7 @@ import {
   CancelListener,
   IMahiroAdvancedOptions,
   DEFAULT_ADANCED_OPTIONS,
-  DEFAULT_NETWORK
+  DEFAULT_NETWORK,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'

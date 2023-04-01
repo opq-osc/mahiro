@@ -37,6 +37,7 @@
     "@xn-sakina/dora": "^1.0.0",
     "chalk": "^5.2.0",
     "mahiro": "workspace:*",
+    "prettier": "^2.8.7",
     "rimraf": "^4.4.1"
   }
 }
