@@ -182,7 +182,7 @@ export class Mahiro {
       `FromType: ${MsgHead?.FromType}`,
       `MsgType: ${MsgHead?.MsgType}`,
       `C2cCmd: ${MsgHead?.C2cCmd}`,
-      `Content: ${MsgBody?.Content || ''}`
+      `Content: ${MsgBody?.Content || ''}`,
     )
 
     const { ignoreMyself } = this.advancedOptions
@@ -208,7 +208,7 @@ export class Mahiro {
       this.logger.info(
         `Received ${chalk.green('group')} message: `,
         `${data?.groupName}(${data?.groupId})`,
-        `${data?.userNickname}(${data?.userId})`
+        `${data?.userNickname}(${data?.userId})`,
       )
       this.callback.onGroupMessage.forEach((callback) => {
         callback(data, json)
@@ -234,7 +234,7 @@ export class Mahiro {
       // trigger callback
       this.logger.info(
         `Received ${chalk.blue('friend')} message: `,
-        `${data?.userName}(${data?.userId})`
+        `${data?.userName}(${data?.userId})`,
       )
       this.callback.onFreindMessage.forEach((callback) => {
         callback(data, json)
@@ -273,7 +273,7 @@ export class Mahiro {
     return () => {
       this.callback.onGroupMessage.splice(
         this.callback.onGroupMessage.indexOf(callback),
-        1
+        1,
       )
     }
   }
@@ -284,7 +284,7 @@ export class Mahiro {
     return () => {
       this.callback.onFreindMessage.splice(
         this.callback.onFreindMessage.indexOf(callback),
-        1
+        1,
       )
     }
   }
@@ -293,7 +293,7 @@ export class Mahiro {
     this.logger.info(
       `Send ${chalk.green('group')} message: ${data.groupId}, ${
         data?.msg?.Content?.slice(0, 10) || ''
-      }...`
+      }...`,
     )
     const res = await this.sendApi({
       CgiRequest: {
@@ -309,7 +309,7 @@ export class Mahiro {
     this.logger.info(
       `Send ${chalk.blue('friend')} message: ${data.userId}, ${
         data?.msg?.Content?.slice(0, 10) || ''
-      }`
+      }`,
     )
     const res = await this.sendApi({
       CgiRequest: {

@@ -1,0 +1,22 @@
+{
+  "formatter": {
+    "enabled": true,
+    "ignore": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/compiled/**",
+      "**/test/**"
+    ],
+    "indentStyle": "space",
+    "lineWidth": 80,
+    "indentSize": 2
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded"
+    }
+  },
+  "$schema": "https://unpkg.com/rome@latest/configuration_schema.json"
+}

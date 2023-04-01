@@ -69,7 +69,7 @@ export interface ISendMsgResponse {
 }
 
 export enum EFuncName {
-  MagicCgiCmd = 'MagicCgiCmd'
+  MagicCgiCmd = 'MagicCgiCmd',
 }
 
 export interface ISendParams {

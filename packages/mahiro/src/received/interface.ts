@@ -147,9 +147,9 @@ export enum EMsgType {
   /**
    * 收到好友私聊消息
    */
-  friends = 166
+  friends = 166,
 
-  // 被拉群了 
+  // 被拉群了
   // 1. fromType 2 + msgType 33 + c2c 0
   // 2. from 2 + msg 87 + c2c 0
 

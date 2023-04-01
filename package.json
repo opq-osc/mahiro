@@ -2,7 +2,9 @@
   "name": "mahiro",
   "version": "1.0.0",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "format": "rome format ./packages --write"
+  },
   "engines": {
     "pnpm": "^8",
     "node": "^18"
@@ -11,6 +13,7 @@
   "devDependencies": {
     "@types/node": "^18.15.11",
     "@xn-sakina/mental": "^4.0.2",
+    "rome": "^12.0.0",
     "tsx": "^3.12.6",
     "typescript": "^5.0.3"
   }
