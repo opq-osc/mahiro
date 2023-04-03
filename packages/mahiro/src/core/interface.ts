@@ -1,5 +1,6 @@
 import { IMsg, IMsgBody } from '../received/interface'
 import { ICgiRequest } from '../send/interface'
+import { z } from 'zod'
 
 export interface IMahiroAdvancedOptions {
   /**
@@ -15,6 +16,7 @@ export interface IMahiroAdvancedOptions {
 export interface IMahiroInitBase {
   qq: number
   advancedOptions?: IMahiroAdvancedOptions
+  nodeServer?: INodeServerOpts
 }
 
 export const DEFAULT_NETWORK = {
@@ -77,6 +79,21 @@ export interface ICallbacks {
 
 export type IApiMsg = Pick<ICgiRequest, 'Content' | 'AtUinLists' | 'Images'>
 
+const msgSchema = z.object({
+  Content: z.string(),
+  AtUinLists: z.array(z.any()).optional(),
+  Images: z.array(z.any()).optional()
+})
+export const apiSchema = {
+  sendGroupMessage: z.object({
+    groupId: z.number(),
+    msg: msgSchema
+  }),
+  sendFriendMessage: z.object({
+    userId: z.number(),
+    msg: msgSchema
+  })
+} satisfies Record<string, z.ZodSchema<any>>
 export interface IApiSendGroupMessage {
   groupId: number
   msg: IApiMsg
@@ -86,3 +103,25 @@ export interface IApiSendFriendMessage {
   userId: number
   msg: IApiMsg
 }
+
+const getDefaultNodeServerPort = () => {
+  const fallback = 8098
+  const env = process.env.MAHIRO_NODE_URL
+  if (env?.length) {
+    const url = new URL(env)
+    return parseInt(url.port, 10) || fallback
+  }
+  return fallback
+}
+export const DEFAULT_NODE_SERVER: Required<INodeServerOpts> = {
+  port: getDefaultNodeServerPort(),
+}
+export interface INodeServerOpts {
+  port?: number
+}
+export const SERVER_ROUTES = {
+  recive: {
+    group: '/recive/group',
+    friend: '/recive/friend',
+  }
+} as const

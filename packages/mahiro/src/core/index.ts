@@ -13,6 +13,10 @@ import {
   IMahiroAdvancedOptions,
   DEFAULT_ADANCED_OPTIONS,
   DEFAULT_NETWORK,
+  INodeServerOpts,
+  DEFAULT_NODE_SERVER,
+  SERVER_ROUTES,
+  apiSchema,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -37,6 +41,8 @@ import {
 } from '../received/interface'
 import chalk from 'mahiro/compiled/chalk'
 import figlet from 'figlet'
+import express from 'express'
+import cors from 'cors'
 
 export class Mahiro {
   ws!: string
@@ -44,7 +50,15 @@ export class Mahiro {
   qq!: number
   logger = consola
 
+  // ws instance
+  wsIns!: WebSocket
+  wsRetrying = false
+  wsConnected = false
+
   advancedOptions!: Required<IMahiroAdvancedOptions>
+
+  app!: express.Express
+  nodeServer!: Required<INodeServerOpts>
 
   callback: ICallbacks = {
     onGroupMessage: [],
@@ -56,6 +70,7 @@ export class Mahiro {
     this.checkInitOpts(opts)
     this.initUrl()
     this.connect()
+    this.startNodeServer()
   }
 
   private printLogo() {
@@ -83,6 +98,11 @@ export class Mahiro {
             .default(DEFAULT_ADANCED_OPTIONS.ignoreMyself),
         })
         .default(DEFAULT_ADANCED_OPTIONS),
+      nodeServer: z
+        .object({
+          port: z.number().default(DEFAULT_NODE_SERVER.port),
+        })
+        .default(DEFAULT_NODE_SERVER),
     }
     const schema = z.union([
       z.object({
@@ -103,6 +123,9 @@ export class Mahiro {
     this.advancedOptions =
       result.advancedOptions as Required<IMahiroAdvancedOptions>
     this.logger.debug('Advanced options: ', this.advancedOptions)
+    // nodeServer
+    this.nodeServer = result.nodeServer as Required<INodeServerOpts>
+    this.logger.debug('Node server options: ', this.nodeServer)
 
     // ws
     const withWs = result as IMahiroInitWithWs
@@ -120,30 +143,28 @@ export class Mahiro {
   }
 
   private connect() {
+    this.wsRetrying = false
     this.logger.info('Try connect...')
-    let ws: WebSocket | null = new WebSocket(this.ws)
+    const ws: WebSocket = this.wsIns = new WebSocket(this.ws)
 
-    const retryConnect = (time: number = 3 * 1e3) => {
-      if (ws) {
-        ws.close()
-        ws = null
+    const retryConnect = (time: number = 5 * 1e3) => {
+      if (this.wsRetrying) {
+        return
       }
       this.logger.warn('Retry connect..., wait ', time, 'ms')
+      this.wsRetrying = true
       setTimeout(() => {
         this.connect()
       }, time)
     }
-    if (!ws) {
-      return
-    }
 
     ws.on('error', (err) => {
       this.logger.error(`WS Error: `, err)
-      retryConnect()
     })
 
     ws.on('open', () => {
       this.logger.success('WS Connected', this.ws)
+      this.wsConnected = true
     })
 
     ws.on('message', (data: Buffer) => {
@@ -159,6 +180,7 @@ export class Mahiro {
 
     ws.on('close', () => {
       this.logger.warn('WS Closed')
+      this.wsConnected = false
       retryConnect()
     })
   }
@@ -246,6 +268,10 @@ export class Mahiro {
   private async sendApi(opts: {
     CgiRequest: ISendMsg['CgiRequest']
   }): Promise<ISendMsgResponse | undefined> {
+    if (!this.wsConnected) {
+      this.logger.error('WS not connected, send api failed')
+      return
+    }
     const { CgiRequest } = opts
     const params = {
       funcname: EFuncName.MagicCgiCmd,
@@ -319,5 +345,72 @@ export class Mahiro {
       },
     })
     return res
+  }
+
+  private startNodeServer() {
+    const { port } = this.nodeServer
+    const app = (this.app = express())
+    this.addBaseServerMiddleware()
+    this.addBaseServerRoutes()
+    app.listen(port, () => {
+      this.logger.info(`[Node Server] start at ${chalk.magenta(port)}`)
+    })
+  }
+
+  private addBaseServerMiddleware() {
+    this.logger.debug('[Node Server] Add base middleware')
+    const app = this.app
+    app.use(express.json())
+    app.use(cors())
+  }
+
+  private addBaseServerRoutes() {
+    this.logger.debug('[Node Server] Add base routes')
+    const app = this.app
+    // recive message
+    app.post(SERVER_ROUTES.recive.group, async (req, res) => {
+      const json = req.body as IApiSendGroupMessage
+      try {
+        apiSchema.sendGroupMessage.parse(json)
+        // todo: transform to api schema
+        this.logger.debug(
+          '[Node Server] Recive group message: ',
+          JSON.stringify(json),
+        )
+        await this.sendGroupMessage(json)
+        res.json({
+          code: 200,
+        })
+        res.status(200)
+      } catch {
+        this.logger.error('[Node Server] Recive group message error: ', json)
+        res.json({
+          code: 500,
+        })
+        res.status(500)
+      }
+    })
+    app.post(SERVER_ROUTES.recive.friend, async (req, res) => {
+      const json = req.body as IApiSendFriendMessage
+      try {
+        apiSchema.sendFriendMessage.parse(json)
+        // todo: transform to api schema
+        this.logger.debug(
+          '[Node Server] Recive friend message: ',
+          JSON.stringify(json),
+        )
+        await this.sendFriendMessage(json)
+        res.json({
+          code: 200,
+        })
+        res.status(200)
+      } catch {
+        this.logger.error('[Node Server] Recive friend message error: ', json)
+        res.json({
+          code: 500,
+        })
+        res.status(500)
+      }
+    })
   }
 }
