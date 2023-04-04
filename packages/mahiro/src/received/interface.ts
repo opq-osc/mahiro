@@ -29,7 +29,7 @@ export interface IEventData {
   MsgBody?: IMsgBody
 }
 
-export enum EMsgType {
+export enum ESubMsgType {
   /**
    * 0为单一或复合类型消息(文字 At 图片 自由组合)
    */
@@ -83,7 +83,7 @@ export interface IVideo {
 }
 
 export interface IMsgBody {
-  SubMsgType: EMsgType
+  SubMsgType: ESubMsgType
   /**
    * 接受的内容 文字/XML/JSON
    *

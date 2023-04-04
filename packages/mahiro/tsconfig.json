@@ -2,7 +2,8 @@
   "extends": "@xn-sakina/mental/lib",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "declarationMap": true
   },
   "include": ["src"]
 }

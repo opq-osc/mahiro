@@ -43,6 +43,7 @@ import chalk from 'mahiro/compiled/chalk'
 import figlet from 'figlet'
 import express from 'express'
 import cors from 'cors'
+import { removeNull } from '../utils/removeNULL'
 
 export class Mahiro {
   ws!: string
@@ -59,6 +60,7 @@ export class Mahiro {
 
   app!: express.Express
   nodeServer!: Required<INodeServerOpts>
+  pythonServerCannotConnect = false
 
   callback: ICallbacks = {
     onGroupMessage: [],
@@ -101,6 +103,7 @@ export class Mahiro {
       nodeServer: z
         .object({
           port: z.number().default(DEFAULT_NODE_SERVER.port),
+          pythonPort: z.number().default(DEFAULT_NODE_SERVER.pythonPort),
         })
         .default(DEFAULT_NODE_SERVER),
     }
@@ -196,7 +199,10 @@ export class Mahiro {
       this.logger.error('Unsupport event name: ', EventName)
       return
     }
-    const { MsgHead, MsgBody } = EventData
+    const { MsgHead, MsgBody: _MsgBody } = EventData
+    // remove msg body null value
+    // because null can not match models in python
+    const MsgBody = removeNull(_MsgBody)
 
     // debug log
     this.logger.debug(
@@ -355,6 +361,7 @@ export class Mahiro {
     app.listen(port, () => {
       this.logger.info(`[Node Server] start at ${chalk.magenta(port)}`)
     })
+    this.registryPythonForward()
   }
 
   private addBaseServerMiddleware() {
@@ -411,6 +418,47 @@ export class Mahiro {
         })
         res.status(500)
       }
+    })
+  }
+
+  private async sendToPython(opts: { path: string, data: Record<string, any> }) {
+    const { path, data } = opts
+    const base = `http://0.0.0.0:${this.nodeServer.pythonPort}`
+    this.logger.debug(`[Node Server] Python Forward - ${path}: `, data)
+    const url = `${base}${path}`
+    try {
+      const res = await axios.post(url, data)
+      if (res.status !== 200) {
+        this.logger.error(`[Node Server] Python Forward - ${path} status error: `, res.status)
+      }
+      if (res.data?.code !== 200) {
+        this.logger.error(`[Node Server] Python Forward - ${path} response code error: `, res.data?.code)
+      }
+      return res.data
+    } catch (e) {
+      if (!this.pythonServerCannotConnect) {
+        // only log once
+        this.logger.warn(`[Node Server] Python Forward - Failed`)
+        this.pythonServerCannotConnect = true
+      }
+    }
+  }
+
+  private registryPythonForward() {
+    const prefix = `[Node Server] Python Forward - `
+    const pathWithGroup = `/recive/group`
+    this.onGroupMessage(`${prefix}Group Message`, async (data) => {
+      await this.sendToPython({
+        path: pathWithGroup,
+        data,
+      })
+    })
+    const pathWithFriend = `/recive/friend`
+    this.onFriendMessage(`${prefix}Friend Message`, async (data) => {
+      await this.sendToPython({
+        path: pathWithFriend,
+        data,
+      })
     })
   }
 }

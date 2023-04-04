@@ -113,11 +113,20 @@ const getDefaultNodeServerPort = () => {
   }
   return fallback
 }
+const getDefaultPythonServerPort = () => {
+  const env = process.env.MAHIRO_PYTHON_PORT
+  if (env?.length) {
+    return parseInt(env, 10)
+  }
+  return 8099
+}
 export const DEFAULT_NODE_SERVER: Required<INodeServerOpts> = {
   port: getDefaultNodeServerPort(),
+  pythonPort: getDefaultPythonServerPort(),
 }
 export interface INodeServerOpts {
   port?: number
+  pythonPort?: number
 }
 export const SERVER_ROUTES = {
   recive: {
