@@ -1,0 +1,4 @@
+[submodule "python/plugins/chinchin_pk"]
+	path = python/plugins/chinchin_pk
+	url = https://github.com/opq-osc/chinchin-pk.git
+	branch = main

@@ -2,7 +2,7 @@ import { Mahiro } from 'mahiro'
 
 const run = async () => {
   const ins = new Mahiro({
-    // host: `100.0.0.1`,
+    host: `100.0.0.1`,
     qq: 12345678,
   })
 
