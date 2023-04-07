@@ -10,6 +10,7 @@ from .models import (
 
 # plugins
 from plugins.chinchin_pk_mahiro.main import chinchin_pk
+from plugins.opqqq_plugins_mahiro.src.bot_good_morning import bot_good_morning
 
 app = FastAPI()
 
@@ -23,6 +24,7 @@ async def recive_group(data: GroupMessage):
     # call plugins
     # TODO: auto import all plugins and dynamic call
     await chinchin_pk(mahiro)
+    await bot_good_morning(mahiro)
 
     # response
     return {"code": 200}

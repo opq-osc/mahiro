@@ -1,0 +1,2 @@
+ujson==5.7.0
+python_dateutil
