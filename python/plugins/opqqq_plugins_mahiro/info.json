@@ -1,3 +1,4 @@
 {
-  "repo": "https://github.com/opq-osc/opqqq-plugin"
+  "repo": "https://github.com/opq-osc/opqqq-plugin",
+  "todo": ["sign-in", "image-custom", "throw-creep", "vtuber-fortune"]
 }
