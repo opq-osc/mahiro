@@ -1,7 +1,9 @@
 import { join } from 'path'
 import { IMsg, IMsgBody } from '../received/interface'
-import { ICgiRequest } from '../send/interface'
+import { ICgiRequest, ISendMsg, ISendParams } from '../send/interface'
 import { z } from 'zod'
+import { consola } from 'consola'
+import { securityCopilotInterceptor } from '../interceptors/securityCopilot'
 
 export interface IMahiroAdvancedOptions {
   /**
@@ -18,7 +20,31 @@ export interface IMahiroAdvancedOptions {
    * @default ${cwd}/mahiro.db
    */
   databasePath?: string
+
+  /**
+   * 发送消息拦截器
+   * @default []
+   */
+  interceptors?: IMahiroInterceptor[]
 }
+
+export type IMahiroMsgStack = Map<number, IMahiroMsgHistory[]>
+
+export interface IMahiroMsgHistory {
+  time: number
+  msg: ISendMsg
+}
+
+export interface IMahiroInterceptorContext {
+  params: ISendParams
+  data: ISendMsg
+  logger: typeof consola
+  stack: readonly IMahiroMsgHistory[]
+}
+export type IMahiroInterceptorFunction = (
+  ctx: IMahiroInterceptorContext,
+) => Promise<boolean> | boolean
+export type IMahiroInterceptor = string | IMahiroInterceptorFunction
 
 export interface IMahiroInitBase {
   qq: number
@@ -33,6 +59,7 @@ export const DEFAULT_NETWORK = {
 export const DEFAULT_ADANCED_OPTIONS: Required<IMahiroAdvancedOptions> = {
   ignoreMyself: true,
   databasePath: join(process.cwd(), 'mahiro.db'),
+  interceptors: [securityCopilotInterceptor],
 }
 export interface IMahiroInitWithSimple extends IMahiroInitBase {
   /**
@@ -95,17 +122,17 @@ export type IApiMsg = Pick<ICgiRequest, 'Content' | 'AtUinLists' | 'Images'>
 const msgSchema = z.object({
   Content: z.string(),
   AtUinLists: z.array(z.any()).optional(),
-  Images: z.array(z.any()).optional()
+  Images: z.array(z.any()).optional(),
 })
 export const apiSchema = {
   sendGroupMessage: z.object({
     groupId: z.number(),
-    msg: msgSchema
+    msg: msgSchema,
   }),
   sendFriendMessage: z.object({
     userId: z.number(),
-    msg: msgSchema
-  })
+    msg: msgSchema,
+  }),
 } satisfies Record<string, z.ZodSchema<any>>
 export interface IApiSendGroupMessage {
   groupId: number
@@ -145,7 +172,7 @@ export const SERVER_ROUTES = {
   recive: {
     group: '/api/v1/recive/group',
     friend: '/api/v1/recive/friend',
-  }
+  },
 } as const
 
 export const ASYNC_CONTEXT_SPLIT = '__ASYNC_CONTEXT_SPLIT__'

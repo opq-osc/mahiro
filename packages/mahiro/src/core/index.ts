@@ -18,6 +18,9 @@ import {
   SERVER_ROUTES,
   apiSchema,
   ASYNC_CONTEXT_SPLIT,
+  IMahiroInterceptorContext,
+  IMahiroInterceptorFunction,
+  IMahiroMsgStack,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -57,6 +60,7 @@ export class Mahiro {
   url!: string
   qq!: number
   logger = consola
+  loggerWithInterceptor = consola.withTag('interceptor') as typeof consola
 
   // ws instance
   wsIns!: WebSocket
@@ -86,10 +90,18 @@ export class Mahiro {
   // async context
   asyncLocalStorage = new AsyncLocalStorage()
 
+  // msg stack
+  msgStack: IMahiroMsgStack = new Map()
+  msgStackConfig = {
+    timeout: 3 * 60 * 1e3,
+    max: 10,
+  }
+
   constructor(opts: IMahiroOpts) {
     this.printLogo()
     this.checkInitOpts(opts)
     this.initUrl()
+    this.registerInterceptors()
   }
 
   async run() {
@@ -133,6 +145,11 @@ export class Mahiro {
           databasePath: z
             .string()
             .default(DEFAULT_ADANCED_OPTIONS.databasePath),
+          interceptors: z
+            .array(
+              z.union([z.string(), z.custom((v) => typeof v === 'function')]),
+            )
+            .default(DEFAULT_ADANCED_OPTIONS.interceptors),
         })
         .default(DEFAULT_ADANCED_OPTIONS),
       nodeServer: z
@@ -271,7 +288,7 @@ export class Mahiro {
         msg: MsgBody!,
         configs: {
           availablePlugins: [],
-        }
+        },
       } as IGroupMessage
       // ignore myself
       if (ignoreMyself && data.userId === this.qq) {
@@ -365,16 +382,67 @@ export class Mahiro {
     } satisfies ISendParams
     const stringifyParams = qs.stringify(params)
     const sendMsgUrl = `${this.url}/v1/LuaApiCaller?${stringifyParams}`
+    const data: ISendMsg = {
+      CgiCmd: ESendCmd.send,
+      CgiRequest,
+    }
+    // run interceptor
+    const interceptors = this.advancedOptions
+      .interceptors as IMahiroInterceptorFunction[]
+    if (interceptors?.length) {
+      const context: IMahiroInterceptorContext = {
+        params,
+        data,
+        logger: this.loggerWithInterceptor,
+        stack: Object.freeze(this.msgStack.get(CgiRequest.ToUin) || []),
+      }
+      for await (const inter of interceptors) {
+        const notDrop = await inter(context)
+        if (!notDrop) {
+          this.logger.info('[Interceptor] Drop message: ', JSON.stringify(data))
+          return
+        }
+      }
+    }
     try {
-      const res = await axios.post(sendMsgUrl, {
-        CgiCmd: ESendCmd.send,
-        CgiRequest,
-      } satisfies ISendMsg)
+      const res = await axios.post(sendMsgUrl, data)
+      // push to stack
+      this.pushMsgToStack(data)
       if (res?.data) {
         return res.data
       }
     } catch (e) {
       this.logger.error('Send api error: ', e)
+    }
+  }
+
+  private pushMsgToStack(data: ISendMsg) {
+    const to = data.CgiRequest?.ToUin
+    if (to) {
+      const { max, timeout } = this.msgStackConfig
+      const stack = this.msgStack.get(to) || []
+      // check expired
+      const now = Date.now()
+      while (!!stack.length) {
+        const timeGap = now - stack[0].time
+        const isExpired = timeGap > timeout
+        if (isExpired) {
+          stack.shift()
+        } else {
+          break
+        }
+      }
+      // check max
+      if (stack.length >= max) {
+        stack.shift()
+      }
+      // push
+      stack.push({
+        time: now,
+        msg: data,
+      })
+      // max length
+      this.msgStack.set(to, stack)
     }
   }
 
@@ -572,7 +640,9 @@ export class Mahiro {
       return res.data
     } catch (e) {
       // python 掉了，需要清掉外部插件
-      this.logger.debug(`[Node Server] Python Forward Offline, will clear plugins`)
+      this.logger.debug(
+        `[Node Server] Python Forward Offline, will clear plugins`,
+      )
       this.db.clearExternalPlugins()
       // warn only once
       if (!this.pythonServerCannotConnect) {
@@ -614,5 +684,24 @@ export class Mahiro {
     })
     await this.db.init()
     this.logger.info(`[Database] Connected`)
+  }
+
+  private registerInterceptors() {
+    this.logger.debug(`[Interceptors] Registering...`)
+    const interceptors = this.advancedOptions.interceptors
+    for (let i = 0; i < interceptors.length; i++) {
+      const value = interceptors[i]
+      const isString = typeof value === 'string'
+      if (isString) {
+        try {
+          interceptors[i] = require(value)
+        } catch {
+          this.logger.error(
+            `[Interceptors] Register failed from path: ${value}`,
+          )
+        }
+      }
+    }
+    this.logger.debug(`[Interceptors] Registered`)
   }
 }
