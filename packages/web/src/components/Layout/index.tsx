@@ -13,6 +13,8 @@ import zhCN from 'antd/locale/zh_CN'
 import dayjs from 'dayjs'
 
 import 'dayjs/locale/zh-cn'
+import { useVersion } from '@/stores/global'
+import { useVersionGet } from '@/hooks/useVersionGet'
 dayjs.locale('zh-cn')
 
 const queryClient = new QueryClient({
@@ -26,16 +28,46 @@ const queryClient = new QueryClient({
 
 const Logo = styled.div`
   color: #b080fe;
+  font-family: Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif;
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 550;
   padding: 15px 10px;
+  cursor: default;
   text-align: center;
   border-inline-end: 1px solid rgba(5, 5, 5, 0.06);
 `
 
+const Version = styled.div`
+  font-size: 12px;
+  font-weight: 550;
+  padding: 0 5px;
+  font-style: italic;
+  letter-spacing: .3px;
+`
+
 export const Layout = () => {
+  return (
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#B080FE',
+        },
+      }}
+      locale={zhCN}
+    >
+      <QueryClientProvider client={queryClient}>
+        <Internal />
+      </QueryClientProvider>
+    </ConfigProvider>
+  )
+}
+
+const Internal = () => {
   const location = useLocation()
   const navigate = useNavigate()
+
+  useVersionGet()
+  const [version] = useVersion()
 
   const getDefaultSelectedKeys = useCallback(() => {
     const pathname = location.pathname
@@ -52,62 +84,54 @@ export const Layout = () => {
   }, [])
 
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: '#B080FE',
-        },
+    <AntdLayout
+      style={{
+        height: '100vh',
       }}
-      locale={zhCN}
     >
-      <QueryClientProvider client={queryClient}>
-        <AntdLayout
+      <AntdLayout.Sider theme="light" trigger={null} collapsible>
+        <Logo>
+          Mahiro
+          <Version>{version}</Version>
+        </Logo>
+        <Menu
           style={{
-            height: '100vh',
+            height: '100%',
+          }}
+          mode="inline"
+          defaultSelectedKeys={getDefaultSelectedKeys()}
+          onClick={(e) => {
+            changePath(`/${e.key}`)
+          }}
+          items={[
+            {
+              key: EMenu.home,
+              icon: <HomeOutlined />,
+              label: '首页',
+            },
+            {
+              key: EMenu.plugins,
+              icon: <FireOutlined />,
+              label: '插件管理',
+            },
+            {
+              key: EMenu.groups,
+              icon: <UsergroupAddOutlined />,
+              label: '群组管理',
+            },
+          ]}
+        />
+      </AntdLayout.Sider>
+      <AntdLayout className="site-layout">
+        <AntdLayout.Content
+          style={{
+            background: '#fff',
+            padding: 24,
           }}
         >
-          <AntdLayout.Sider theme="light" trigger={null} collapsible>
-            <Logo>Mahiro</Logo>
-            <Menu
-              style={{
-                height: '100%',
-              }}
-              mode="inline"
-              defaultSelectedKeys={getDefaultSelectedKeys()}
-              onClick={(e) => {
-                changePath(`/${e.key}`)
-              }}
-              items={[
-                {
-                  key: EMenu.home,
-                  icon: <HomeOutlined />,
-                  label: '首页',
-                },
-                {
-                  key: EMenu.plugins,
-                  icon: <FireOutlined />,
-                  label: '插件管理',
-                },
-                {
-                  key: EMenu.groups,
-                  icon: <UsergroupAddOutlined />,
-                  label: '群组管理',
-                },
-              ]}
-            />
-          </AntdLayout.Sider>
-          <AntdLayout className="site-layout">
-            <AntdLayout.Content
-              style={{
-                background: '#fff',
-                padding: 24,
-              }}
-            >
-              <Outlet />
-            </AntdLayout.Content>
-          </AntdLayout>
-        </AntdLayout>
-      </QueryClientProvider>
-    </ConfigProvider>
+          <Outlet />
+        </AntdLayout.Content>
+      </AntdLayout>
+    </AntdLayout>
   )
 }

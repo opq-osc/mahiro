@@ -30,7 +30,7 @@
 ### Usage
 
 ```ts
-import { Mahiro } from '../src'
+import { Mahiro } from 'mahiro'
 
 const run = async () => {
   const ins = await Mahiro.start({

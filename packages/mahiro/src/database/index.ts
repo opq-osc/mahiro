@@ -16,6 +16,7 @@ import { toArrayNumber } from '../utils'
 import dayjs from 'dayjs'
 import { type Express } from 'express'
 import { uniq } from 'lodash'
+import chalk from 'mahiro/compiled/chalk'
 
 export class Database {
   private path!: string
@@ -104,6 +105,11 @@ export class Database {
     } else {
       // todo: check version and upgrade columns
     }
+  }
+
+  async getVersion() {
+    const version = await this.db(this.table.version).first()
+    return version.version as EVersion
   }
 
   async registerPlugin(
@@ -310,13 +316,73 @@ export class Database {
     return this.groupCache.get(groupId)
   }
 
-  // todo: 管理插件
-  async isGroupAdmin(groupId: number, userId: number) {
+  async isGroupAdmin(opts: { groupId: number; userId: number }) {
+    const { groupId, userId } = opts
     const group = await this.getGroupMapFromCache(groupId)
     if (group) {
       return group.admins.includes(userId)
     }
     return false
+  }
+
+  private async getPluginIdByName(name: string) {
+    const plugins = await this.getPluginListFromCache()
+    const pluginId = plugins
+      .filter((p) => !p.internal && p.enabled)
+      .find((p) => p.name === name)?.id
+    return pluginId
+  }
+
+  async closePlugin(opts: { groupId: number; pluginName: string }) {
+    const { groupId, pluginName } = opts
+    const pluginId = await this.getPluginIdByName(pluginName)
+    if (!pluginId) {
+      return false
+    }
+    const group = await this.getGroupMapFromCache(groupId)
+    if (!group) {
+      return false
+    }
+    const newGroupPlugins = group.plugins.filter((p) => p !== pluginId)
+    const res = await this.updateGroup({
+      id: group.id,
+      plugins: newGroupPlugins,
+    })
+    this.logger.info(
+      `[Admin Manager] Group(${groupId}) ${chalk.gray(
+        'close',
+      )} plugin(${pluginName}) by admin`,
+    )
+    if (res) {
+      this.groupCache.delete(groupId)
+    }
+    return true
+  }
+
+  async openPlugin(opts: { groupId: number; pluginName: string }) {
+    const { groupId, pluginName } = opts
+    const pluginId = await this.getPluginIdByName(pluginName)
+    if (!pluginId) {
+      return false
+    }
+    const group = await this.getGroupMapFromCache(groupId)
+    if (!group) {
+      return false
+    }
+    const newGroupPlugins = uniq([...group.plugins, pluginId])
+    const res = await this.updateGroup({
+      id: group.id,
+      plugins: newGroupPlugins,
+    })
+    this.logger.info(
+      `[Admin Manager] Group(${groupId}) ${chalk.green(
+        'open',
+      )} plugin(${pluginName}) by admin`,
+    )
+    if (res) {
+      this.groupCache.delete(groupId)
+    }
+    return true
   }
 
   async isGroupValid(groupId: number) {
@@ -486,8 +552,23 @@ export class Database {
         })
       }
     })
+    // get versions
+    app.get(DATABASE_APIS.getVersion, async (req, res, next) => {
+      res.status(200)
+      try {
+        const version = await this.getVersion()
+        res.json({
+          code: 200,
+          data: version,
+        })
+      } catch (e: any) {
+        res.json({
+          code: 500,
+          message: e?.message || 'Internal Server Error',
+        })
+      }
+    })
   }
 
   // todo: 发卡
-  // todo: js interpreter
 }

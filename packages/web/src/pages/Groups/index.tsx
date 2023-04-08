@@ -290,7 +290,7 @@ function AddModal({
           <Form.Item
             name="admins"
             label="管理员"
-            extra="可以先不设置或留空，后面有需求再添加"
+            extra="某个群的管理员，可以用命令 .clode 插件名  / .open 插件名 来关闭或开启任何在后台面板里启用的插件"
             rules={[numberListValidator]}
             initialValue={[]}
           >

@@ -11,8 +11,8 @@ container = GroupMessageContainer()
 
 # load plugins
 # TODO: auto import all plugins and dynamic call
-container.add(id="chinchin_pk", callback=chinchin_pk)
-container.add(id="bot_good_morning", callback=bot_good_morning)
+container.add(id="牛了个牛", callback=chinchin_pk)
+container.add(id="早晚安", callback=bot_good_morning)
 
 
 @app.post("/recive/group")

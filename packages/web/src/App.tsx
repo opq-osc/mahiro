@@ -1,5 +1,5 @@
 import {
-  createBrowserRouter,
+  createHashRouter,
   createRoutesFromElements,
   Route,
   RouterProvider,
@@ -20,7 +20,7 @@ function Redirect({ to }: { to: string }) {
   return null
 }
 
-const router = createBrowserRouter(
+const router = createHashRouter(
   createRoutesFromElements(
     <Route element={<Layout />}>
       <Route index element={<Redirect to={`/${EMenu.home}`} />} />

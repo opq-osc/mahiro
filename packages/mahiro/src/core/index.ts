@@ -53,6 +53,7 @@ import { AsyncLocalStorage } from 'async_hooks'
 import { existsSync } from 'fs'
 import { dirname, join } from 'path'
 import serveStatic from 'serve-static'
+import { cloneDeep, trim } from 'lodash'
 
 export class Mahiro {
   // base props
@@ -101,7 +102,6 @@ export class Mahiro {
     this.printLogo()
     this.checkInitOpts(opts)
     this.initUrl()
-    this.registerInterceptors()
   }
 
   async run() {
@@ -109,6 +109,8 @@ export class Mahiro {
     await this.connect()
     await this.connectDatabase()
     await this.startNodeServer()
+    this.registerInterceptors()
+    this.registerAdminManager()
     this.logger.success('Mahiro started')
     this.initialled = true
   }
@@ -394,7 +396,7 @@ export class Mahiro {
         params,
         data,
         logger: this.loggerWithInterceptor,
-        stack: Object.freeze(this.msgStack.get(CgiRequest.ToUin) || []),
+        stack: cloneDeep(this.msgStack.get(CgiRequest.ToUin) || []),
       }
       for await (const inter of interceptors) {
         const notDrop = await inter(context)
@@ -549,6 +551,7 @@ export class Mahiro {
       app.use(
         serveStatic(join(websiteDist), {
           index: ['index.html'],
+          // not need fallback, because we have use hash router
         }),
       )
       const url = `http://localhost:${this.nodeServer.port}`
@@ -703,5 +706,74 @@ export class Mahiro {
       }
     }
     this.logger.debug(`[Interceptors] Registered`)
+  }
+
+  private registerAdminManager() {
+    this.logger.debug(`[Admin Manager] Registering...`)
+    const cmd = {
+      open: /^\.open (.+)/,
+      close: /^\.close (.+)/,
+    } as const
+    this.onGroupMessage(
+      '[Admin Manager] Plugin Manager',
+      async (data) => {
+        const isAdmin = await this.db.isGroupAdmin({
+          groupId: data.groupId,
+          userId: data.userId,
+        })
+        if (!isAdmin) {
+          return
+        }
+        const content = data.msg?.Content
+        if (!content?.length) {
+          return
+        }
+        const matchOpen = content.match(cmd.open)
+        if (matchOpen) {
+          const name = matchOpen[1]
+          if (!name?.length || !trim(name)?.length) {
+            return
+          }
+          this.logger.debug(`[Admin Manager] Open plugin: ${name}`)
+          const success = await this.db.openPlugin({
+            pluginName: trim(name),
+            groupId: data.groupId,
+          })
+          if (success) {
+            this.sendGroupMessage({
+              groupId: data.groupId,
+              msg: {
+                Content: `插件 ${name} 已开启`,
+              },
+            })
+          }
+        }
+        const matchClose = content.match(cmd.close)
+        if (matchClose) {
+          const name = matchClose[1]
+          if (!name?.length || !trim(name)?.length) {
+            return
+          }
+          this.logger.debug(`[Admin Manager] Close plugin: ${name}`)
+          const success = await this.db.closePlugin({
+            pluginName: trim(name),
+            groupId: data.groupId,
+          })
+          if (success) {
+            this.sendGroupMessage({
+              groupId: data.groupId,
+              msg: {
+                Content: `插件 ${name} 已关闭`,
+              },
+            })
+          }
+          return
+        }
+      },
+      {
+        internal: true,
+      },
+    )
+    this.logger.debug(`[Admin Manager] Registered`)
   }
 }
