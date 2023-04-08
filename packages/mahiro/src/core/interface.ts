@@ -1,3 +1,4 @@
+import { join } from 'path'
 import { IMsg, IMsgBody } from '../received/interface'
 import { ICgiRequest } from '../send/interface'
 import { z } from 'zod'
@@ -11,6 +12,12 @@ export interface IMahiroAdvancedOptions {
 
   // TODO: 发消息队列
   // messageQueue?: IMahiroMessageQueue
+
+  /**
+   * mahiro 管理面板数据库路径
+   * @default ${cwd}/mahiro.db
+   */
+  databasePath?: string
 }
 
 export interface IMahiroInitBase {
@@ -25,6 +32,7 @@ export const DEFAULT_NETWORK = {
 }
 export const DEFAULT_ADANCED_OPTIONS: Required<IMahiroAdvancedOptions> = {
   ignoreMyself: true,
+  databasePath: join(process.cwd(), 'mahiro.db'),
 }
 export interface IMahiroInitWithSimple extends IMahiroInitBase {
   /**
@@ -73,8 +81,8 @@ export interface IOnFriendMessage {
 }
 
 export interface ICallbacks {
-  onGroupMessage: IOnGroupMessage[]
-  onFreindMessage: IOnFriendMessage[]
+  onGroupMessage: Record<string, IOnGroupMessage>
+  onFreindMessage: Record<string, IOnFriendMessage>
 }
 
 export type IApiMsg = Pick<ICgiRequest, 'Content' | 'AtUinLists' | 'Images'>
@@ -130,7 +138,9 @@ export interface INodeServerOpts {
 }
 export const SERVER_ROUTES = {
   recive: {
-    group: '/recive/group',
-    friend: '/recive/friend',
+    group: '/api/v1/recive/group',
+    friend: '/api/v1/recive/friend',
   }
 } as const
+
+export const ASYNC_CONTEXT_SPLIT = '__ASYNC_CONTEXT_SPLIT__'

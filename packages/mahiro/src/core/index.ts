@@ -17,6 +17,7 @@ import {
   DEFAULT_NODE_SERVER,
   SERVER_ROUTES,
   apiSchema,
+  ASYNC_CONTEXT_SPLIT,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -43,9 +44,15 @@ import chalk from 'mahiro/compiled/chalk'
 import figlet from 'figlet'
 import express from 'express'
 import cors from 'cors'
-import { removeNull } from '../utils/removeNULL'
+import { removeNull } from '../utils/removeNull'
+import { Database } from '../database'
+import { AsyncLocalStorage } from 'async_hooks'
+import { existsSync } from 'fs'
+import { dirname, join } from 'path'
+import serveStatic from 'serve-static'
 
 export class Mahiro {
+  // base props
   ws!: string
   url!: string
   qq!: number
@@ -56,23 +63,48 @@ export class Mahiro {
   wsRetrying = false
   wsConnected = false
 
+  // more options
   advancedOptions!: Required<IMahiroAdvancedOptions>
 
+  // node server
   app!: express.Express
   nodeServer!: Required<INodeServerOpts>
   pythonServerCannotConnect = false
 
+  // listeners
   callback: ICallbacks = {
-    onGroupMessage: [],
-    onFreindMessage: [],
+    onGroupMessage: {},
+    onFreindMessage: {},
   }
+
+  // db
+  db!: Database
+
+  // status
+  initialled = false
+
+  // async context
+  asyncLocalStorage = new AsyncLocalStorage()
 
   constructor(opts: IMahiroOpts) {
     this.printLogo()
     this.checkInitOpts(opts)
     this.initUrl()
-    this.connect()
-    this.startNodeServer()
+  }
+
+  async run() {
+    this.logger.info('Mahiro is starting...')
+    await this.connect()
+    await this.connectDatabase()
+    await this.startNodeServer()
+    this.logger.success('Mahiro started')
+    this.initialled = true
+  }
+
+  static async start(opts: IMahiroOpts) {
+    const ins = new Mahiro(opts)
+    await ins.run()
+    return ins
   }
 
   private printLogo() {
@@ -98,6 +130,9 @@ export class Mahiro {
           ignoreMyself: z
             .boolean()
             .default(DEFAULT_ADANCED_OPTIONS.ignoreMyself),
+          databasePath: z
+            .string()
+            .default(DEFAULT_ADANCED_OPTIONS.databasePath),
         })
         .default(DEFAULT_ADANCED_OPTIONS),
       nodeServer: z
@@ -145,10 +180,14 @@ export class Mahiro {
     throw new Error('Invalid opts')
   }
 
-  private connect() {
+  private async connect() {
+    let resolve = () => {}
+    const promise = new Promise((_resolve, _) => {
+      resolve = _resolve as any
+    })
     this.wsRetrying = false
     this.logger.info('Try connect...')
-    const ws: WebSocket = this.wsIns = new WebSocket(this.ws)
+    const ws: WebSocket = (this.wsIns = new WebSocket(this.ws))
 
     const retryConnect = (time: number = 5 * 1e3) => {
       if (this.wsRetrying) {
@@ -168,6 +207,7 @@ export class Mahiro {
     ws.on('open', () => {
       this.logger.success('WS Connected', this.ws)
       this.wsConnected = true
+      resolve()
     })
 
     ws.on('message', (data: Buffer) => {
@@ -186,9 +226,11 @@ export class Mahiro {
       this.wsConnected = false
       retryConnect()
     })
+
+    return promise
   }
 
-  private triggerListener(json: IMsg) {
+  private async triggerListener(json: IMsg) {
     const { CurrentPacket, CurrentQQ } = json
     if (CurrentQQ !== this.qq) {
       this.logger.error('CurrentQQ not match: ', CurrentQQ)
@@ -238,8 +280,34 @@ export class Mahiro {
         `${data?.groupName}(${data?.groupId})`,
         `${data?.userNickname}(${data?.userId})`,
       )
-      this.callback.onGroupMessage.forEach((callback) => {
-        callback(data, json)
+      // group expired
+      const isExpired = await this.db.isGroupValid(data.groupId)
+      if (isExpired) {
+        this.logger.debug(`Group(${data.groupId}) expired, ignore message`)
+        return
+      }
+      // trigger callback
+      const avaliablePlugins = await this.db.getAvailablePlugins({
+        groupId: data.groupId,
+        userId: data.userId,
+      })
+      this.logger.debug(
+        `Group(${data.groupId}) + User(${data.userId}) avaliable plugins: `,
+        avaliablePlugins,
+      )
+      if (!avaliablePlugins.length) {
+        return
+      }
+      Object.entries(this.callback.onGroupMessage).forEach(([name, cb]) => {
+        const isAvaliable = avaliablePlugins.includes(name)
+        if (!isAvaliable) {
+          return
+        }
+        const timestamp = Date.now()
+        const contextId = `${name}${ASYNC_CONTEXT_SPLIT}${timestamp}`
+        this.asyncLocalStorage.run(contextId, () => {
+          cb(data, json)
+        })
       })
       return
     }
@@ -264,8 +332,13 @@ export class Mahiro {
         `Received ${chalk.blue('friend')} message: `,
         `${data?.userName}(${data?.userId})`,
       )
-      this.callback.onFreindMessage.forEach((callback) => {
-        callback(data, json)
+      // trigger callback
+      Object.entries(this.callback.onFreindMessage).forEach(([name, cb]) => {
+        const timestamp = Date.now()
+        const contextId = `${name}${ASYNC_CONTEXT_SPLIT}${timestamp}`
+        this.asyncLocalStorage.run(contextId, () => {
+          cb(data, json)
+        })
       })
       return
     }
@@ -299,26 +372,44 @@ export class Mahiro {
     }
   }
 
-  onGroupMessage(name: string, callback: IOnGroupMessage): CancelListener {
+  async onGroupMessage(
+    name: string,
+    callback: IOnGroupMessage,
+    opts: { internal?: boolean } = {},
+  ) {
+    const { internal = false } = opts
     this.logger.info(`Register ${chalk.green('onGroupMessage')}: `, name)
-    this.callback.onGroupMessage.push(callback)
-    return () => {
-      this.callback.onGroupMessage.splice(
-        this.callback.onGroupMessage.indexOf(callback),
-        1,
-      )
+    const has = this.callback.onGroupMessage[name] as any as Partial<
+      ICallbacks['onGroupMessage']
+    >
+    if (has) {
+      throw new Error(`Plugin ${name} has been registered`)
+    } else {
+      this.callback.onGroupMessage[name] = callback
     }
+    // register to database
+    await this.db.registerPlugin({ name, internal })
+    const unlistener: CancelListener = () => {
+      delete this.callback.onGroupMessage[name]
+    }
+    return unlistener
   }
 
-  onFriendMessage(name: string, callback: IOnFriendMessage): CancelListener {
+  async onFriendMessage(name: string, callback: IOnFriendMessage) {
     this.logger.info(`Register ${chalk.blue('onFriendMessage')}: `, name)
-    this.callback.onFreindMessage.push(callback)
-    return () => {
-      this.callback.onFreindMessage.splice(
-        this.callback.onFreindMessage.indexOf(callback),
-        1,
-      )
+    const has = this.callback.onFreindMessage[name] as any as Partial<
+      ICallbacks['onFreindMessage']
+    >
+    if (has) {
+      throw new Error(`Plugin ${name} has been registered`)
+    } else {
+      this.callback.onFreindMessage[name] = callback
     }
+    // TODO: can manage friends plugins in database
+    const unlistener: CancelListener = () => {
+      delete this.callback.onFreindMessage[name]
+    }
+    return unlistener
   }
 
   async sendGroupMessage(data: IApiSendGroupMessage) {
@@ -327,6 +418,8 @@ export class Mahiro {
         data?.msg?.Content?.slice(0, 10) || ''
       }...`,
     )
+    // todo: 插件粒度的出口限速
+    // const contextId = this.asyncLocalStorage.getStore()
     const res = await this.sendApi({
       CgiRequest: {
         ToUin: data.groupId,
@@ -353,15 +446,42 @@ export class Mahiro {
     return res
   }
 
-  private startNodeServer() {
+  private async startNodeServer() {
     const { port } = this.nodeServer
     const app = (this.app = express())
     this.addBaseServerMiddleware()
     this.addBaseServerRoutes()
-    app.listen(port, () => {
-      this.logger.info(`[Node Server] start at ${chalk.magenta(port)}`)
-    })
     this.registryPythonForward()
+    this.startWebSite()
+    return new Promise<void>((resolve, _) => {
+      app.listen(port, () => {
+        this.logger.info(`[Node Server] start at ${chalk.magenta(port)}`)
+        resolve()
+      })
+    })
+  }
+
+  private startWebSite() {
+    const app = this.app
+    // start website apis
+    this.db.createMiddleware(app)
+    // start website
+    try {
+      const websiteDist = dirname(require.resolve('@xn-sakina/mahiro-web'))
+      if (!existsSync(join(websiteDist, 'index.html'))) {
+        this.logger.error('[Web Site] Website dist not found')
+        return
+      }
+      app.use(
+        serveStatic(join(websiteDist), {
+          index: ['index.html'],
+        }),
+      )
+      const url = `http://localhost:${this.nodeServer.port}`
+      this.logger.info('[Web Site] Start at ', chalk.cyan(url))
+    } catch {
+      this.logger.warn('[Web Site] Website start failed')
+    }
   }
 
   private addBaseServerMiddleware() {
@@ -421,7 +541,10 @@ export class Mahiro {
     })
   }
 
-  private async sendToPython(opts: { path: string, data: Record<string, any> }) {
+  private async sendToPython(opts: {
+    path: string
+    data: Record<string, any>
+  }) {
     const { path, data } = opts
     const base = `http://0.0.0.0:${this.nodeServer.pythonPort}`
     this.logger.debug(`[Node Server] Python Forward - ${path}: `, data)
@@ -429,10 +552,16 @@ export class Mahiro {
     try {
       const res = await axios.post(url, data)
       if (res.status !== 200) {
-        this.logger.error(`[Node Server] Python Forward - ${path} status error: `, res.status)
+        this.logger.error(
+          `[Node Server] Python Forward - ${path} status error: `,
+          res.status,
+        )
       }
       if (res.data?.code !== 200) {
-        this.logger.error(`[Node Server] Python Forward - ${path} response code error: `, res.data?.code)
+        this.logger.error(
+          `[Node Server] Python Forward - ${path} response code error: `,
+          res.data?.code,
+        )
       }
       return res.data
     } catch (e) {
@@ -447,12 +576,18 @@ export class Mahiro {
   private registryPythonForward() {
     const prefix = `[Node Server] Python Forward - `
     const pathWithGroup = `/recive/group`
-    this.onGroupMessage(`${prefix}Group Message`, async (data) => {
-      await this.sendToPython({
-        path: pathWithGroup,
-        data,
-      })
-    })
+    this.onGroupMessage(
+      `${prefix}Group Message`,
+      async (data) => {
+        await this.sendToPython({
+          path: pathWithGroup,
+          data,
+        })
+      },
+      {
+        internal: true,
+      },
+    )
     const pathWithFriend = `/recive/friend`
     this.onFriendMessage(`${prefix}Friend Message`, async (data) => {
       await this.sendToPython({
@@ -460,5 +595,14 @@ export class Mahiro {
         data,
       })
     })
+  }
+
+  private async connectDatabase() {
+    this.logger.info(`[Database] Connecting...`)
+    this.db = new Database({
+      path: this.advancedOptions.databasePath,
+    })
+    await this.db.init()
+    this.logger.info(`[Database] Connected`)
   }
 }

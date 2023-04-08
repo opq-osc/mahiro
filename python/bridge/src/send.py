@@ -2,8 +2,8 @@ import os
 import requests
 
 UP_STREAM_URL = os.environ.get("MAHIRO_NODE_URL", "http://0.0.0.0:8098")
-GROUP_URL = f"{UP_STREAM_URL}/recive/group"
-FRIEND_URL = f"{UP_STREAM_URL}/recive/friend"
+GROUP_URL = f"{UP_STREAM_URL}/api/v1/recive/group"
+FRIEND_URL = f"{UP_STREAM_URL}/api/v1/recive/friend"
 
 
 class Sender:

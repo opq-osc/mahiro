@@ -33,7 +33,7 @@
 import { Mahiro } from '../src'
 
 const run = async () => {
-  const ins = new Mahiro({
+  const ins = await Mahiro.start({
     host: `100.0.0.1`,
     port: 8086,
     qq: 123456788,
