@@ -1,7 +1,7 @@
 import { Mahiro } from 'mahiro'
 
 const run = async () => {
-  const ins = new Mahiro({
+  const ins = await Mahiro.start({
     host: `100.0.0.1`,
     qq: 12345678,
   })
