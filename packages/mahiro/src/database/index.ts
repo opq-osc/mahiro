@@ -24,6 +24,7 @@ export class Database {
 
   // runtime
   private registeredPlugins: string[] = [] // name list
+  private registeredExternalPlugins: string[] = [] // name list
 
   // cache
   private cacheTime = getCacheTime()
@@ -71,7 +72,7 @@ export class Database {
     if (!pluginsExists) {
       await this.db.schema.createTable(table.plugins, (table) => {
         table.increments('id')
-        table.string('name')
+        table.string('name').unique()
         table.boolean('enabled')
         table.string('white_list_users')
         table.string('black_list_users')
@@ -105,7 +106,13 @@ export class Database {
     }
   }
 
-  async registerPlugin(opts: IDataRegisterPluginOpts) {
+  async registerPlugin(
+    opts: IDataRegisterPluginOpts,
+    configs: {
+      external?: boolean
+    } = {},
+  ) {
+    const { external = false } = configs
     const { name, internal = false } = opts
     const has = await this.db.table(this.table.plugins).where({ name }).first()
     if (!has) {
@@ -122,6 +129,19 @@ export class Database {
     if (!this.registeredPlugins.includes(name)) {
       this.registeredPlugins.push(name)
     }
+    // add to external runtime
+    if (external && !this.registeredExternalPlugins.includes(name)) {
+      this.registeredExternalPlugins.push(name)
+    }
+  }
+
+  clearExternalPlugins() {
+    // remove external plugins from runtime
+    this.registeredPlugins = this.registeredPlugins.filter((name) => {
+      return !this.registeredExternalPlugins.includes(name)
+    })
+    // clear external plugins
+    this.registeredExternalPlugins = []
   }
 
   async registerGroup(opts: IDataRegisterGroupOpts) {
@@ -447,9 +467,27 @@ export class Database {
         })
       }
     })
+    // register plugin from external (e.g. python)
+    app.post(DATABASE_APIS.registerPlugin, async (req, res, next) => {
+      const json = req.body
+      res.status(200)
+      try {
+        const apiRes = await this.registerPlugin(json, {
+          external: true,
+        })
+        res.json({
+          code: 200,
+          data: apiRes,
+        })
+      } catch (e: any) {
+        res.json({
+          code: 500,
+          message: e?.message || 'Internal Server Error',
+        })
+      }
+    })
   }
 
   // todo: 发卡
-  // todo: python 脚本 id 化管理
   // todo: js interpreter
 }

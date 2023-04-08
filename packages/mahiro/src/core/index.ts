@@ -269,7 +269,10 @@ export class Mahiro {
         userId: MsgHead?.SenderUin,
         userNickname: MsgHead?.SenderNick || '',
         msg: MsgBody!,
-      } satisfies IGroupMessage
+        configs: {
+          availablePlugins: [],
+        }
+      } as IGroupMessage
       // ignore myself
       if (ignoreMyself && data.userId === this.qq) {
         return
@@ -281,8 +284,8 @@ export class Mahiro {
         `${data?.userNickname}(${data?.userId})`,
       )
       // group expired
-      const isExpired = await this.db.isGroupValid(data.groupId)
-      if (isExpired) {
+      const isValid = await this.db.isGroupValid(data.groupId)
+      if (!isValid) {
         this.logger.debug(`Group(${data.groupId}) expired, ignore message`)
         return
       }
@@ -298,6 +301,9 @@ export class Mahiro {
       if (!avaliablePlugins.length) {
         return
       }
+      // add configs
+      data.configs.availablePlugins = avaliablePlugins
+      // call callbacks
       Object.entries(this.callback.onGroupMessage).forEach(([name, cb]) => {
         const isAvaliable = avaliablePlugins.includes(name)
         if (!isAvaliable) {
@@ -565,6 +571,10 @@ export class Mahiro {
       }
       return res.data
     } catch (e) {
+      // python 掉了，需要清掉外部插件
+      this.logger.debug(`[Node Server] Python Forward Offline, will clear plugins`)
+      this.db.clearExternalPlugins()
+      // warn only once
       if (!this.pythonServerCannotConnect) {
         // only log once
         this.logger.warn(`[Node Server] Python Forward - Failed`)

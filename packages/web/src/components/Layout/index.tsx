@@ -9,11 +9,17 @@ import {
   UsergroupAddOutlined,
 } from '@ant-design/icons'
 import { useCallback } from 'react'
+import zhCN from 'antd/locale/zh_CN'
+import dayjs from 'dayjs'
+
+import 'dayjs/locale/zh-cn'
+dayjs.locale('zh-cn')
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnMount: false,
+      // 这个配置先不要关，在这个场景下效果不错
+      // refetchOnWindowFocus: false,
     },
   },
 })
@@ -52,6 +58,7 @@ export const Layout = () => {
           colorPrimary: '#B080FE',
         },
       }}
+      locale={zhCN}
     >
       <QueryClientProvider client={queryClient}>
         <AntdLayout

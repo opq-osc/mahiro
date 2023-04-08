@@ -70,4 +70,5 @@ export const DATABASE_APIS = {
   updateGroup: `${DATABASE_API_PREFIX}/group/update`,
   addGroup: `${DATABASE_API_PREFIX}/group/add`,
   deleteGroup: `${DATABASE_API_PREFIX}/group/delete`,
+  registerPlugin: `${DATABASE_API_PREFIX}/plugin/register`,
 } as const

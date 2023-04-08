@@ -1,6 +1,7 @@
 from pydantic import BaseModel
-from enum import Enum
 from .send import Sender
+import requests
+from typing import Awaitable
 
 
 class AtUin(BaseModel):
@@ -26,12 +27,17 @@ class SubMsgType:
 
 
 # group msg
+class GroupMessageConfigs(BaseModel):
+    availablePlugins: list[str] = []
+
+
 class GroupMessage(BaseModel):
     userId: int
     userNickname: str = ""
     groupId: int
     groupNickname: str = ""
     msg: Msg
+    configs: GroupMessageConfigs
 
 
 class GroupMessageExtra:
@@ -50,6 +56,40 @@ class GroupMessageMahiro:
         self.ctx = ctx
         self.sender = sender
         self.extra = extra
+
+    @staticmethod
+    def create_group_message_mahiro(id: str, ctx: GroupMessage):
+        is_text = ctx.msg.SubMsgType == SubMsgType.mixed
+        extra = GroupMessageExtra(is_text=is_text)
+        sender = Sender(id=id)
+        return GroupMessageMahiro(ctx=ctx, sender=sender, extra=extra)
+
+
+class GroupMessageContainer:
+    instances: dict[str, Awaitable] = {}
+
+    def __init__(self):
+        pass
+
+    def register_plugin_to_node(self, id: str):
+        requests.post(
+            Sender.REGISTER_PLUGIN_URL,
+            json={"name": id},
+        )
+
+    def add(self, id: str, callback: Awaitable):
+        self.register_plugin_to_node(id=id)
+        self.instances[id] = callback
+
+    async def call(self, ctx: GroupMessage):
+        available_plugins = ctx.configs.availablePlugins
+        for key in available_plugins:
+            if key not in self.instances:
+                continue
+            # create mahiro
+            mahiro = GroupMessageMahiro.create_group_message_mahiro(id=key, ctx=ctx)
+            # call
+            await self.instances[key](mahiro)
 
 
 # friend msg

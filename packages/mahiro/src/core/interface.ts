@@ -55,12 +55,17 @@ export interface IMahiroInitWithWs extends IMahiroInitBase {
 
 export type IMahiroOpts = IMahiroInitWithSimple | IMahiroInitWithWs
 
+export interface IGroupMessageConfigs {
+  availablePlugins: string[]
+}
+
 export interface IGroupMessage {
   groupId: number
   groupName: string
   userId: number
   userNickname: string
   msg: IMsgBody
+  configs: IGroupMessageConfigs
 }
 
 export type CancelListener = () => void
