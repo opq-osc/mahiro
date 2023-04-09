@@ -42,6 +42,7 @@ import {
   EMsgEvent,
   EMsgType,
   IMsg,
+  VALID_MSG_EVENT,
 } from '../received/interface'
 import chalk from 'mahiro/compiled/chalk'
 import figlet from 'figlet'
@@ -232,6 +233,9 @@ export class Mahiro {
     ws.on('message', (data: Buffer) => {
       const str = data.toString()
       this.logger.debug('WS Message: ', str)
+      if (process.env.MAHIRO_ONLY_LOG_WS_MSG) {
+        return
+      }
       try {
         const json = JSON.parse(str)
         this.triggerListener(json)
@@ -255,11 +259,26 @@ export class Mahiro {
       this.logger.error('CurrentQQ not match: ', CurrentQQ)
       return
     }
+    
     const { EventData, EventName } = CurrentPacket
-    if (EventName !== EMsgEvent.ON_EVENT_QQNT_NEW_MSG) {
+    // valid event name
+    const isSupportEvent = VALID_MSG_EVENT.includes(EventName)
+    if (!isSupportEvent) {
       this.logger.error('Unsupport event name: ', EventName)
       return
     }
+
+    // event name logger
+    switch (EventName) {
+      case EMsgEvent.ON_EVENT_LOGIN_SUCCESS:
+        this.logger.success('Login success')
+        break
+      case EMsgEvent.ON_EVENT_NETWORK_CHANGE:
+        this.logger.success('Network change')
+        break
+      // todo: more event name tips
+    }
+
     const { MsgHead, MsgBody: _MsgBody } = EventData
     // remove msg body null value
     // because null can not match models in python

@@ -31,7 +31,8 @@
     "serve-static": "^1.15.0",
     "shallowequal": "^1.1.0",
     "styled-components": "6.0.0-beta.14",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "jotai": "^2.0.3"
   },
   "browserslist": {
     "production": [
@@ -44,8 +45,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "dependencies": {
-    "jotai": "^2.0.3"
   }
 }

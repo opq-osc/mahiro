@@ -127,10 +127,6 @@ importers:
         version: registry.npmjs.org/rimraf@4.4.1
 
   packages/web:
-    dependencies:
-      jotai:
-        specifier: ^2.0.3
-        version: registry.npmjs.org/jotai@2.0.3(react@18.2.0)
     devDependencies:
       '@ant-design/icons':
         specifier: ^5.0.1
@@ -171,6 +167,9 @@ importers:
       dayjs:
         specifier: ^1.11.7
         version: registry.npmjs.org/dayjs@1.11.7
+      jotai:
+        specifier: ^2.0.3
+        version: registry.npmjs.org/jotai@2.0.3(react@18.2.0)
       lodash:
         specifier: ^4.17.21
         version: registry.npmjs.org/lodash@4.17.21
@@ -8740,7 +8739,7 @@ packages:
         optional: true
     dependencies:
       react: registry.npmjs.org/react@18.2.0
-    dev: false
+    dev: true
 
   registry.npmjs.org/js-cookie@2.2.1:
     resolution: {integrity: sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/js-cookie/-/js-cookie-2.2.1.tgz}
@@ -8752,6 +8751,7 @@ packages:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz}
     name: js-tokens
     version: 4.0.0
+    dev: true
 
   registry.npmjs.org/js-yaml@3.14.1:
     resolution: {integrity: sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/js-yaml/-/js-yaml-3.14.1.tgz}
@@ -9217,6 +9217,7 @@ packages:
     hasBin: true
     dependencies:
       js-tokens: registry.npmjs.org/js-tokens@4.0.0
+    dev: true
 
   registry.npmjs.org/lower-case@2.0.2:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/lower-case/-/lower-case-2.0.2.tgz}
@@ -12478,6 +12479,7 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       loose-envify: registry.npmjs.org/loose-envify@1.4.0
+    dev: true
 
   registry.npmjs.org/read-yaml-file@1.1.0:
     resolution: {integrity: sha512-VIMnQi/Z4HT2Fxuwg5KrY174U1VdUIASQVWXXyqtNRtxSr9IYkn1rsI6Tb6HsrHCmB7gVpNwX6JxPTHcH6IoTA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/read-yaml-file/-/read-yaml-file-1.1.0.tgz}
