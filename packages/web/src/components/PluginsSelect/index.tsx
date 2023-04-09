@@ -82,10 +82,10 @@ export const PluginsSelect = ({
     )
   }
 
-  const filteredValue = value?.filter(i => {
+  const filteredValue = value?.filter((i) => {
     // cannot select internal plugin
     // must be in options
-    const isExist = options?.find(o => toString(o?.value) === toString(i))
+    const isExist = options?.find((o) => toString(o?.value) === toString(i))
     return isExist
   })
 

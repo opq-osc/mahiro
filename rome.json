@@ -15,7 +15,8 @@
   "javascript": {
     "formatter": {
       "quoteStyle": "single",
-      "semicolons": "asNeeded"
+      "semicolons": "asNeeded",
+      "trailingComma": "all"
     }
   },
   "$schema": "https://unpkg.com/rome@latest/configuration_schema.json"

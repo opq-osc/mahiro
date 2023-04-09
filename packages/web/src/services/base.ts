@@ -20,7 +20,7 @@ request.interceptors.response.use(
   (err) => {
     message.error(err?.message || 'Network Error')
     return Promise.reject(err)
-  }
+  },
 )
 
 export type IResult =

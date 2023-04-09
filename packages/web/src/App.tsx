@@ -27,8 +27,8 @@ const router = createHashRouter(
       <Route path={EMenu.home} element={<Home />} />
       <Route path={EMenu.groups} element={<Groups />} />
       <Route path={EMenu.plugins} element={<Plugins />} />
-    </Route>
-  )
+    </Route>,
+  ),
 )
 
 export function App() {

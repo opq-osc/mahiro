@@ -4,5 +4,5 @@ export default defineConfig({
   compile: 'swc',
   cssMinify: 'parcelCss',
   jsMinify: 'esbuild',
-  title: 'Mahiro 管理面板'
+  title: 'Mahiro 管理面板',
 })

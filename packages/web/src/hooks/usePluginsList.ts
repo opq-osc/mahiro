@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 export const usePluginsList = (
   opts: {
     cache?: boolean
-  } = {}
+  } = {},
 ) => {
   const { cache = false } = opts
 

@@ -10,6 +10,12 @@ importers:
       '@xn-sakina/mental':
         specifier: ^4.0.2
         version: registry.npmjs.org/@xn-sakina/mental@4.0.2
+      prettier:
+        specifier: ^2.8.7
+        version: registry.npmjs.org/prettier@2.8.7
+      rimraf:
+        specifier: ^4.4.1
+        version: registry.npmjs.org/rimraf@4.4.1
       rome:
         specifier: ^12.0.0
         version: registry.npmjs.org/rome@12.0.0
@@ -119,12 +125,6 @@ importers:
       mahiro:
         specifier: workspace:*
         version: 'link:'
-      prettier:
-        specifier: ^2.8.7
-        version: registry.npmjs.org/prettier@2.8.7
-      rimraf:
-        specifier: ^4.4.1
-        version: registry.npmjs.org/rimraf@4.4.1
 
   packages/web:
     devDependencies:

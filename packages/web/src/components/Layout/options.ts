@@ -4,8 +4,4 @@ export enum EMenu {
   groups = 'groups',
 }
 
-export const menus = [
-  EMenu.home,
-  EMenu.plugins,
-  EMenu.groups,
-] as const;
+export const menus = [EMenu.home, EMenu.plugins, EMenu.groups] as const

@@ -62,7 +62,7 @@ export enum EVersion {
   v1 = 'v1',
 }
 
-const DATABASE_API_PREFIX = `/api/v1/panel` 
+const DATABASE_API_PREFIX = `/api/v1/panel`
 export const DATABASE_APIS = {
   getPlugins: `${DATABASE_API_PREFIX}/plugins`,
   updatePlugin: `${DATABASE_API_PREFIX}/plugin/update`,

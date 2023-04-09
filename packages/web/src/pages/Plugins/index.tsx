@@ -152,7 +152,7 @@ export const Plugins = () => {
         dataSource={query.data || []}
         columns={columns}
         pagination={{
-          hideOnSinglePage: true
+          hideOnSinglePage: true,
         }}
       />
       <Modal
