@@ -21,6 +21,8 @@ import {
   IMahiroInterceptorContext,
   IMahiroInterceptorFunction,
   IMahiroMsgStack,
+  IMahiroUploadFileOpts,
+  IApiMsg,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -33,6 +35,9 @@ import {
   ISendMsg,
   ISendMsgResponse,
   EToType,
+  IUploadFile,
+  EUploadCommandId,
+  ISendImage,
 } from '../send/interface'
 import qs from 'qs'
 import { parse } from 'url'
@@ -52,14 +57,17 @@ import { removeNull } from '../utils/removeNull'
 import { Database } from '../database'
 import { AsyncLocalStorage } from 'async_hooks'
 import { existsSync } from 'fs'
-import { dirname, join } from 'path'
+import { dirname, isAbsolute, join } from 'path'
 import serveStatic from 'serve-static'
-import { cloneDeep, trim } from 'lodash'
+import { cloneDeep, isNil, trim } from 'lodash'
+import { detectFileType, getFileBase64 } from '../utils/file'
 
 export class Mahiro {
   // base props
   ws!: string
   url!: string
+  // is server in local
+  isLocal = false
   qq!: number
   logger = consola
   loggerWithInterceptor = consola.withTag('interceptor') as typeof consola
@@ -134,6 +142,12 @@ export class Mahiro {
 
   private initUrl() {
     const parsed = parse(this.ws)
+    // check local
+    const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(
+      parsed.hostname || '',
+    )
+    this.isLocal = isLocal
+    this.logger.debug('[Local] Is local: ', isLocal)
     this.url = `http://${parsed.hostname}:${parsed.port}`
   }
 
@@ -259,12 +273,16 @@ export class Mahiro {
       this.logger.error('CurrentQQ not match: ', CurrentQQ)
       return
     }
-    
+
     const { EventData, EventName } = CurrentPacket
     // valid event name
     const isSupportEvent = VALID_MSG_EVENT.includes(EventName)
     if (!isSupportEvent) {
-      this.logger.error('Unsupport event name: ', EventName)
+      this.logger.warn(
+        'Unsupport event name: ',
+        chalk.yellow(EventName),
+        'will ignore it',
+      )
       return
     }
 
@@ -388,9 +406,7 @@ export class Mahiro {
     }
   }
 
-  private async sendApi(opts: {
-    CgiRequest: ISendMsg['CgiRequest']
-  }): Promise<ISendMsgResponse | undefined> {
+  private async sendApi(opts: { CgiRequest: ISendMsg['CgiRequest'] }) {
     if (!this.wsConnected) {
       this.logger.error('WS not connected, send api failed')
       return
@@ -430,10 +446,93 @@ export class Mahiro {
       // push to stack
       this.pushMsgToStack(data)
       if (res?.data) {
-        return res.data
+        return res.data as ISendMsgResponse
       }
     } catch (e) {
       this.logger.error('Send api error: ', e)
+    }
+  }
+
+  private async uploadFile(opts: IMahiroUploadFileOpts) {
+    if (!this.wsConnected) {
+      this.logger.error('WS not connected, upload file failed')
+      return
+    }
+    const { file, commandId } = opts
+    this.logger.debug('[Upload File] Will upload file: ', file)
+    let { filePath, fileUrl } = detectFileType(file)
+    // check file
+    let hasFilePath = !!filePath?.length
+    if (hasFilePath) {
+      if (!existsSync(filePath!)) {
+        this.logger.error(`File not exists: ${filePath}`)
+        return
+      }
+      if (!isAbsolute(filePath!)) {
+        this.logger.error(`File path must be absolute: ${filePath}`)
+        return
+      }
+      if (!this.isLocal) {
+        this.logger.error(
+          `[Upload File] Currently the server is not in local, not support upload file: ${filePath}`,
+        )
+        // todo: support base64
+        return
+        // filePath auto convert to url when server not in local
+        // const base64 = await getFileBase64(filePath!)
+        // if (!base64) {
+        //   this.logger.error(
+        //     `[Upload File] The server is not in local, auto convert file to base64 failed: ${filePath}`,
+        //   )
+        //   return
+        // }
+        // this.logger.debug(
+        //   `[Upload File] The server is not in local, auto convert file to base64 success: ${filePath}`,
+        // )
+        // hasFilePath = false
+        // fileUrl = base64
+      }
+    } else if (fileUrl?.length) {
+      const isUrl = fileUrl.startsWith('http')
+      const isData = fileUrl.startsWith('data:')
+      if (!isUrl && !isData) {
+        this.logger.error(`File url must be http or data: ${fileUrl}`)
+        return
+      }
+    } else {
+      this.logger.error(
+        'File absolute path or url required (e.g. /path/to/file or http://example.com/file.png or data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB)',
+      )
+      return
+    }
+    const uploadUrl = `${this.url}/v1/upload`
+    const data: IUploadFile = {
+      CgiCmd: ESendCmd.upload,
+      CgiRequest: {
+        CommandId: commandId,
+        ...(hasFilePath
+          ? {
+              FilePath: filePath,
+            }
+          : {
+              FileUrl: fileUrl,
+            }),
+      },
+    }
+    try {
+      const res = await axios.post(uploadUrl, data)
+      const json = res?.data as ISendMsgResponse | undefined
+      if (json) {
+        this.logger.debug(
+          '[Upload File] Upload file success: ',
+          file,
+          'response: ',
+          json,
+        )
+        return json as ISendMsgResponse
+      }
+    } catch (e) {
+      this.logger.error('Upload file error: ', e)
     }
   }
 
@@ -513,13 +612,39 @@ export class Mahiro {
         data?.msg?.Content?.slice(0, 10) || ''
       }...`,
     )
-    // todo: 插件粒度的出口限速
+    const {
+      fastImage,
+      msg = {
+        Content: '',
+      },
+      groupId,
+    } = data
+    // ensure msg content is string
+    if (isNil(msg?.Content)) {
+      msg.Content = ''
+    }
+    if (fastImage?.length) {
+      const res = await this.uploadFile({
+        file: fastImage,
+        commandId: EUploadCommandId.groupImage,
+      })
+      const fileInfo = res?.ResponseData as ISendImage
+      if (!fileInfo?.FileMd5?.length) {
+        this.logger.error('[FastImage] Upload file failed, not get fileMd5')
+        return
+      } else {
+        this.logger.success('[FastImage] Upload file success (Group)')
+      }
+      // add to msg
+      msg.Images = [...(msg.Images || []), fileInfo]
+    }
+    // todo: async context 插件粒度的出口限速
     // const contextId = this.asyncLocalStorage.getStore()
     const res = await this.sendApi({
       CgiRequest: {
-        ToUin: data.groupId,
+        ToUin: groupId,
         ToType: EToType.group,
-        ...data.msg,
+        ...(msg as IApiMsg),
       },
     })
     return res
@@ -531,11 +656,32 @@ export class Mahiro {
         data?.msg?.Content?.slice(0, 10) || ''
       }`,
     )
+    const { fastImage, msg = { Content: '' }, userId } = data
+    // ensure msg content is string
+    if (isNil(msg?.Content)) {
+      msg.Content = ''
+    }
+    // upload fast image
+    if (fastImage?.length) {
+      const res = await this.uploadFile({
+        file: fastImage,
+        commandId: EUploadCommandId.friendImage,
+      })
+      const fileInfo = res?.ResponseData as ISendImage
+      if (!fileInfo?.FileMd5?.length) {
+        this.logger.error('[FastImage] Upload file failed, not get fileMd5')
+        return
+      } else {
+        this.logger.success('[FastImage] Upload file success (Friend)')
+      }
+      // add to msg
+      msg.Images = [...(msg.Images || []), fileInfo]
+    }
     const res = await this.sendApi({
       CgiRequest: {
-        ToUin: data.userId,
+        ToUin: userId,
         ToType: EToType.friends,
-        ...data.msg,
+        ...(msg as IApiMsg),
       },
     })
     return res

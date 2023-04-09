@@ -1,6 +1,11 @@
 import { join } from 'path'
 import { IMsg, IMsgBody } from '../received/interface'
-import { ICgiRequest, ISendMsg, ISendParams } from '../send/interface'
+import {
+  EUploadCommandId,
+  ICgiRequest,
+  ISendMsg,
+  ISendParams,
+} from '../send/interface'
 import { z } from 'zod'
 import { consola } from 'consola'
 import { securityCopilotInterceptor } from '../interceptors/securityCopilot'
@@ -136,12 +141,22 @@ export const apiSchema = {
 } satisfies Record<string, z.ZodSchema<any>>
 export interface IApiSendGroupMessage {
   groupId: number
-  msg: IApiMsg
+  msg?: Partial<IApiMsg>
+  /**
+   * 便捷字段，会被转换为 msg.Images
+   * 必须传图片本地绝对路径或 url
+   */
+  fastImage?: string
+  // todo: support voice
 }
 
 export interface IApiSendFriendMessage {
   userId: number
-  msg: IApiMsg
+  msg?: Partial<IApiMsg>
+  /**
+   * @see {@link IApiSendGroupMessage.fastImage}
+   */
+  fastImage?: string
 }
 
 const getDefaultNodeServerPort = () => {
@@ -176,3 +191,11 @@ export const SERVER_ROUTES = {
 } as const
 
 export const ASYNC_CONTEXT_SPLIT = '__ASYNC_CONTEXT_SPLIT__'
+
+export interface IMahiroUploadFileOpts {
+  commandId: EUploadCommandId
+  /**
+   * 可以是 url 或者本地文件绝对路径，会自动区分
+   */
+  file: string
+}
