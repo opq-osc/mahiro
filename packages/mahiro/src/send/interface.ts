@@ -88,7 +88,16 @@ export enum IAt {
 }
 
 export interface IAtUinList {
-  QQUid: number | IAt
+  /**
+   * 可以为空 但是PC客户端显示不正常手机端正常
+   * @version v6.9.6-0410
+   */
+  Nick: string | ''
+  /**
+   * 号码
+   * @version v6.9.6-0410
+   */
+  Uin: number | IAt
 }
 
 export interface ISendImage {

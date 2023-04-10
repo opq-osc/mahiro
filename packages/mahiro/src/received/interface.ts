@@ -255,12 +255,14 @@ export interface IImage {
 export interface IAtUinLists {
   /**
    * 群昵称
+   * @version v6.9.6-0410
    */
-  QQNick: string
+  Nick: string | ''
   /**
    * qq 号
+   * @version v6.9.6-0410
    */
-  QQUid: number
+  Uin: number
 }
 
 export interface IVoice {
