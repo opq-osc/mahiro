@@ -31,6 +31,13 @@ export interface IMahiroAdvancedOptions {
    * @default []
    */
   interceptors?: IMahiroInterceptor[]
+
+  /**
+   * 伴生bot，用于多Q场景
+   * @description 还没测试过
+   * @default []
+   */
+  sideQQs?: number[]
 }
 
 export type IMahiroMsgStack = Map<number, IMahiroMsgHistory[]>
@@ -65,6 +72,7 @@ export const DEFAULT_ADANCED_OPTIONS: Required<IMahiroAdvancedOptions> = {
   ignoreMyself: true,
   databasePath: join(process.cwd(), 'mahiro.db'),
   interceptors: [securityCopilotInterceptor],
+  sideQQs: [],
 }
 export interface IMahiroInitWithSimple extends IMahiroInitBase {
   /**
@@ -207,7 +215,38 @@ export const SERVER_ROUTES = {
   },
 } as const
 
-export const ASYNC_CONTEXT_SPLIT = '__ASYNC_CONTEXT_SPLIT__'
+export enum EAsyncContextFrom {
+  group = 'group',
+  friend = 'friend',
+}
+
+export interface IAsyncContext {
+  /**
+   * plugin name
+   */
+  name: string
+  qq: number
+  /**
+   * timestamp
+   */
+  time: number
+  /**
+   * 来源
+   */
+  from: EAsyncContextFrom
+}
+export const asyncHookUtils = {
+  hash: (opts: IAsyncContext) => {
+    return JSON.stringify(opts)
+  },
+  parse: (hash?: any) => {
+    if (hash?.length) {
+      try {
+        return JSON.parse(hash) as IAsyncContext
+      } catch {}
+    }
+  },
+}
 
 export interface IMahiroUploadFileOpts {
   commandId: EUploadCommandId

@@ -23,6 +23,8 @@ import {
   IMahiroMsgStack,
   IMahiroUploadFileOpts,
   IApiMsg,
+  asyncHookUtils,
+  EAsyncContextFrom,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -60,7 +62,7 @@ import { AsyncLocalStorage } from 'async_hooks'
 import { existsSync } from 'fs'
 import { dirname, isAbsolute, join } from 'path'
 import serveStatic from 'serve-static'
-import { cloneDeep, isNil, trim } from 'lodash'
+import { cloneDeep, isNil, trim, uniq } from 'lodash'
 import { detectFileType, getFileBase64 } from '../utils/file'
 
 export class Mahiro {
@@ -70,6 +72,7 @@ export class Mahiro {
   // is server in local
   isLocal = false
   qq!: number
+  allQQ!: number[]
   request!: AxiosInstance
   logger = consola
   loggerWithInterceptor = consola.withTag('interceptor') as typeof consola
@@ -170,6 +173,7 @@ export class Mahiro {
               z.union([z.string(), z.custom((v) => typeof v === 'function')]),
             )
             .default(DEFAULT_ADANCED_OPTIONS.interceptors),
+          sideQQs: z.array(z.number()).default(DEFAULT_ADANCED_OPTIONS.sideQQs),
         })
         .default(DEFAULT_ADANCED_OPTIONS),
       nodeServer: z
@@ -193,7 +197,13 @@ export class Mahiro {
 
     const result = schema.parse(opts)
     // qq
-    this.qq = result.qq
+    const mainQQ = (this.qq = result.qq)
+    const sideQQs = result.advancedOptions.sideQQs || []
+    if (sideQQs.includes(mainQQ)) {
+      throw new Error('Side QQs cannot contain main QQ')
+    }
+    // sideQQs
+    this.allQQ = uniq([mainQQ, ...sideQQs])
     // advancedOptions
     this.advancedOptions =
       result.advancedOptions as Required<IMahiroAdvancedOptions>
@@ -272,8 +282,13 @@ export class Mahiro {
 
   private async triggerListener(json: IMsg) {
     const { CurrentPacket, CurrentQQ } = json
-    if (CurrentQQ !== this.qq) {
-      this.logger.error('CurrentQQ not match: ', CurrentQQ)
+    const isValidQQ = this.allQQ.includes(CurrentQQ)
+    if (!isValidQQ) {
+      this.logger.error(
+        'CurrentQQ not match: ',
+        CurrentQQ,
+        'if you want to use it, please add it to "advancedOptions.sideQQs"',
+      )
       return
     }
 
@@ -332,8 +347,9 @@ export class Mahiro {
           availablePlugins: [],
         },
       } as IGroupMessage
-      // ignore myself
-      if (ignoreMyself && data.userId === this.qq) {
+      // ignore myself and all side qq
+      const isBot = this.allQQ.includes(data.userId)
+      if (ignoreMyself && isBot) {
         return
       }
       // trigger callback
@@ -369,7 +385,12 @@ export class Mahiro {
           return
         }
         const timestamp = Date.now()
-        const contextId = `${name}${ASYNC_CONTEXT_SPLIT}${timestamp}`
+        const contextId = asyncHookUtils.hash({
+          time: timestamp,
+          name,
+          qq: CurrentQQ,
+          from: EAsyncContextFrom.group,
+        })
         this.asyncLocalStorage.run(contextId, () => {
           cb(data, json)
         })
@@ -388,8 +409,9 @@ export class Mahiro {
         userName: MsgHead?.SenderNick || '',
         msg: MsgBody!,
       } satisfies IFriendMessage
-      // ignore myself
-      if (ignoreMyself && data.userId === this.qq) {
+      // ignore myself and all side qq
+      const isBot = this.allQQ.includes(data.userId)
+      if (ignoreMyself && isBot) {
         return
       }
       // trigger callback
@@ -400,7 +422,12 @@ export class Mahiro {
       // trigger callback
       Object.entries(this.callback.onFreindMessage).forEach(([name, cb]) => {
         const timestamp = Date.now()
-        const contextId = `${name}${ASYNC_CONTEXT_SPLIT}${timestamp}`
+        const contextId = asyncHookUtils.hash({
+          time: timestamp,
+          name,
+          qq: CurrentQQ,
+          from: EAsyncContextFrom.friend,
+        })
         this.asyncLocalStorage.run(contextId, () => {
           cb(data, json)
         })
@@ -409,16 +436,27 @@ export class Mahiro {
     }
   }
 
+  private getAsyncContext() {
+    return asyncHookUtils.parse(this.asyncLocalStorage.getStore())
+  }
+
   private async sendApi(opts: { CgiRequest: ISendMsg['CgiRequest'] }) {
     if (!this.wsConnected) {
       this.logger.error('WS not connected, send api failed')
       return
     }
     const { CgiRequest } = opts
+    const asyncContext = this.getAsyncContext()
+    const mainQQ = this.qq
+    if (!asyncContext?.qq) {
+      this.logger.info(`No context, will use main qq (${mainQQ}) send message`)
+      return
+    }
+    this.logger.debug(`Send message with context: `, asyncContext)
     const params = {
       funcname: EFuncName.MagicCgiCmd,
       timeout: 10,
-      qq: this.qq,
+      qq: asyncContext?.qq || mainQQ,
     } satisfies ISendParams
     const stringifyParams = qs.stringify(params)
     const sendMsgUrl = `${this.url}/v1/LuaApiCaller?${stringifyParams}`
@@ -508,7 +546,10 @@ export class Mahiro {
       )
       return
     }
-    const uploadUrl = `${this.url}/v1/upload?qq=${this.qq}`
+    const asyncContext = this.getAsyncContext()
+    const useQQ = asyncContext?.qq || this.qq
+    this.logger.debug('[Upload File] Will use qq: ', useQQ)
+    const uploadUrl = `${this.url}/v1/upload?qq=${useQQ}`
     const data: IUploadFile = {
       CgiCmd: ESendCmd.upload,
       CgiRequest: {
@@ -645,8 +686,6 @@ export class Mahiro {
       // add to msg
       msg.Images = [...(msg.Images || []), fileInfo]
     }
-    // todo: async context 插件粒度的出口限速
-    // const contextId = this.asyncLocalStorage.getStore()
     const res = await this.sendApi({
       CgiRequest: {
         ToUin: groupId,
