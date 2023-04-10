@@ -27,7 +27,7 @@ import {
 import { z } from 'zod'
 import { consola } from 'consola'
 import WebSocket from 'ws'
-import axios from 'axios'
+import axios, { type AxiosInstance } from 'axios'
 import {
   EFuncName,
   ESendCmd,
@@ -38,6 +38,7 @@ import {
   IUploadFile,
   EUploadCommandId,
   ISendImage,
+  ECgiBaseRes,
 } from '../send/interface'
 import qs from 'qs'
 import { parse } from 'url'
@@ -69,6 +70,7 @@ export class Mahiro {
   // is server in local
   isLocal = false
   qq!: number
+  request!: AxiosInstance
   logger = consola
   loggerWithInterceptor = consola.withTag('interceptor') as typeof consola
 
@@ -111,6 +113,7 @@ export class Mahiro {
     this.printLogo()
     this.checkInitOpts(opts)
     this.initUrl()
+    this.createRequest()
   }
 
   async run() {
@@ -442,7 +445,7 @@ export class Mahiro {
       }
     }
     try {
-      const res = await axios.post(sendMsgUrl, data)
+      const res = await this.request.post(sendMsgUrl, data)
       // push to stack
       this.pushMsgToStack(data)
       if (res?.data) {
@@ -461,8 +464,10 @@ export class Mahiro {
     const { file, commandId } = opts
     this.logger.debug('[Upload File] Will upload file: ', file)
     let { filePath, fileUrl } = detectFileType(file)
+    let Base64Buf: string | undefined
     // check file
     let hasFilePath = !!filePath?.length
+    const hasFileUrl = !!fileUrl?.length
     if (hasFilePath) {
       if (!existsSync(filePath!)) {
         this.logger.error(`File not exists: ${filePath}`)
@@ -473,28 +478,26 @@ export class Mahiro {
         return
       }
       if (!this.isLocal) {
-        this.logger.error(
-          `[Upload File] Currently the server is not in local, not support upload file: ${filePath}`,
-        )
-        // todo: support base64
-        return
         // filePath auto convert to url when server not in local
-        // const base64 = await getFileBase64(filePath!)
-        // if (!base64) {
-        //   this.logger.error(
-        //     `[Upload File] The server is not in local, auto convert file to base64 failed: ${filePath}`,
-        //   )
-        //   return
-        // }
-        // this.logger.debug(
-        //   `[Upload File] The server is not in local, auto convert file to base64 success: ${filePath}`,
-        // )
-        // hasFilePath = false
-        // fileUrl = base64
+        const base64 = await getFileBase64(filePath!)
+        if (!base64) {
+          this.logger.error(
+            `[Upload File] The server is not in local, auto convert file to base64 failed: ${filePath}`,
+          )
+          return
+        }
+        this.logger.debug(
+          `[Upload File] The server is not in local, auto convert file to base64 success: ${filePath}`,
+        )
+        hasFilePath = false
+        Base64Buf = base64
+        this.logger.debug(
+          `[Upload File] base64 preview : ${base64.slice(0, 20)}...`,
+        )
       }
-    } else if (fileUrl?.length) {
-      const isUrl = fileUrl.startsWith('http')
-      const isData = fileUrl.startsWith('data:')
+    } else if (hasFileUrl) {
+      const isUrl = fileUrl!.startsWith('http')
+      const isData = fileUrl!.startsWith('data:')
       if (!isUrl && !isData) {
         this.logger.error(`File url must be http or data: ${fileUrl}`)
         return
@@ -505,7 +508,7 @@ export class Mahiro {
       )
       return
     }
-    const uploadUrl = `${this.url}/v1/upload`
+    const uploadUrl = `${this.url}/v1/upload?qq=${this.qq}`
     const data: IUploadFile = {
       CgiCmd: ESendCmd.upload,
       CgiRequest: {
@@ -514,13 +517,17 @@ export class Mahiro {
           ? {
               FilePath: filePath,
             }
-          : {
+          : hasFileUrl
+          ? {
               FileUrl: fileUrl,
+            }
+          : {
+              Base64Buf,
             }),
       },
     }
     try {
-      const res = await axios.post(uploadUrl, data)
+      const res = await this.request.post(uploadUrl, data)
       const json = res?.data as ISendMsgResponse | undefined
       if (json) {
         this.logger.debug(
@@ -792,7 +799,7 @@ export class Mahiro {
     this.logger.debug(`[Node Server] Python Forward - ${path}: `, data)
     const url = `${base}${path}`
     try {
-      const res = await axios.post(url, data)
+      const res = await this.request.post(url, data)
       if (res.status !== 200) {
         this.logger.error(
           `[Node Server] Python Forward - ${path} status error: `,
@@ -940,5 +947,33 @@ export class Mahiro {
       },
     )
     this.logger.debug(`[Admin Manager] Registered`)
+  }
+
+  private createRequest() {
+    const ins = (this.request = axios.create({
+      timeout: 20 * 1000,
+      headers: {
+        'content-type': 'application/json',
+      },
+    }))
+    ins.interceptors.response.use(
+      (response) => {
+        const res = response.data as Partial<ISendMsgResponse>
+        const errorCode = res?.CgiBaseResponse?.Ret
+        const hasErrorCode = errorCode !== ECgiBaseRes.success
+        const hasErrorMsg = res?.CgiBaseResponse?.ErrMsg?.length
+        if (hasErrorCode && hasErrorMsg) {
+          this.logger.error(
+            `[Response] Error(code: ${errorCode}) : `,
+            res?.CgiBaseResponse?.ErrMsg,
+          )
+          return Promise.reject(res?.CgiBaseResponse?.ErrMsg)
+        }
+        return response
+      },
+      (err) => {
+        return Promise.reject(err)
+      },
+    )
   }
 }

@@ -38,6 +38,11 @@ export interface IUploadFileRequest {
    * 文件网络路径
    */
   FileUrl?: string
+  /**
+   * 文件Base64
+   * @version v6.9.6-0410
+   */
+  Base64Buf?: string
 }
 
 export interface ISendMsg {
@@ -92,8 +97,12 @@ export interface ISendImage {
   FileSize: number
 }
 
+export enum ECgiBaseRes {
+  success = 0,
+}
+
 export interface ICgiBaseResponse {
-  Ret: 0
+  Ret: ECgiBaseRes
   ErrMsg: string | ''
 }
 

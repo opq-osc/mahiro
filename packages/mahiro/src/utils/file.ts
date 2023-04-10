@@ -32,6 +32,7 @@ export const detectFileType = (url: string): IDetectFileType => {
   return {}
 }
 
+// todo: remove me
 const getFileBase64Prefix = (file: string) => {
   const isPng = /\.png$/.test(file)
   const isJpg = /\.jpe?g$/.test(file)
@@ -55,7 +56,7 @@ const getFileBase64Prefix = (file: string) => {
 export const getFileBase64 = async (file: string) => {
   try {
     const base64 = await readFile(file, 'base64')
-    return `${getFileBase64Prefix(file)}${base64}`
+    return base64
   } catch {
     return
   }
@@ -64,7 +65,7 @@ export const getFileBase64 = async (file: string) => {
 export const getFileBase64Sync = (file: string) => {
   try {
     const base64 = readFileSync(file, 'base64')
-    return `${getFileBase64Prefix(file)}${base64}`
+    return base64
   } catch {
     return
   }
