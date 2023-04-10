@@ -125,18 +125,35 @@ export interface ICallbacks {
 export type IApiMsg = Pick<ICgiRequest, 'Content' | 'AtUinLists' | 'Images'>
 
 const msgSchema = z.object({
-  Content: z.string(),
-  AtUinLists: z.array(z.any()).optional(),
-  Images: z.array(z.any()).optional(),
+  Content: z.string().optional(),
+  AtUinLists: z
+    .array(
+      z.object({
+        Uin: z.number(),
+        Nick: z.string().optional(),
+      }),
+    )
+    .optional(),
+  Images: z
+    .array(
+      z.object({
+        FileId: z.number(),
+        FileMd5: z.string(),
+        FileSize: z.number(),
+      }),
+    )
+    .optional(),
 })
 export const apiSchema = {
   sendGroupMessage: z.object({
     groupId: z.number(),
     msg: msgSchema,
+    fastImage: z.string().optional(),
   }),
   sendFriendMessage: z.object({
     userId: z.number(),
     msg: msgSchema,
+    fastImage: z.string().optional(),
   }),
 } satisfies Record<string, z.ZodSchema<any>>
 export interface IApiSendGroupMessage {

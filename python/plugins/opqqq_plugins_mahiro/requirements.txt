@@ -1,2 +1,4 @@
-ujson==5.7.0
+ujson>=5.7.0
 python_dateutil
+httpx>=0.23.3
+pillow

@@ -1,20 +1,15 @@
 from pydantic import BaseModel
-from .send import Sender
+from .send import Sender, AtUin, Image
 import requests
 from typing import Awaitable
-
-
-class AtUin(BaseModel):
-    QQUid: int
-    QQNick: str = ""
 
 
 class Msg(BaseModel):
     SubMsgType: int
     Content: str = ""
     AtUinLists: list[AtUin] = []
-    # TODO: types
-    Images: list = []
+    Images: list[Image] = []
+    # todo: add types
     Video: dict = {}
     Voice: dict = {}
 
@@ -72,10 +67,14 @@ class GroupMessageContainer:
         pass
 
     def register_plugin_to_node(self, id: str):
-        requests.post(
-            Sender.REGISTER_PLUGIN_URL,
-            json={"name": id},
-        )
+        try:
+            requests.post(
+                Sender.REGISTER_PLUGIN_URL,
+                json={"name": id},
+            )
+            print(f"register plugin [{id}] to node success")
+        except Exception as e:
+            print("register plugin to node error: ", e)
 
     def add(self, id: str, callback: Awaitable):
         self.register_plugin_to_node(id=id)
