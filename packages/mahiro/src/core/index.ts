@@ -17,7 +17,6 @@ import {
   DEFAULT_NODE_SERVER,
   SERVER_ROUTES,
   apiSchema,
-  ASYNC_CONTEXT_SPLIT,
   IMahiroInterceptorContext,
   IMahiroInterceptorFunction,
   IMahiroMsgStack,
@@ -25,6 +24,7 @@ import {
   IApiMsg,
   asyncHookUtils,
   EAsyncContextFrom,
+  ISendApiOpts,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -343,6 +343,7 @@ export class Mahiro {
         userId: MsgHead?.SenderUin,
         userNickname: MsgHead?.SenderNick || '',
         msg: MsgBody!,
+        qq: CurrentQQ,
         configs: {
           availablePlugins: [],
         },
@@ -359,7 +360,10 @@ export class Mahiro {
         `${data?.userNickname}(${data?.userId})`,
       )
       // group expired
-      const isValid = await this.db.isGroupValid(data.groupId)
+      const isValid = await this.db.isGroupValid({
+        groupId: data.groupId,
+        qq: CurrentQQ,
+      })
       if (!isValid) {
         this.logger.debug(`Group(${data.groupId}) expired, ignore message`)
         return
@@ -408,6 +412,7 @@ export class Mahiro {
         userId: MsgHead?.SenderUin,
         userName: MsgHead?.SenderNick || '',
         msg: MsgBody!,
+        qq: CurrentQQ,
       } satisfies IFriendMessage
       // ignore myself and all side qq
       const isBot = this.allQQ.includes(data.userId)
@@ -440,23 +445,33 @@ export class Mahiro {
     return asyncHookUtils.parse(this.asyncLocalStorage.getStore())
   }
 
-  private async sendApi(opts: { CgiRequest: ISendMsg['CgiRequest'] }) {
+  private getUseQQ(opts: { specifiedQQ?: number }) {
+    const { specifiedQQ } = opts
+    let useQQ = specifiedQQ
+    if (!useQQ) {
+      const asyncContext = this.getAsyncContext()
+      const mainQQ = this.qq
+      if (!asyncContext?.qq) {
+        this.logger.info(`No context, will use main qq (${mainQQ})`)
+        useQQ = mainQQ
+      } else {
+        this.logger.debug(`with context: `, asyncContext)
+        useQQ = asyncContext.qq
+      }
+    }
+    return useQQ
+  }
+
+  private async sendApi(opts: ISendApiOpts) {
     if (!this.wsConnected) {
       this.logger.error('WS not connected, send api failed')
       return
     }
-    const { CgiRequest } = opts
-    const asyncContext = this.getAsyncContext()
-    const mainQQ = this.qq
-    if (!asyncContext?.qq) {
-      this.logger.info(`No context, will use main qq (${mainQQ}) send message`)
-      return
-    }
-    this.logger.debug(`Send message with context: `, asyncContext)
+    const { CgiRequest, qq } = opts
     const params = {
       funcname: EFuncName.MagicCgiCmd,
       timeout: 10,
-      qq: asyncContext?.qq || mainQQ,
+      qq,
     } satisfies ISendParams
     const stringifyParams = qs.stringify(params)
     const sendMsgUrl = `${this.url}/v1/LuaApiCaller?${stringifyParams}`
@@ -499,7 +514,7 @@ export class Mahiro {
       this.logger.error('WS not connected, upload file failed')
       return
     }
-    const { file, commandId } = opts
+    const { file, commandId, qq } = opts
     this.logger.debug('[Upload File] Will upload file: ', file)
     let { filePath, fileUrl } = detectFileType(file)
     let Base64Buf: string | undefined
@@ -546,10 +561,8 @@ export class Mahiro {
       )
       return
     }
-    const asyncContext = this.getAsyncContext()
-    const useQQ = asyncContext?.qq || this.qq
-    this.logger.debug('[Upload File] Will use qq: ', useQQ)
-    const uploadUrl = `${this.url}/v1/upload?qq=${useQQ}`
+    this.logger.debug('[Upload File] Will use qq: ', qq)
+    const uploadUrl = `${this.url}/v1/upload?qq=${qq}`
     const data: IUploadFile = {
       CgiCmd: ESendCmd.upload,
       CgiRequest: {
@@ -666,15 +679,20 @@ export class Mahiro {
         Content: '',
       },
       groupId,
+      qq
     } = data
     // ensure msg content is string
     if (isNil(msg?.Content)) {
       msg.Content = ''
     }
+    const useQQ = this.getUseQQ({
+      specifiedQQ: qq,
+    })
     if (fastImage?.length) {
       const res = await this.uploadFile({
         file: fastImage,
         commandId: EUploadCommandId.groupImage,
+        qq: useQQ
       })
       const fileInfo = res?.ResponseData as ISendImage
       if (!fileInfo?.FileMd5?.length) {
@@ -692,6 +710,7 @@ export class Mahiro {
         ToType: EToType.group,
         ...(msg as IApiMsg),
       },
+      qq: useQQ
     })
     return res
   }
@@ -702,16 +721,20 @@ export class Mahiro {
         data?.msg?.Content?.slice(0, 10) || ''
       }`,
     )
-    const { fastImage, msg = { Content: '' }, userId } = data
+    const { fastImage, msg = { Content: '' }, userId, qq } = data
     // ensure msg content is string
     if (isNil(msg?.Content)) {
       msg.Content = ''
     }
+    const useQQ = this.getUseQQ({
+      specifiedQQ: qq,
+    })
     // upload fast image
     if (fastImage?.length) {
       const res = await this.uploadFile({
         file: fastImage,
         commandId: EUploadCommandId.friendImage,
+        qq: useQQ
       })
       const fileInfo = res?.ResponseData as ISendImage
       if (!fileInfo?.FileMd5?.length) {
@@ -729,6 +752,7 @@ export class Mahiro {
         ToType: EToType.friends,
         ...(msg as IApiMsg),
       },
+      qq: useQQ
     })
     return res
   }
@@ -895,6 +919,7 @@ export class Mahiro {
     this.logger.info(`[Database] Connecting...`)
     this.db = new Database({
       path: this.advancedOptions.databasePath,
+      mahiro: this,
     })
     await this.db.init()
     this.logger.info(`[Database] Connected`)

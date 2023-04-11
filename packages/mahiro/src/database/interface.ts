@@ -1,16 +1,13 @@
+import type { Mahiro } from "../core"
+
 export interface IDatabaseOpts {
   path: string
+  mahiro: Mahiro
 }
 
 export interface IDataRegisterPluginOpts {
   name: string
   internal?: boolean
-}
-
-export interface IDataRegisterGroupOpts {
-  name: string
-  group_id: number
-  expired_at: string
 }
 
 export interface IDataPlugin {
@@ -38,6 +35,7 @@ export interface IDataGroup {
   admins: string
   expired_at: string
   plugins: string
+  link_qqs: string
 }
 
 export interface IMvcGroup {
@@ -47,6 +45,7 @@ export interface IMvcGroup {
   admins: number[]
   expired_at: string
   plugins: number[]
+  link_qqs: number[]
 }
 
 export type IDataCache<T> = Map<number, T>
@@ -72,4 +71,5 @@ export const DATABASE_APIS = {
   deleteGroup: `${DATABASE_API_PREFIX}/group/delete`,
   registerPlugin: `${DATABASE_API_PREFIX}/plugin/register`,
   getVersion: `${DATABASE_API_PREFIX}/version`,
+  getAllQQs: `${DATABASE_API_PREFIX}/qq/all`,
 } as const

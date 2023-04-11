@@ -11,6 +11,7 @@ import { useEffect } from 'react'
 import { EMenu } from './components/Layout/options'
 import { Plugins } from './pages/Plugins'
 import { Groups } from './pages/Groups'
+import { QQs } from './pages/QQs'
 
 function Redirect({ to }: { to: string }) {
   const navigate = useNavigate()
@@ -27,6 +28,7 @@ const router = createHashRouter(
       <Route path={EMenu.home} element={<Home />} />
       <Route path={EMenu.groups} element={<Groups />} />
       <Route path={EMenu.plugins} element={<Plugins />} />
+      <Route path={EMenu.qqs} element={<QQs />} />
     </Route>,
   ),
 )

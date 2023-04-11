@@ -7,8 +7,9 @@ import {
   HomeOutlined,
   FireOutlined,
   UsergroupAddOutlined,
+  QqOutlined,
 } from '@ant-design/icons'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import zhCN from 'antd/locale/zh_CN'
 import dayjs from 'dayjs'
 
@@ -28,7 +29,8 @@ const queryClient = new QueryClient({
 
 const Logo = styled.div`
   color: #b080fe;
-  font-family: Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif;
+  font-family: Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans',
+    source-sans-pro, sans-serif;
   font-size: 24px;
   font-weight: 550;
   padding: 15px 10px;
@@ -42,7 +44,7 @@ const Version = styled.div`
   font-weight: 550;
   padding: 0 5px;
   font-style: italic;
-  letter-spacing: .3px;
+  letter-spacing: 0.3px;
 `
 
 export const Layout = () => {
@@ -79,6 +81,13 @@ const Internal = () => {
     return mached ? [mached] : [EMenu.home]
   }, [location.pathname])
 
+  const [selected, setSelected] = useState<string[]>(getDefaultSelectedKeys())
+
+  // listen path change
+  useEffect(() => {
+    setSelected(getDefaultSelectedKeys())
+  }, [location.pathname])
+
   const changePath = useCallback((p: string) => {
     navigate(p)
   }, [])
@@ -99,8 +108,9 @@ const Internal = () => {
             height: '100%',
           }}
           mode="inline"
-          defaultSelectedKeys={getDefaultSelectedKeys()}
+          selectedKeys={selected}
           onClick={(e) => {
+            setSelected([e.key])
             changePath(`/${e.key}`)
           }}
           items={[
@@ -118,6 +128,11 @@ const Internal = () => {
               key: EMenu.groups,
               icon: <UsergroupAddOutlined />,
               label: '群组管理',
+            },
+            {
+              key: EMenu.qqs,
+              icon: <QqOutlined />,
+              label: 'QQ管理',
             },
           ]}
         />

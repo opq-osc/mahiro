@@ -18,16 +18,19 @@ class Image(BaseModel):
 
 class Sender:
     id: str
+    # from qq
+    qq: int
 
     GROUP_URL = f"{UP_STREAM_URL}/api/v1/recive/group"
     FRIEND_URL = f"{UP_STREAM_URL}/api/v1/recive/friend"
     REGISTER_PLUGIN_URL = f"{UP_STREAM_URL}/api/v1/panel/plugin/register"
 
-    def __init__(self, id: str):
+    def __init__(self, id: str, qq: int):
         self.id = id
+        self.qq = qq
 
     def create_configs(self):
-        return {"configs": {"id": self.id}}
+        return {"id": self.id}
 
     def send_to_group(
         self,
@@ -44,6 +47,7 @@ class Sender:
                 "Images": imgs,
                 "AtUinLists": ats,
             },
+            "qq": self.qq,
             "configs": self.create_configs(),
         }
         if fast_image:
@@ -63,6 +67,8 @@ class Sender:
         json = {
             "userId": user_id,
             "msg": {"Content": msg, "Images": imgs},
+            "qq": self.qq,
+            "configs": self.create_configs(),
         }
         if fast_image:
             json["fastImage"] = fast_image

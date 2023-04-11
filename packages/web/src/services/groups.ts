@@ -8,6 +8,7 @@ export interface IGroup {
   group_id: number
   admins: number[]
   plugins: number[]
+  link_qqs: number[]
   expired_at: string
 }
 

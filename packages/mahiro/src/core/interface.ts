@@ -105,6 +105,13 @@ export interface IGroupMessage {
   userId: number
   userNickname: string
   msg: IMsgBody
+  /**
+   * 来源
+   */
+  qq: number
+  /**
+   * 高级配置，一般用于内部
+   */
   configs: IGroupMessageConfigs
 }
 
@@ -119,6 +126,7 @@ export interface IFriendMessage {
   userId: number
   userName: string
   msg: IMsgBody
+  qq: number
 }
 
 export interface IOnFriendMessage {
@@ -152,20 +160,30 @@ const msgSchema = z.object({
     )
     .optional(),
 })
+
+// 一些需要回传的额外信息
+const pythonConfigsSchema = z.object({
+  id: z.string()
+})
 export const apiSchema = {
   sendGroupMessage: z.object({
     groupId: z.number(),
     msg: msgSchema,
     fastImage: z.string().optional(),
+    qq: z.number(),
+    configs: pythonConfigsSchema
   }),
   sendFriendMessage: z.object({
     userId: z.number(),
     msg: msgSchema,
     fastImage: z.string().optional(),
+    qq: z.number(),
+    configs: pythonConfigsSchema
   }),
 } satisfies Record<string, z.ZodSchema<any>>
 export interface IApiSendGroupMessage {
   groupId: number
+  qq?: number
   msg?: Partial<IApiMsg>
   /**
    * 便捷字段，会被转换为 msg.Images
@@ -177,11 +195,17 @@ export interface IApiSendGroupMessage {
 
 export interface IApiSendFriendMessage {
   userId: number
+  qq?: number
   msg?: Partial<IApiMsg>
   /**
    * @see {@link IApiSendGroupMessage.fastImage}
    */
   fastImage?: string
+}
+
+export interface ISendApiOpts {
+  CgiRequest: ICgiRequest
+  qq: number
 }
 
 const getDefaultNodeServerPort = () => {
@@ -250,6 +274,7 @@ export const asyncHookUtils = {
 
 export interface IMahiroUploadFileOpts {
   commandId: EUploadCommandId
+  qq: number
   /**
    * 可以是 url 或者本地文件绝对路径，会自动区分
    */

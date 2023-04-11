@@ -1,34 +1,13 @@
 import { usePluginsList } from '@/hooks/usePluginsList'
-import { Popover, Select, SelectProps, Space, Tag } from 'antd'
+import { Select, SelectProps, Space, Tag } from 'antd'
 import { Fragment, useMemo } from 'react'
 import { toString } from 'lodash'
+import { randomColor } from '@/utils/color'
 
 export interface IPluginsSelectProps extends SelectProps {
   value?: string[]
   onChange?: (value: string[]) => void
   preview?: boolean
-}
-
-const colors = [
-  'magenta',
-  'red',
-  'volcano',
-  'orange',
-  'gold',
-  'lime',
-  'green',
-  'cyan',
-  'blue',
-  'geekblue',
-  'purple',
-] as const
-
-const randomColor = (id?: number) => {
-  if (!id) {
-    return colors[0]
-  }
-  const index = id % colors.length
-  return colors[index]
 }
 
 export const PluginsSelect = ({

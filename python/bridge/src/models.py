@@ -32,6 +32,7 @@ class GroupMessage(BaseModel):
     groupId: int
     groupNickname: str = ""
     msg: Msg
+    qq: int
     configs: GroupMessageConfigs
 
 
@@ -56,7 +57,7 @@ class GroupMessageMahiro:
     def create_group_message_mahiro(id: str, ctx: GroupMessage):
         is_text = ctx.msg.SubMsgType == SubMsgType.mixed
         extra = GroupMessageExtra(is_text=is_text)
-        sender = Sender(id=id)
+        sender = Sender(id=id, qq=ctx.qq)
         return GroupMessageMahiro(ctx=ctx, sender=sender, extra=extra)
 
 
@@ -96,6 +97,7 @@ class FriendMessage(BaseModel):
     userId: int
     userNickname: str = ""
     msg: Msg
+    qq: int
 
 
 class FriendMessageMahiro:

@@ -228,7 +228,7 @@ export function ListView({ value = [] }: { value?: number[] }) {
   if (!value?.length) {
     return <div>-</div>
   }
-  const label = `${value[0]} 等 ${value.length} 人`
+  const label = `${value[0]} 等 ${value.length} 个`
   return (
     <div>
       <Popover

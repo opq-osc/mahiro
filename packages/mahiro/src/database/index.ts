@@ -3,7 +3,6 @@ import {
   EVersion,
   IDataCache,
   IDataPlugin,
-  IDataRegisterGroupOpts,
   IDataRegisterPluginOpts,
   IDatabaseOpts,
   IMvcGroup,
@@ -17,11 +16,14 @@ import dayjs from 'dayjs'
 import { type Express } from 'express'
 import { uniq } from 'lodash'
 import chalk from 'mahiro/compiled/chalk'
+import type { Mahiro } from '../core'
 
 export class Database {
   private path!: string
   private db!: ReturnType<typeof knex>
   private logger = consola.withTag('Database') as typeof consola
+  // parent
+  private mahiro!: Mahiro
 
   // runtime
   private registeredPlugins: string[] = [] // name list
@@ -45,6 +47,7 @@ export class Database {
 
   constructor(opts: IDatabaseOpts) {
     this.path = opts.path
+    this.mahiro = opts.mahiro
   }
 
   async init() {
@@ -91,6 +94,7 @@ export class Database {
         table.string('admins')
         table.string('expired_at')
         table.string('plugins')
+        table.string('link_qqs')
       })
     }
     const versionExists = await db.schema.hasTable(table.version)
@@ -148,24 +152,6 @@ export class Database {
     })
     // clear external plugins
     this.registeredExternalPlugins = []
-  }
-
-  async registerGroup(opts: IDataRegisterGroupOpts) {
-    const { name, group_id, expired_at } = opts
-    const has = await this.db
-      .table(this.table.groups)
-      .where({ group_id })
-      .first()
-    if (!has) {
-      this.logger.info(`Registering group ${name}`)
-      await this.db(this.table.groups).insert({
-        name,
-        group_id,
-        admins: '',
-        expired_at,
-        plugins: '',
-      })
-    }
   }
 
   private isCacheExpired(key: string) {
@@ -235,7 +221,8 @@ export class Database {
         expired_at: g.expired_at,
         admins: toArrayNumber(g.admins),
         plugins: toArrayNumber(g.plugins),
-      } as IMvcGroup
+        link_qqs: toArrayNumber(g.link_qqs),
+      } satisfies IMvcGroup
     })
     return mvcGroups
   }
@@ -263,6 +250,10 @@ export class Database {
         // @ts-ignore
         group.plugins = group.plugins.join(',')
       }
+      if (group.link_qqs) {
+        // @ts-ignore
+        group.link_qqs = group.link_qqs.join(',')
+      }
       const res = await this.db(this.table.groups).where({ id }).update(group)
       return res
     }
@@ -277,6 +268,8 @@ export class Database {
     group.admins = group.admins.join(',')
     // @ts-ignore
     group.plugins = group.plugins.join(',')
+    // @ts-ignore
+    group.link_qqs = group.link_qqs.join(',')
     const res = await this.db(this.table.groups).insert(group)
     return res
   }
@@ -385,12 +378,22 @@ export class Database {
     return true
   }
 
-  async isGroupValid(groupId: number) {
+  async isGroupValid(opts: { groupId: number; qq: number }) {
+    const { groupId, qq } = opts
     const group = await this.getGroupMapFromCache(groupId)
     if (group) {
       const expiredAt = dayjs(group.expired_at).valueOf()
       const now = Date.now()
-      return now <= expiredAt
+      const isTimeValid = now <= expiredAt
+      const isQQValid = group.link_qqs.includes(qq)
+      this.logger.debug(
+        '[isGroupValid]',
+        'isTimeValid: ',
+        isTimeValid,
+        'isQQValid: ',
+        isQQValid,
+      )
+      return isTimeValid && isQQValid
     }
     return false
   }
@@ -568,6 +571,27 @@ export class Database {
         })
       }
     })
+    // get all qqs
+    app.get(DATABASE_APIS.getAllQQs, async (req, res, next) => {
+      res.status(200)
+      try {
+        const qqs = this.getAllQQs()
+        res.json({
+          code: 200,
+          data: qqs,
+        })
+      } catch (e: any) {
+        res.json({
+          code: 500,
+          message: e?.message || 'Internal Server Error',
+        })
+      }
+    })
+  }
+
+  private getAllQQs() {
+    const qqs = this.mahiro.allQQ
+    return qqs
   }
 
   // todo: 发卡

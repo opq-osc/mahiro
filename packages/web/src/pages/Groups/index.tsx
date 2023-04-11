@@ -13,6 +13,7 @@ import {
   Select,
   Spin,
   Popconfirm,
+  Tooltip,
 } from 'antd'
 import { useEffect, useState } from 'react'
 import { trim, isNumber, cloneDeep } from 'lodash'
@@ -25,6 +26,8 @@ import { IGroup, addGroup, deleteGroup, updateGroup } from '@/services/groups'
 import { ListView } from '../Plugins'
 import dayjs from 'dayjs'
 import { toNumberFromArray } from '@/utils'
+import { QQsSelect } from '@/components/QQsSelect'
+import { useQQsList } from '@/hooks/useQQsList'
 
 export const Groups = () => {
   const [addVisible, setAddVisible] = useState(false)
@@ -52,18 +55,24 @@ export const Groups = () => {
     }
   }
 
+  const qqsQuery = useQQsList()
+
   const columns: ColumnType<any>[] = [
     {
       title: '群组名称',
       dataIndex: 'name',
+      width: 170,
+      fixed: 'left',
     },
     {
       title: '群号',
       dataIndex: 'group_id',
+      width: 120,
     },
     {
       title: '管理员',
       dataIndex: 'admins',
+      width: 150,
       render: (col) => {
         return <ListView value={col} />
       },
@@ -71,6 +80,39 @@ export const Groups = () => {
     {
       title: '过期时间',
       dataIndex: 'expired_at',
+      width: 170,
+      render: (col) => {
+        const ins = dayjs(col)
+        const nowIns = dayjs()
+        const isExpired = ins.isBefore(nowIns)
+        const span = (
+          <span
+            style={{
+              color: isExpired ? 'rgba(0, 0, 0, .6)' : undefined,
+            }}
+          >
+            {col}
+          </span>
+        )
+        return (
+          <Tooltip title="已过期" open={isExpired ? undefined : false}>
+            {isExpired ? <del>{span}</del> : span}
+          </Tooltip>
+        )
+      },
+    },
+    {
+      title: '绑定账号',
+      dataIndex: 'link_qqs',
+      width: 150,
+      render: (col: number[]) => {
+        const qqs = col || []
+        const currentUsingQQs = qqsQuery.data || []
+        const filteredQQs: number[] = qqs.filter((i) => {
+          return currentUsingQQs.includes(i)
+        })
+        return <ListView value={filteredQQs} />
+      },
     },
     {
       title: '可用插件',
@@ -82,6 +124,8 @@ export const Groups = () => {
     {
       title: '操作',
       dataIndex: 'action',
+      fixed: 'right',
+      width: 120,
       render: (_, row) => {
         const id = row?.id
         return (
@@ -152,6 +196,7 @@ export const Groups = () => {
         </Space>
       </Row>
       <Table
+        scroll={{ x: 1300 }}
         loading={query.isFetching}
         size="small"
         dataSource={query?.data || []}
@@ -271,6 +316,14 @@ function AddModal({
           }}
           form={form}
         >
+          <Typography.Title
+            style={{
+              marginTop: 0,
+            }}
+            level={5}
+          >
+            {`☕️ 基本选项`}
+          </Typography.Title>
           <Form.Item name="id" noStyle>
             <Input
               style={{
@@ -278,7 +331,12 @@ function AddModal({
               }}
             />
           </Form.Item>
-          <Form.Item name="name" label="群组名称" required>
+          <Form.Item
+            name="name"
+            label="群组名称"
+            extra={<div>这是一个群组的备注，可以任意填写关键信息</div>}
+            required
+          >
             <Input />
           </Form.Item>
           <Form.Item name="group_id" label="群号" required>
@@ -288,13 +346,16 @@ function AddModal({
             <DatePicker showTime />
           </Form.Item>
           <Form.Item
-            name="admins"
-            label="管理员"
-            extra="某个群的管理员，可以用命令 .clode 插件名  / .open 插件名 来关闭或开启任何在后台面板里启用的插件"
-            rules={[numberListValidator]}
+            name="link_qqs"
+            label="绑定账号"
+            extra={
+              <div>
+                注意必须绑定账号，对应的账号才在该群生效；多账号在一个群时，建议只开启一个账号
+              </div>
+            }
             initialValue={[]}
           >
-            <Select placeholder="请输入用户号码" allowClear mode="tags" />
+            <QQsSelect />
           </Form.Item>
           <Form.Item
             label="可用插件"
@@ -303,6 +364,16 @@ function AddModal({
             initialValue={[]}
           >
             <PluginsSelect />
+          </Form.Item>
+          <Typography.Title level={5}>{`🤔 高级选项`}</Typography.Title>
+          <Form.Item
+            name="admins"
+            label="管理员"
+            extra="某个群的管理员，可以用命令 .close 插件名  / .open 插件名 来关闭或开启任何在后台面板里启用的插件"
+            rules={[numberListValidator]}
+            initialValue={[]}
+          >
+            <Select placeholder="请输入用户号码" allowClear mode="tags" />
           </Form.Item>
         </Form>
       </Spin>
