@@ -69,7 +69,8 @@ const Internal = () => {
   const navigate = useNavigate()
 
   useVersionGet()
-  const [version] = useVersion()
+  const [versionInfo] = useVersion()
+  const version = versionInfo?.version || ''
 
   const getDefaultSelectedKeys = useCallback(() => {
     const pathname = location.pathname

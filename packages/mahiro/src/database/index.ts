@@ -562,7 +562,10 @@ export class Database {
         const version = await this.getVersion()
         res.json({
           code: 200,
-          data: version,
+          data: {
+            version,
+            robotUrl: this.mahiro.url,
+          },
         })
       } catch (e: any) {
         res.json({
