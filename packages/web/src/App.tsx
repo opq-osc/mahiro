@@ -12,6 +12,7 @@ import { EMenu } from './components/Layout/options'
 import { Plugins } from './pages/Plugins'
 import { Groups } from './pages/Groups'
 import { QQs } from './pages/QQs'
+import { Panel } from './pages/Panel'
 
 function Redirect({ to }: { to: string }) {
   const navigate = useNavigate()
@@ -29,6 +30,7 @@ const router = createHashRouter(
       <Route path={EMenu.groups} element={<Groups />} />
       <Route path={EMenu.plugins} element={<Plugins />} />
       <Route path={EMenu.qqs} element={<QQs />} />
+      <Route path={EMenu.panel} element={<Panel />} />
     </Route>,
   ),
 )

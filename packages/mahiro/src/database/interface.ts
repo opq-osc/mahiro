@@ -72,4 +72,11 @@ export const DATABASE_APIS = {
   registerPlugin: `${DATABASE_API_PREFIX}/plugin/register`,
   getVersion: `${DATABASE_API_PREFIX}/version`,
   getAllQQs: `${DATABASE_API_PREFIX}/qq/all`,
+  getPanel: `${DATABASE_API_PREFIX}/panel`,
 } as const
+
+export interface IMahiroWebPanel {
+  name: string
+  version?: string
+  content: string | (() => string | Promise<string>)
+}

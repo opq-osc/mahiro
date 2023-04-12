@@ -5,6 +5,7 @@ import {
   IDataPlugin,
   IDataRegisterPluginOpts,
   IDatabaseOpts,
+  IMahiroWebPanel,
   IMvcGroup,
   IMvcPlugin,
   getCacheTime,
@@ -14,7 +15,7 @@ import { consola } from 'consola'
 import { toArrayNumber } from '../utils'
 import dayjs from 'dayjs'
 import { type Express } from 'express'
-import { uniq } from 'lodash'
+import { isString, uniq } from 'lodash'
 import chalk from 'mahiro/compiled/chalk'
 import type { Mahiro } from '../core'
 import Keyv from '@keyvhq/core'
@@ -40,6 +41,9 @@ export class Database {
     plugins: 'plugins',
     groups: 'groups',
   }
+
+  // web extra panel
+  private panel: IMahiroWebPanel[] = []
 
   // kv
   kv!: Keyv
@@ -604,10 +608,46 @@ export class Database {
         })
       }
     })
+    // get panels
+    app.get(DATABASE_APIS.getPanel, async (req, res, next) => {
+      res.status(200)
+      try {
+        const panels = await this.getPanel()
+        res.json({
+          code: 200,
+          data: panels,
+        })
+      } catch (e: any) {
+        res.json({
+          code: 500,
+          message: e?.message || 'Internal Server Error',
+        })
+      }
+    })
   }
 
   private getAllQQs() {
     const qqs = this.mahiro.allQQ
     return qqs
+  }
+
+  async registerWebPanel(panel: IMahiroWebPanel) {
+    if (!panel?.name?.length) {
+      throw new Error('panel name is required')
+    }
+    this.panel.push(panel)
+    this.logger.info(`[web] register panel: ${panel.name}`)
+  }
+
+  async getPanel() {
+    const finalPanels = this.panel.map(async (panel) => {
+      return {
+        ...panel,
+        content: isString(panel.content)
+          ? panel.content
+          : await panel.content(),
+      }
+    })
+    return Promise.all(finalPanels)
   }
 }

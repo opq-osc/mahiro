@@ -3,6 +3,7 @@ export enum EMenu {
   plugins = 'plugins',
   groups = 'groups',
   qqs = 'qqs',
+  panel = 'panel',
 }
 
 export const menus = [
@@ -10,4 +11,5 @@ export const menus = [
   EMenu.plugins,
   EMenu.groups,
   EMenu.qqs,
+  EMenu.panel,
 ] as const

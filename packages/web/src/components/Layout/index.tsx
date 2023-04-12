@@ -8,6 +8,7 @@ import {
   FireOutlined,
   UsergroupAddOutlined,
   QqOutlined,
+  DashboardOutlined,
 } from '@ant-design/icons'
 import { useCallback, useEffect, useState } from 'react'
 import zhCN from 'antd/locale/zh_CN'
@@ -134,6 +135,11 @@ const Internal = () => {
               key: EMenu.qqs,
               icon: <QqOutlined />,
               label: 'QQ管理',
+            },
+            {
+              key: EMenu.panel,
+              icon: <DashboardOutlined />,
+              label: '超级仪表盘',
             },
           ]}
         />
