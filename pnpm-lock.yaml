@@ -49,50 +49,53 @@ importers:
 
   packages/mahiro:
     dependencies:
-      '@napi-rs/blake-hash':
-        specifier: ^1.3.3
-        version: registry.npmjs.org/@napi-rs/blake-hash@1.3.3
+      '@keyvhq/core':
+        specifier: 1.6.26
+        version: registry.npmjs.org/@keyvhq/core@1.6.26
+      '@keyvhq/sqlite':
+        specifier: 1.6.28
+        version: registry.npmjs.org/@keyvhq/sqlite@1.6.28
       '@xn-sakina/mahiro-web':
         specifier: workspace:*
         version: link:../web
       axios:
-        specifier: ^1.3.4
+        specifier: 1.3.4
         version: registry.npmjs.org/axios@1.3.4
       better-sqlite3:
-        specifier: ^8.2.0
+        specifier: 8.2.0
         version: registry.npmjs.org/better-sqlite3@8.2.0
       consola:
         specifier: 3.0.0-3
         version: registry.npmjs.org/consola@3.0.0-3
       cors:
-        specifier: ^2.8.5
+        specifier: 2.8.5
         version: registry.npmjs.org/cors@2.8.5
       dayjs:
-        specifier: ^1.11.7
+        specifier: 1.11.7
         version: registry.npmjs.org/dayjs@1.11.7
       express:
-        specifier: ^4.18.2
+        specifier: 4.18.2
         version: registry.npmjs.org/express@4.18.2
       figlet:
-        specifier: ^1.5.2
+        specifier: 1.5.2
         version: registry.npmjs.org/figlet@1.5.2
       knex:
-        specifier: ^2.4.2
+        specifier: 2.4.2
         version: registry.npmjs.org/knex@2.4.2(better-sqlite3@8.2.0)
       lodash:
-        specifier: ^4.17.21
+        specifier: 4.17.21
         version: registry.npmjs.org/lodash@4.17.21
       qs:
-        specifier: ^6.11.1
+        specifier: 6.11.1
         version: registry.npmjs.org/qs@6.11.1
       serve-static:
-        specifier: ^1.15.0
+        specifier: 1.15.0
         version: registry.npmjs.org/serve-static@1.15.0
       ws:
-        specifier: ^8.13.0
+        specifier: 8.13.0
         version: registry.npmjs.org/ws@8.13.0
       zod:
-        specifier: ^3.21.4
+        specifier: 3.21.4
         version: registry.npmjs.org/zod@3.21.4
     devDependencies:
       '@types/cors':
@@ -3079,6 +3082,35 @@ packages:
       '@jridgewell/sourcemap-codec': registry.npmjs.org/@jridgewell/sourcemap-codec@1.4.15
     dev: true
 
+  registry.npmjs.org/@keyvhq/core@1.6.26:
+    resolution: {integrity: sha512-0jy/fOVCYdo3MImM3yjdHuFZNkycPmEAq0v+UGt0dRltnXccgQ+7vCdCNbLpgP3688g5Mw8L+0vcRt5MK53UPA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@keyvhq/core/-/core-1.6.26.tgz}
+    name: '@keyvhq/core'
+    version: 1.6.26
+    engines: {node: '>= 14'}
+    dependencies:
+      json-buffer: registry.npmjs.org/json-buffer@3.0.1
+    dev: false
+
+  registry.npmjs.org/@keyvhq/sql@1.6.28:
+    resolution: {integrity: sha512-DYU5T0lB6k0IH7yqCd8Tj+vJPIgi+DTFiwk+02mA+SZs+WgxAX4NtrKVMcDKtG+6l5luBpBE1+pH6nlibzPBqw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@keyvhq/sql/-/sql-1.6.28.tgz}
+    name: '@keyvhq/sql'
+    version: 1.6.28
+    engines: {node: '>= 14'}
+    dependencies:
+      sql-ts: registry.npmjs.org/sql-ts@5.4.0
+    dev: false
+
+  registry.npmjs.org/@keyvhq/sqlite@1.6.28:
+    resolution: {integrity: sha512-3ml+3LhZa2JxKumFaLOnGWEGqdGa5pUNZtkyHS7RNtlbDIpiummGBshAeut4OpbO5ka3VaSmz9PqQ68UUIru0A==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@keyvhq/sqlite/-/sqlite-1.6.28.tgz}
+    name: '@keyvhq/sqlite'
+    version: 1.6.28
+    engines: {node: '>= 14'}
+    dependencies:
+      '@keyvhq/sql': registry.npmjs.org/@keyvhq/sql@1.6.28
+      '@vscode/sqlite3': registry.npmjs.org/@vscode/sqlite3@5.1.2
+      pify: registry.npmjs.org/pify@5.0.0
+    dev: false
+
   registry.npmjs.org/@leichtgewicht/ip-codec@2.0.4:
     resolution: {integrity: sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz}
     name: '@leichtgewicht/ip-codec'
@@ -3118,146 +3150,6 @@ packages:
       jju: registry.npmjs.org/jju@1.4.0
       read-yaml-file: registry.npmjs.org/read-yaml-file@1.1.0
     dev: true
-
-  registry.npmjs.org/@napi-rs/blake-hash-android-arm64@1.3.3:
-    resolution: {integrity: sha512-BlXSmENklyiPgT8P0CTnmK/JUs0R0/SagZK6f9i+Ot3AGVNRM5wvTwnGaQ7LzbcJqQO9ttCEVGojinKXdpcnhA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash-android-arm64/-/blake-hash-android-arm64-1.3.3.tgz}
-    name: '@napi-rs/blake-hash-android-arm64'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [android]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmjs.org/@napi-rs/blake-hash-darwin-arm64@1.3.3:
-    resolution: {integrity: sha512-kAbsPLxEyUYEpnYgDUrN+h8aUItMcxP1zJEQKvhqD3MGYazTwLVO1Z9kKN/OGvTnhkaWC3aNvcEkhO7HxHUW8A==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash-darwin-arm64/-/blake-hash-darwin-arm64-1.3.3.tgz}
-    name: '@napi-rs/blake-hash-darwin-arm64'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [darwin]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmjs.org/@napi-rs/blake-hash-darwin-x64@1.3.3:
-    resolution: {integrity: sha512-HSSNq0Yv4mMcKfxRik4H5ll2ylN7yTZ0cjjyleZQP+GFcQqhoqVlvOzuP3OAz6ZfzMG5E+EG8ShxsIr1r1hLhg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash-darwin-x64/-/blake-hash-darwin-x64-1.3.3.tgz}
-    name: '@napi-rs/blake-hash-darwin-x64'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [darwin]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmjs.org/@napi-rs/blake-hash-freebsd-x64@1.3.3:
-    resolution: {integrity: sha512-rh4Z9kgcxD3LtSIWJ43bDCk9YJyj3IoVmt1fES2VkDdvSyXAGsKn9P10bmnMHvFR+hnwrN94CVBgbI0ofjB4NA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash-freebsd-x64/-/blake-hash-freebsd-x64-1.3.3.tgz}
-    name: '@napi-rs/blake-hash-freebsd-x64'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [freebsd]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmjs.org/@napi-rs/blake-hash-linux-arm64-gnu@1.3.3:
-    resolution: {integrity: sha512-H0neB17uKFXzkf+KVPU/T66h7qInaG3bH1+QucWy7U55s5Fx7aHJtAkbDFf4kdC2wLiLIrbCPPHkD4cKRWuUJA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash-linux-arm64-gnu/-/blake-hash-linux-arm64-gnu-1.3.3.tgz}
-    name: '@napi-rs/blake-hash-linux-arm64-gnu'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmjs.org/@napi-rs/blake-hash-linux-arm64-musl@1.3.3:
-    resolution: {integrity: sha512-RLSR+oADqJGmaqGQwE11hzI+oF1mb3QyJibx+ITboaoxyyDJw8ubaSV3QoQKz4I0aVmGxPfhKK8I+y6H4AgyiQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash-linux-arm64-musl/-/blake-hash-linux-arm64-musl-1.3.3.tgz}
-    name: '@napi-rs/blake-hash-linux-arm64-musl'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmjs.org/@napi-rs/blake-hash-linux-x64-gnu@1.3.3:
-    resolution: {integrity: sha512-SUiOTQxQpB5uuAOfdWgyuLcFs7oGBItHxV7rZNf9i4szFK0wUg/+Oojkkdkfy/hjxO2LzPxauF/66RpOwIiR6g==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash-linux-x64-gnu/-/blake-hash-linux-x64-gnu-1.3.3.tgz}
-    name: '@napi-rs/blake-hash-linux-x64-gnu'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmjs.org/@napi-rs/blake-hash-linux-x64-musl@1.3.3:
-    resolution: {integrity: sha512-crEw9pL5d3s55KWsu362UId5a723rcCq7ZACaDnqUzAW/W5dY20Dt3INAqc+DcWjWc4ePWZnF1QQnC/QzFcVbQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash-linux-x64-musl/-/blake-hash-linux-x64-musl-1.3.3.tgz}
-    name: '@napi-rs/blake-hash-linux-x64-musl'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmjs.org/@napi-rs/blake-hash-win32-arm64-msvc@1.3.3:
-    resolution: {integrity: sha512-xQtHQisFj2YfSADxQs2NJYJo02QPyF/sS8dPWZrgqFcw/PToS8e/YkCzeUH1zBTQrXQPI1AIY8/YBX84YynMtg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash-win32-arm64-msvc/-/blake-hash-win32-arm64-msvc-1.3.3.tgz}
-    name: '@napi-rs/blake-hash-win32-arm64-msvc'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmjs.org/@napi-rs/blake-hash-win32-ia32-msvc@1.3.3:
-    resolution: {integrity: sha512-92T9+Yy1rmlROnegJbs7CTLl3Jwt4GGttmpYMMK5LqRg2QAnwOxERmk8HfIObmdgE/fvBHR2l7RLZ6uNbG0CvQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash-win32-ia32-msvc/-/blake-hash-win32-ia32-msvc-1.3.3.tgz}
-    name: '@napi-rs/blake-hash-win32-ia32-msvc'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    cpu: [ia32]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmjs.org/@napi-rs/blake-hash-win32-x64-msvc@1.3.3:
-    resolution: {integrity: sha512-FnDi/M35o87/kcVg2qJw8L7FmA4rL7ui4mjuxuMpdpUeW9vkSx/MpXiWIc/83IPjlj6GLyT21AHkqymUOCrnfA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash-win32-x64-msvc/-/blake-hash-win32-x64-msvc-1.3.3.tgz}
-    name: '@napi-rs/blake-hash-win32-x64-msvc'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmjs.org/@napi-rs/blake-hash@1.3.3:
-    resolution: {integrity: sha512-5Tp3v9X5XQySR8DQx4Y7DF/1X+0007soghQWGyodkDp7JAhFL5y8fhKjUOhcHtN6o6+Os3Xi21rJJbDRsKLkFw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/blake-hash/-/blake-hash-1.3.3.tgz}
-    name: '@napi-rs/blake-hash'
-    version: 1.3.3
-    engines: {node: '>= 10'}
-    optionalDependencies:
-      '@napi-rs/blake-hash-android-arm64': registry.npmjs.org/@napi-rs/blake-hash-android-arm64@1.3.3
-      '@napi-rs/blake-hash-darwin-arm64': registry.npmjs.org/@napi-rs/blake-hash-darwin-arm64@1.3.3
-      '@napi-rs/blake-hash-darwin-x64': registry.npmjs.org/@napi-rs/blake-hash-darwin-x64@1.3.3
-      '@napi-rs/blake-hash-freebsd-x64': registry.npmjs.org/@napi-rs/blake-hash-freebsd-x64@1.3.3
-      '@napi-rs/blake-hash-linux-arm64-gnu': registry.npmjs.org/@napi-rs/blake-hash-linux-arm64-gnu@1.3.3
-      '@napi-rs/blake-hash-linux-arm64-musl': registry.npmjs.org/@napi-rs/blake-hash-linux-arm64-musl@1.3.3
-      '@napi-rs/blake-hash-linux-x64-gnu': registry.npmjs.org/@napi-rs/blake-hash-linux-x64-gnu@1.3.3
-      '@napi-rs/blake-hash-linux-x64-musl': registry.npmjs.org/@napi-rs/blake-hash-linux-x64-musl@1.3.3
-      '@napi-rs/blake-hash-win32-arm64-msvc': registry.npmjs.org/@napi-rs/blake-hash-win32-arm64-msvc@1.3.3
-      '@napi-rs/blake-hash-win32-ia32-msvc': registry.npmjs.org/@napi-rs/blake-hash-win32-ia32-msvc@1.3.3
-      '@napi-rs/blake-hash-win32-x64-msvc': registry.npmjs.org/@napi-rs/blake-hash-win32-x64-msvc@1.3.3
-    dev: false
 
   registry.npmjs.org/@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents.3:
     resolution: {integrity: sha512-s88O1aVtXftvp5bCPB7WnmXc5IwOZZ7YPuwNPt+GtOOXpPvad1LfbmjYv+qII7zP6RU2QGnqve27dnLycEnyEQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@nicolo-ribaudo/chokidar-2/-/chokidar-2-2.1.8-no-fsevents.3.tgz}
@@ -4541,6 +4433,15 @@ packages:
     version: 0.36.1
     hasBin: true
     dev: true
+
+  registry.npmjs.org/@vscode/sqlite3@5.1.2:
+    resolution: {integrity: sha512-XE2p2bqBEBZkbLxPcdRwwsyhgttbkLiD3LljJPnIuShjum5ZC50DoheFlKzEN5mWkZBY5rrfspnXDYb8amzB1w==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@vscode/sqlite3/-/sqlite3-5.1.2.tgz}
+    name: '@vscode/sqlite3'
+    version: 5.1.2
+    requiresBuild: true
+    dependencies:
+      node-addon-api: registry.npmjs.org/node-addon-api@4.3.0
+    dev: false
 
   registry.npmjs.org/@webassemblyjs/ast@1.11.1:
     resolution: {integrity: sha512-ukBh14qFLjxTQNTXocdyksN5QdM28S1CxHt2rdskFyL+xFV7VremuBLVbmCePj+URalXBENx/9Lm7lnhihtCSw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@webassemblyjs/ast/-/ast-1.11.1.tgz}
@@ -8787,6 +8688,12 @@ packages:
     hasBin: true
     dev: true
 
+  registry.npmjs.org/json-buffer@3.0.1:
+    resolution: {integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/json-buffer/-/json-buffer-3.0.1.tgz}
+    name: json-buffer
+    version: 3.0.1
+    dev: false
+
   registry.npmjs.org/json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/json-parse-even-better-errors/-/json-parse-even-better-errors-2.3.1.tgz}
     name: json-parse-even-better-errors
@@ -9622,6 +9529,12 @@ packages:
     version: 3.1.1
     dev: true
 
+  registry.npmjs.org/node-addon-api@4.3.0:
+    resolution: {integrity: sha512-73sE9+3UaLYYFmDsFZnqCInzPyh3MqIwZO9cw58yIqAZhONrrabrYyYe3TuIqtIiOuTXVhsGau8hcrhhwSsDIQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/node-addon-api/-/node-addon-api-4.3.0.tgz}
+    name: node-addon-api
+    version: 4.3.0
+    dev: false
+
   registry.npmjs.org/node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/node-domexception/-/node-domexception-1.0.0.tgz}
     name: node-domexception
@@ -10078,6 +9991,13 @@ packages:
     version: 4.0.1
     engines: {node: '>=6'}
     dev: true
+
+  registry.npmjs.org/pify@5.0.0:
+    resolution: {integrity: sha512-eW/gHNMlxdSP6dmG6uJip6FXN0EQBwm2clYYd8Wul42Cwu/DK8HEftzsapcNdYe2MfLiIwZqsDk2RDEsTE79hA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/pify/-/pify-5.0.0.tgz}
+    name: pify
+    version: 5.0.0
+    engines: {node: '>=10'}
+    dev: false
 
   registry.npmjs.org/pinkie-promise@2.0.1:
     resolution: {integrity: sha512-0Gni6D4UcLTbv9c57DfxDGdr41XfgUjqWZu492f0cIGr16zDU06BWP/RAEvOuo7CQ0CNjHaLlM59YJJFm3NWlw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/pinkie-promise/-/pinkie-promise-2.0.1.tgz}
@@ -13158,6 +13078,12 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
+  registry.npmjs.org/sliced@1.0.1:
+    resolution: {integrity: sha512-VZBmZP8WU3sMOZm1bdgTadsQbcscK0UM8oKxKVBs4XAhUo2Xxzm/OFMGBkPusxw9xL3Uy8LrzEqGqJhclsr0yA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/sliced/-/sliced-1.0.1.tgz}
+    name: sliced
+    version: 1.0.1
+    dev: false
+
   registry.npmjs.org/sockjs@0.3.24:
     resolution: {integrity: sha512-GJgLTZ7vYb/JtPSSZ10hsOYIvEYsjbNU+zPdIHcUaWVNUEPivzxku31865sSSud0Da0W4lEeOPlmw93zLQchuQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/sockjs/-/sockjs-0.3.24.tgz}
     name: sockjs
@@ -13276,6 +13202,17 @@ packages:
     name: sprintf-js
     version: 1.0.3
     dev: true
+
+  registry.npmjs.org/sql-ts@5.4.0:
+    resolution: {integrity: sha512-OFwAmN07K6YJxxpwqHVsvbFm8FNdzqn3YhuPg+IqRoJc8O30ep9r8hzBVeaWRDxTbFbJ/Ti3jdXzP7ESW/mjGQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/sql-ts/-/sql-ts-5.4.0.tgz}
+    name: sql-ts
+    version: 5.4.0
+    engines: {node: ^12.0.0 || >=14.0.0}
+    dependencies:
+      lodash: registry.npmjs.org/lodash@4.17.21
+      sliced: registry.npmjs.org/sliced@1.0.1
+      tslib: registry.npmjs.org/tslib@2.0.3
+    dev: false
 
   registry.npmjs.org/stack-generator@2.0.10:
     resolution: {integrity: sha512-mwnua/hkqM6pF4k8SnmZ2zfETsRUpWXREfA/goT8SLCV4iOFa4bzOX2nDipWAZFPTjLvQB82f5yaodMVhK0yJQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/stack-generator/-/stack-generator-2.0.10.tgz}
@@ -13853,6 +13790,12 @@ packages:
       v8-compile-cache-lib: registry.npmjs.org/v8-compile-cache-lib@3.0.1
       yn: registry.npmjs.org/yn@3.1.1
     dev: true
+
+  registry.npmjs.org/tslib@2.0.3:
+    resolution: {integrity: sha512-uZtkfKblCEQtZKBF6EBXVZeQNl82yqtDQdv+eck8u7tdPxjLu2/lp5/uPW+um2tpuxINHWy3GhiccY7QgEaVHQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/tslib/-/tslib-2.0.3.tgz}
+    name: tslib
+    version: 2.0.3
+    dev: false
 
   registry.npmjs.org/tslib@2.5.0:
     resolution: {integrity: sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/tslib/-/tslib-2.5.0.tgz}

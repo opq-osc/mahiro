@@ -17,6 +17,8 @@ import { type Express } from 'express'
 import { uniq } from 'lodash'
 import chalk from 'mahiro/compiled/chalk'
 import type { Mahiro } from '../core'
+import Keyv from '@keyvhq/core'
+import KeyvSQLite from '@keyvhq/sqlite'
 
 export class Database {
   private path!: string
@@ -39,6 +41,9 @@ export class Database {
     groups: 'groups',
   }
 
+  // kv
+  kv!: Keyv
+
   private table = {
     plugins: 'plugins',
     groups: 'groups',
@@ -52,6 +57,7 @@ export class Database {
 
   async init() {
     this.connect()
+    this.connectKV()
     await this.checkTables()
   }
 
@@ -66,6 +72,14 @@ export class Database {
         min: 2,
         max: 10,
       },
+    })
+  }
+
+  private connectKV() {
+    this.logger.debug('Connecting KV database')
+    this.kv = new Keyv({
+      store: new KeyvSQLite(this.path),
+      namespace: 'mahirokv',
     })
   }
 

@@ -9,6 +9,7 @@ import {
 import { z } from 'zod'
 import { consola } from 'consola'
 import { securityCopilotInterceptor } from '../interceptors/securityCopilot'
+import type { Mahiro } from './'
 
 export interface IMahiroAdvancedOptions {
   /**
@@ -279,4 +280,8 @@ export interface IMahiroUploadFileOpts {
    * 可以是 url 或者本地文件绝对路径，会自动区分
    */
   file: string
+}
+
+export interface IMahiroPlugin {
+  (mahiro: Mahiro): Promise<void> | void
 }

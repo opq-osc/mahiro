@@ -25,6 +25,7 @@ import {
   asyncHookUtils,
   EAsyncContextFrom,
   ISendApiOpts,
+  IMahiroPlugin,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -679,7 +680,7 @@ export class Mahiro {
         Content: '',
       },
       groupId,
-      qq
+      qq,
     } = data
     // ensure msg content is string
     if (isNil(msg?.Content)) {
@@ -692,7 +693,7 @@ export class Mahiro {
       const res = await this.uploadFile({
         file: fastImage,
         commandId: EUploadCommandId.groupImage,
-        qq: useQQ
+        qq: useQQ,
       })
       const fileInfo = res?.ResponseData as ISendImage
       if (!fileInfo?.FileMd5?.length) {
@@ -710,7 +711,7 @@ export class Mahiro {
         ToType: EToType.group,
         ...(msg as IApiMsg),
       },
-      qq: useQQ
+      qq: useQQ,
     })
     return res
   }
@@ -734,7 +735,7 @@ export class Mahiro {
       const res = await this.uploadFile({
         file: fastImage,
         commandId: EUploadCommandId.friendImage,
-        qq: useQQ
+        qq: useQQ,
       })
       const fileInfo = res?.ResponseData as ISendImage
       if (!fileInfo?.FileMd5?.length) {
@@ -752,7 +753,7 @@ export class Mahiro {
         ToType: EToType.friends,
         ...(msg as IApiMsg),
       },
-      qq: useQQ
+      qq: useQQ,
     })
     return res
   }
@@ -1039,5 +1040,13 @@ export class Mahiro {
         return Promise.reject(err)
       },
     )
+  }
+
+  // for register extra plugins
+  async register(plugin: IMahiroPlugin) {
+    this.logger.debug(
+      `[Plugin] Will register extra plugin: ${plugin?.name || 'unknown'}`,
+    )
+    await plugin(this)
   }
 }
