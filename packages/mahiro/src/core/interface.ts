@@ -107,7 +107,7 @@ export interface IGroupMessage {
   userNickname: string
   msg: IMsgBody
   /**
-   * 来源
+   * from bot qq
    */
   qq: number
   /**
@@ -127,6 +127,9 @@ export interface IFriendMessage {
   userId: number
   userName: string
   msg: IMsgBody
+  /**
+   * from bot qq
+   */
   qq: number
 }
 
@@ -164,7 +167,7 @@ const msgSchema = z.object({
 
 // 一些需要回传的额外信息
 const pythonConfigsSchema = z.object({
-  id: z.string()
+  id: z.string(),
 })
 export const apiSchema = {
   sendGroupMessage: z.object({
@@ -172,14 +175,14 @@ export const apiSchema = {
     msg: msgSchema,
     fastImage: z.string().optional(),
     qq: z.number(),
-    configs: pythonConfigsSchema
+    configs: pythonConfigsSchema,
   }),
   sendFriendMessage: z.object({
     userId: z.number(),
     msg: msgSchema,
     fastImage: z.string().optional(),
     qq: z.number(),
-    configs: pythonConfigsSchema
+    configs: pythonConfigsSchema,
   }),
 } satisfies Record<string, z.ZodSchema<any>>
 export interface IApiSendGroupMessage {
@@ -282,6 +285,24 @@ export interface IMahiroUploadFileOpts {
   file: string
 }
 
-export interface IMahiroPlugin {
+export interface IMahiroUse {
   (mahiro: Mahiro): Promise<void> | void
+}
+
+export interface IMiddlewares {
+  group: IMahiroGroupMiddleware[]
+  friend: IMahiroFriendMiddleware[]
+}
+
+export type IMahiroMiddleware<T = any> = (
+  data: T,
+) => (T | false) | Promise<T | false>
+
+export type IMahiroGroupMiddleware = IMahiroMiddleware<IGroupMessage>
+
+export type IMahiroFriendMiddleware = IMahiroMiddleware<IFriendMessage>
+
+export enum EMiddleware {
+  group = 'middleware-group',
+  friend = 'middleware-friend',
 }

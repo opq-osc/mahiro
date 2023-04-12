@@ -610,6 +610,4 @@ export class Database {
     const qqs = this.mahiro.allQQ
     return qqs
   }
-
-  // todo: 发卡
 }

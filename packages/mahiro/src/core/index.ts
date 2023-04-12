@@ -25,7 +25,13 @@ import {
   asyncHookUtils,
   EAsyncContextFrom,
   ISendApiOpts,
-  IMahiroPlugin,
+  IMahiroInterceptor,
+  IMahiroUse,
+  IMahiroGroupMiddleware,
+  IMiddlewares,
+  IMahiroFriendMiddleware,
+  IMahiroMiddleware,
+  EMiddleware,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -63,7 +69,7 @@ import { AsyncLocalStorage } from 'async_hooks'
 import { existsSync } from 'fs'
 import { dirname, isAbsolute, join } from 'path'
 import serveStatic from 'serve-static'
-import { cloneDeep, isNil, trim, uniq } from 'lodash'
+import { cloneDeep, isNil, isString, trim, uniq } from 'lodash'
 import { detectFileType, getFileBase64 } from '../utils/file'
 
 export class Mahiro {
@@ -95,6 +101,12 @@ export class Mahiro {
   callback: ICallbacks = {
     onGroupMessage: {},
     onFreindMessage: {},
+  }
+
+  // middlewares
+  middlewares: IMiddlewares = {
+    group: [],
+    friend: [],
   }
 
   // db
@@ -338,7 +350,7 @@ export class Mahiro {
       MsgHead?.MsgType === EMsgType.group &&
       MsgHead?.C2cCmd === EC2cCmd.group
     if (isGroupMsg) {
-      const data = {
+      let data = {
         groupId: MsgHead?.GroupInfo?.GroupCode!,
         groupName: MsgHead?.GroupInfo?.GroupName!,
         userId: MsgHead?.SenderUin,
@@ -360,6 +372,44 @@ export class Mahiro {
         `${data?.groupName}(${data?.groupId})`,
         `${data?.userNickname}(${data?.userId})`,
       )
+      // async context
+      const withContext = (opts: {
+        name: string
+        cb: (...args: any[]) => any
+      }) => {
+        const { name, cb } = opts
+        const timestamp = Date.now()
+        const contextId = asyncHookUtils.hash({
+          time: timestamp,
+          name,
+          qq: CurrentQQ,
+          from: EAsyncContextFrom.group,
+        })
+        return new Promise<void>((resolve, _) => {
+          this.logger.debug(`Run context: ${contextId}`)
+          this.asyncLocalStorage.run(contextId, async () => {
+            await cb()
+            resolve()
+          })
+        })
+      }
+      // call middlewares
+      const middlewares = this.middlewares.group
+      if (middlewares.length) {
+        await withContext({
+          name: EMiddleware.group,
+          cb: async () => {
+            const newData = await this.callMiddlewares({
+              data,
+              middlewares: this.middlewares.group,
+            })
+            data = newData
+          },
+        })
+      }
+      if (!data) {
+        return
+      }
       // group expired
       const isValid = await this.db.isGroupValid({
         groupId: data.groupId,
@@ -384,20 +434,16 @@ export class Mahiro {
       // add configs
       data.configs.availablePlugins = avaliablePlugins
       // call callbacks
-      Object.entries(this.callback.onGroupMessage).forEach(([name, cb]) => {
+      Object.entries(this.callback.onGroupMessage).forEach(([name, plugin]) => {
         const isAvaliable = avaliablePlugins.includes(name)
         if (!isAvaliable) {
           return
         }
-        const timestamp = Date.now()
-        const contextId = asyncHookUtils.hash({
-          time: timestamp,
+        withContext({
           name,
-          qq: CurrentQQ,
-          from: EAsyncContextFrom.group,
-        })
-        this.asyncLocalStorage.run(contextId, () => {
-          cb(data, json)
+          cb: () => {
+            plugin(data, json)
+          },
         })
       })
       return
@@ -409,7 +455,7 @@ export class Mahiro {
       MsgHead?.MsgType === EMsgType.friends &&
       MsgHead?.C2cCmd === EC2cCmd.firends
     if (isFriendMsg) {
-      const data = {
+      let data = {
         userId: MsgHead?.SenderUin,
         userName: MsgHead?.SenderNick || '',
         msg: MsgBody!,
@@ -425,8 +471,12 @@ export class Mahiro {
         `Received ${chalk.blue('friend')} message: `,
         `${data?.userName}(${data?.userId})`,
       )
-      // trigger callback
-      Object.entries(this.callback.onFreindMessage).forEach(([name, cb]) => {
+      // async context
+      const withContext = (opts: {
+        name: string
+        cb: (...args: any[]) => any
+      }) => {
+        const { name, cb } = opts
         const timestamp = Date.now()
         const contextId = asyncHookUtils.hash({
           time: timestamp,
@@ -434,10 +484,42 @@ export class Mahiro {
           qq: CurrentQQ,
           from: EAsyncContextFrom.friend,
         })
-        this.asyncLocalStorage.run(contextId, () => {
-          cb(data, json)
+        return new Promise<void>((resolve, _) => {
+          this.logger.debug(`Run context: ${contextId}`)
+          this.asyncLocalStorage.run(contextId, async () => {
+            await cb()
+            resolve()
+          })
         })
-      })
+      }
+      // call middlewares
+      const middlewares = this.middlewares.friend
+      if (middlewares.length) {
+        await withContext({
+          name: EMiddleware.friend,
+          cb: async () => {
+            const newData = await this.callMiddlewares({
+              data,
+              middlewares: this.middlewares.friend,
+            })
+            data = newData
+          },
+        })
+      }
+      if (!data) {
+        return
+      }
+      // trigger callback
+      Object.entries(this.callback.onFreindMessage).forEach(
+        ([name, plugin]) => {
+          withContext({
+            name,
+            cb: () => {
+              plugin(data, json)
+            },
+          })
+        },
+      )
       return
     }
   }
@@ -1042,11 +1124,70 @@ export class Mahiro {
     )
   }
 
-  // for register extra plugins
-  async register(plugin: IMahiroPlugin) {
+  async use(feature: IMahiroUse) {
     this.logger.debug(
-      `[Plugin] Will register extra plugin: ${plugin?.name || 'unknown'}`,
+      `[Use] Will register feature: ${feature?.name || 'unknown'}`,
     )
-    await plugin(this)
+    await feature(this)
+  }
+
+  async registerIntercepter(interceptor: IMahiroInterceptor) {
+    if (isString(interceptor)) {
+      try {
+        interceptor = require(interceptor)
+        this.logger.debug(
+          `[Interceptors] Registering from path: ${interceptor}`,
+        )
+      } catch {
+        this.logger.error(
+          `[Interceptors] Register failed from path: ${interceptor}`,
+        )
+      }
+    }
+    // add to interceptors
+    this.advancedOptions.interceptors.push(interceptor)
+  }
+
+  async registerGroupMiddleware(middleware: IMahiroGroupMiddleware) {
+    this.middlewares.group.push(middleware)
+    this.logger.debug(
+      `[Middlewares] Registering group middleware: ${
+        middleware?.name || 'unknown'
+      }`,
+    )
+  }
+
+  async registerFriendMiddleware(middleware: IMahiroFriendMiddleware) {
+    this.middlewares.friend.push(middleware)
+    this.logger.debug(
+      `[Middlewares] Registering friend middleware: ${
+        middleware?.name || 'unknown'
+      }`,
+    )
+  }
+
+  private async callMiddlewares(opts: {
+    middlewares: IMahiroMiddleware[]
+    data: any
+  }) {
+    let data = opts.data
+    for await (const middleware of opts.middlewares) {
+      const newData = await middleware(data)
+      const name = middleware?.name || 'unknown'
+      this.logger.debug(
+        `[Middlewares] Call middleware: ${name}, with data: ${JSON.stringify(
+          data,
+        )}`,
+      )
+      if (newData) {
+        data = newData
+      } else {
+        this.logger.info(
+          `[Middlewares] Middleware: ${name} return false, skip handle message`,
+        )
+        return false
+      }
+    }
+    return data
   }
 }
