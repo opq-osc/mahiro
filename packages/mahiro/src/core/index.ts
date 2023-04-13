@@ -72,6 +72,7 @@ import serveStatic from 'serve-static'
 import { cloneDeep, isNil, isString, trim, uniq } from 'lodash'
 import { detectFileType, getFileBase64 } from '../utils/file'
 import { CronJob } from './cron'
+import { Utils } from './utils'
 
 export class Mahiro {
   // base props
@@ -128,6 +129,9 @@ export class Mahiro {
 
   // cron
   cron = new CronJob()
+
+  // utils
+  utils = new Utils()
 
   constructor(opts: IMahiroOpts) {
     this.printLogo()
@@ -293,6 +297,12 @@ export class Mahiro {
       this.wsConnected = false
       retryConnect()
     })
+
+    // debug
+    if (process.env.MAHIRO_IGNORE_CONNECT) {
+      this.logger.debug('MAHIRO_IGNORE_CONNECT :: Ignore connect')
+      resolve()
+    }
 
     return promise
   }

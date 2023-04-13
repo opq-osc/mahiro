@@ -1,6 +1,7 @@
 import nodeCron from 'node-cron'
 import cronstrue from 'cronstrue'
 import { consola } from 'consola'
+import 'cronstrue/locales/zh_CN'
 
 export class CronJob {
   logger = consola.withTag('cron-job') as typeof consola

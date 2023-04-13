@@ -172,7 +172,7 @@ export class Database {
     this.registeredExternalPlugins = []
   }
 
-  private isCacheExpired(key: string) {
+  isCacheExpired(key: string) {
     const latest = this.cacheTimeMap.get(key)
     if (latest) {
       const now = Date.now()
@@ -183,11 +183,11 @@ export class Database {
     return true
   }
 
-  private updateCacheTimeMap(key: string) {
+  updateCacheTimeMap(key: string) {
     this.cacheTimeMap.set(key, Date.now())
   }
 
-  private async getPlugins() {
+  async getPlugins() {
     const plugins = await this.db(this.table.plugins).select('*')
     const mvcPlugins = plugins
       .map((plugin) => {
@@ -211,7 +211,7 @@ export class Database {
     return mvcPlugins
   }
 
-  private async updatePlugin(plugin: Partial<IMvcPlugin>) {
+  async updatePlugin(plugin: Partial<IMvcPlugin>) {
     const id = plugin.id!
     const has = await this.db.table(this.table.plugins).where({ id }).first()
     if (has) {
@@ -229,10 +229,10 @@ export class Database {
     }
   }
 
-  private async getGroups() {
+  async getGroups() {
     const groups = await this.db(this.table.groups).select('*')
     const mvcGroups = groups.map((g) => {
-      return {
+      const mvc: IMvcGroup = {
         id: g.id,
         name: g.name,
         group_id: g.group_id,
@@ -240,12 +240,13 @@ export class Database {
         admins: toArrayNumber(g.admins),
         plugins: toArrayNumber(g.plugins),
         link_qqs: toArrayNumber(g.link_qqs),
-      } satisfies IMvcGroup
+      }
+      return mvc
     })
     return mvcGroups
   }
 
-  private async getInternalPluginIds() {
+  async getInternalPluginIds() {
     const plugins = await this.getPlugins()
     const internalPluginIds = plugins
       .filter((p) => p?.internal)
@@ -253,7 +254,7 @@ export class Database {
     return internalPluginIds
   }
 
-  private async updateGroup(group: Partial<IMvcGroup>) {
+  async updateGroup(group: Partial<IMvcGroup>) {
     const id = group.id!
     const has = await this.db.table(this.table.groups).where({ id }).first()
     if (has) {
@@ -277,7 +278,7 @@ export class Database {
     }
   }
 
-  private async addGroup(group: IMvcGroup) {
+  async addGroup(group: Omit<IMvcGroup, 'id'>) {
     // auto add internal plugins
     const internalPluginIds = await this.getInternalPluginIds()
     group.plugins = uniq([...internalPluginIds, ...(group.plugins || [])])
@@ -292,12 +293,12 @@ export class Database {
     return res
   }
 
-  private async deleteGroup(id: number) {
+  async deleteGroup(id: number) {
     const res = await this.db(this.table.groups).where({ id }).del()
     return res
   }
 
-  private async getPluginListFromCache() {
+  async getPluginListFromCache() {
     const cache = this.pluginCache
     const update = async () => {
       const plugins = await this.getPlugins()
@@ -311,7 +312,7 @@ export class Database {
     return this.pluginCache
   }
 
-  private async getGroupMapFromCache(groupId: number) {
+  async getGroupMapFromCache(groupId: number) {
     const cache = this.groupCache.get(groupId)
     const update = async () => {
       const groups = await this.getGroups()
@@ -336,7 +337,7 @@ export class Database {
     return false
   }
 
-  private async getPluginIdByName(name: string) {
+  async getPluginIdByName(name: string) {
     const plugins = await this.getPluginListFromCache()
     const pluginId = plugins
       .filter((p) => !p.internal && p.enabled)
@@ -626,7 +627,7 @@ export class Database {
     })
   }
 
-  private getAllQQs() {
+  getAllQQs() {
     const qqs = this.mahiro.allQQ
     return qqs
   }
