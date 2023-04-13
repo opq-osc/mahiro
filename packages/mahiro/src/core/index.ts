@@ -71,6 +71,7 @@ import { dirname, isAbsolute, join } from 'path'
 import serveStatic from 'serve-static'
 import { cloneDeep, isNil, isString, trim, uniq } from 'lodash'
 import { detectFileType, getFileBase64 } from '../utils/file'
+import { CronJob } from './cron'
 
 export class Mahiro {
   // base props
@@ -124,6 +125,9 @@ export class Mahiro {
     timeout: 3 * 60 * 1e3,
     max: 10,
   }
+
+  // cron
+  cron = new CronJob()
 
   constructor(opts: IMahiroOpts) {
     this.printLogo()
