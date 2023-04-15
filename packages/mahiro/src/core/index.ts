@@ -908,8 +908,8 @@ export class Mahiro {
     app.post(SERVER_ROUTES.recive.group, async (req, res) => {
       const json = req.body as IApiSendGroupMessage
       try {
+        // we keep the same schema with send message
         apiSchema.sendGroupMessage.parse(json)
-        // todo: transform to api schema
         this.logger.debug(
           '[Node Server] Recive group message: ',
           JSON.stringify(json),
@@ -931,7 +931,6 @@ export class Mahiro {
       const json = req.body as IApiSendFriendMessage
       try {
         apiSchema.sendFriendMessage.parse(json)
-        // todo: transform to api schema
         this.logger.debug(
           '[Node Server] Recive friend message: ',
           JSON.stringify(json),

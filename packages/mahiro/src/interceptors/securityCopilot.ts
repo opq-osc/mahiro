@@ -2,8 +2,8 @@ import chalk from 'mahiro/compiled/chalk'
 import { IMahiroInterceptorContext } from '../core/interface'
 import { EToType } from '../send/interface'
 import { sleep } from '../utils'
+import { isEqual } from 'lodash'
 
-// todo: prevent continuous repeat send image
 // todo: report danger msg to admin
 export const securityCopilotInterceptor = async (
   ctx: IMahiroInterceptorContext,
@@ -62,6 +62,36 @@ export const securityCopilotInterceptor = async (
           )
           await sleep(sleepTime)
           return true
+        }
+      }
+    }
+  }
+
+  // 防止图片两次连续发一样的
+  const currentImages = ctx?.data?.CgiRequest?.Images
+  if (currentImages?.length) {
+    const prevMsg = stack[stack.length - 1]?.msg
+    if (prevMsg) {
+      const prevImages = prevMsg?.CgiRequest?.Images
+      if (prevImages?.length) {
+        const isLengthEqual = currentImages.length === prevImages?.length
+        if (isLengthEqual) {
+          const isTargetEqual = ctx.data?.CgiRequest?.ToUin === prevMsg?.CgiRequest?.ToUin
+          if (isTargetEqual) {
+            const isImageEqual = isEqual(
+              currentImages.map((i) => i?.FileMd5),
+              prevImages.map((i) => i?.FileMd5),
+            )
+            if (isImageEqual) {
+              // drop
+              logger.error(
+                `[Security Copilot] ${chalk.red(
+                  `The image is repeated, drop it.`,
+                )}`,
+              )
+              return false
+            }
+          }
         }
       }
     }
