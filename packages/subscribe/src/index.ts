@@ -34,6 +34,10 @@ export interface IMahiroSubscribeOpts {
    * @default 'redis://localhost:6379'
    */
   redis?: `redis://${string}:${number}`
+  /**
+   * @todo auto add renewers to admin
+   */
+  // autoAddToAdmin?: boolean
 }
 
 const defaultRedis = 'redis://localhost:6379'
@@ -265,7 +269,31 @@ export const MahiroSubscribe = (opts: IMahiroSubscribeOpts = {}) => {
     }
     mahiro.registerGroupMiddleware(mahiroSubscribeMiddleware)
 
-    // todo: add web panel
+    // add web panel
+    const getPanelHtml = async () => {
+      const data = (await read()) || {}
+      const readableData = Object.entries(data).reduce<typeof data>(
+        (acc, [period, tokens]) => {
+          const readableKey = prettyMilliseconds(Number(period))
+          acc[readableKey] = tokens
+          return acc
+        },
+        {},
+      )
+      const html = /* html */ `
+<div class="text-2xl text-600 p-2">Mahiro Subscribe Tokens</div>
+<div class="p-2">
+  <pre class="pt-0 mt-0 max-h-screen overflow-auto">
+${JSON.stringify(readableData, null, 2)}
+  </pre>
+</div>  
+`.trimStart()
+      return html
+    }
+    mahiro.db.registerWebPanel({
+      name: DB_KEY,
+      content: getPanelHtml,
+    })
 
     logger.success(`[Mahiro Subscribe] init success`)
   }
