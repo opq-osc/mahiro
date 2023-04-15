@@ -1,0 +1,30 @@
+{
+  "name": "@xn-sakina/mahiro-docs",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "debug": "NODE_OPTIONS='--inspect' next dev",
+    "clean": "rimraf .next .turbo"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.33",
+    "@types/react-dom": "^18.0.11",
+    "@xn-sakina/builder-favicon": "^1.0.1",
+    "next": "^13.3.0",
+    "nextra": "^2.4.0",
+    "nextra-theme-docs": "^2.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "packageManager": "pnpm@8.1.0",
+  "license": "MIT",
+  "engines": {
+    "pnpm": "^8",
+    "node": "^18",
+    "yarn": "forbidden, use pnpm",
+    "npm": "forbidden, use pnpm"
+  }
+}
