@@ -1,19 +1,19 @@
 <div align="center">
 
 
-<img src = './packages/web/public/favicon.png' width = '150px' />
+<img src = 'https://cdn.jsdelivr.net/gh/fz6m/Private-picgo@moe-2021/img/20230415212622.png' width='150px' />
 
 # Mahiro
 
-![Nodejs](https://img.shields.io/badge/Node.js-18%2B-brightgreen)
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-![License](https://img.shields.io/github/license/opq-osc/mahiro)
+**Mahiro** is a JavaScript SDK for OPQBot that provides message management, sending and receiving, gateway interception, rate limiting, filtering, and other functionalities.
 
 </div>
 
-**Mahiro** is a JavaScript SDK for OPQBot that provides message management, sending and receiving, gateway interception, rate limiting, filtering, and other functionalities.
+## Preview
+
+<img src="https://cdn.jsdelivr.net/gh/fz6m/Private-picgo@moe-2021/img/20230415213545.webp" height="300px" />
+
+### Terminal
 
 ```txt
       ___           ___           ___                       ___           ___
@@ -35,16 +35,16 @@
 ℹ [Database] Connected
 ```
 
-### Install
+## Install
 
 ```bash
   pnpm i -D mahiro
 ```
 
-### Usage
+## Usage
 
 See [documents](https://mahiro.opqbot.com/)
 
-### License
+## License
 
 MIT

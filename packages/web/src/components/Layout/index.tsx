@@ -4,19 +4,19 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { EMenu, menus } from './options'
 import {
-  HomeOutlined,
-  FireOutlined,
-  UsergroupAddOutlined,
-  QqOutlined,
-  DashboardOutlined,
+  HomeTwoTone,
+  AppstoreTwoTone,
+  MessageTwoTone,
+  ApiTwoTone,
+  DashboardTwoTone,
 } from '@ant-design/icons'
 import { useCallback, useEffect, useState } from 'react'
 import zhCN from 'antd/locale/zh_CN'
-import dayjs from 'dayjs'
-
-import 'dayjs/locale/zh-cn'
 import { useVersion } from '@/stores/global'
 import { useVersionGet } from '@/hooks/useVersionGet'
+
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
 dayjs.locale('zh-cn')
 
 const queryClient = new QueryClient({
@@ -60,12 +60,13 @@ const Version = styled.div`
   letter-spacing: 0.3px;
 `
 
+const themeColor = '#B080FE'
 export const Layout = () => {
   return (
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: '#B080FE',
+          colorPrimary: themeColor,
         },
       }}
       locale={zhCN}
@@ -110,12 +111,12 @@ const Internal = () => {
     <AntdLayout
       style={{
         height: '100vh',
-        overflow: 'hidden'
+        overflow: 'hidden',
       }}
     >
       <AntdLayout.Sider theme="light" trigger={null} collapsible>
         <Logo>
-          <img src="/favicon.png" alt='mahiro' />
+          <img src="/favicon.png" alt="mahiro" />
           <span>Mahiro</span>
           <Version>{version}</Version>
         </Logo>
@@ -132,27 +133,28 @@ const Internal = () => {
           items={[
             {
               key: EMenu.home,
-              icon: <HomeOutlined />,
+              // todo: add data dashboard
+              icon: <HomeTwoTone twoToneColor={themeColor} />,
               label: '首页',
             },
             {
               key: EMenu.plugins,
-              icon: <FireOutlined />,
+              icon: <ApiTwoTone twoToneColor={themeColor} />,
               label: '插件管理',
             },
             {
               key: EMenu.groups,
-              icon: <UsergroupAddOutlined />,
+              icon: <MessageTwoTone twoToneColor={themeColor} />,
               label: '群组管理',
             },
             {
               key: EMenu.qqs,
-              icon: <QqOutlined />,
-              label: 'QQ管理',
+              icon: <AppstoreTwoTone twoToneColor={themeColor} />,
+              label: '账号管理',
             },
             {
               key: EMenu.panel,
-              icon: <DashboardOutlined />,
+              icon: <DashboardTwoTone twoToneColor={themeColor} />,
               label: '超级仪表盘',
             },
           ]}
@@ -163,7 +165,7 @@ const Internal = () => {
           style={{
             background: '#fff',
             padding: 24,
-            overflow: 'auto'
+            overflow: 'auto',
           }}
         >
           <Outlet />
