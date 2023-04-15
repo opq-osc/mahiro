@@ -1,5 +1,6 @@
 import {
   DATABASE_APIS,
+  DEFAULT_REDIS_KV_NAMESPACE,
   EVersion,
   IDataCache,
   IDataPlugin,
@@ -20,6 +21,7 @@ import chalk from 'mahiro/compiled/chalk'
 import type { Mahiro } from '../core'
 import Keyv from '@keyvhq/core'
 import KeyvSQLite from '@keyvhq/sqlite'
+import KeyvRedis from '@keyvhq/redis'
 import { extract } from '@xn-sakina/mahiro-css'
 
 export class Database {
@@ -49,6 +51,18 @@ export class Database {
   // kv
   kv!: Keyv
 
+  // redis kv
+  // only available when config the `advancedOptions.redisKV`
+  private _redisKV: Keyv | undefined
+  get redisKV() {
+    if (!this._redisKV) {
+      throw new Error(
+        `Redis KV is not available, please check your config 'advancedOptions.redisKV'`,
+      )
+    }
+    return this._redisKV
+  }
+
   private table = {
     plugins: 'plugins',
     groups: 'groups',
@@ -63,7 +77,21 @@ export class Database {
   async init() {
     this.connect()
     this.connectKV()
+    this.connectRedisKV()
     await this.checkTables()
+  }
+
+  private connectRedisKV() {
+    const url = this.mahiro.advancedOptions.redisKV
+    if (!url?.length) {
+      return
+    }
+    this.logger.info(`Connecting Redis KV :`, chalk.cyan(url))
+    this._redisKV = new Keyv({
+      store: new KeyvRedis(url),
+      namespace: DEFAULT_REDIS_KV_NAMESPACE,
+    })
+    this.logger.success(`Connected Redis KV`)
   }
 
   private connect() {

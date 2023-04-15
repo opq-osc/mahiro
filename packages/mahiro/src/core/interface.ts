@@ -18,9 +18,6 @@ export interface IMahiroAdvancedOptions {
    */
   ignoreMyself?: boolean
 
-  // TODO: 发消息队列
-  // messageQueue?: IMahiroMessageQueue
-
   /**
    * mahiro 管理面板数据库路径
    * @default ${cwd}/mahiro.db
@@ -35,10 +32,16 @@ export interface IMahiroAdvancedOptions {
 
   /**
    * 伴生bot，用于多Q场景
-   * @description 还没测试过
+   * @experiment 还没测试过
    * @default []
    */
   sideQQs?: number[]
+
+  /**
+   * 启用 redis kv
+   * @example 'redis://localhost:6379'
+   */
+  redisKV?: string
 }
 
 export type IMahiroMsgStack = Map<number, IMahiroMsgHistory[]>
@@ -74,6 +77,7 @@ export const DEFAULT_ADANCED_OPTIONS: Required<IMahiroAdvancedOptions> = {
   databasePath: join(process.cwd(), 'mahiro.db'),
   interceptors: [securityCopilotInterceptor],
   sideQQs: [],
+  redisKV: ''
 }
 export interface IMahiroInitWithSimple extends IMahiroInitBase {
   /**

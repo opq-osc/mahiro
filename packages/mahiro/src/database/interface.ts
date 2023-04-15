@@ -80,3 +80,5 @@ export interface IMahiroWebPanel {
   version?: string
   content: string | (() => string | Promise<string>)
 }
+
+export const DEFAULT_REDIS_KV_NAMESPACE = 'mahiro-redis-kv'

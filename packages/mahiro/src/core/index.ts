@@ -195,6 +195,7 @@ export class Mahiro {
             )
             .default(DEFAULT_ADANCED_OPTIONS.interceptors),
           sideQQs: z.array(z.number()).default(DEFAULT_ADANCED_OPTIONS.sideQQs),
+          redisKV: z.string().default(DEFAULT_ADANCED_OPTIONS.redisKV),
         })
         .default(DEFAULT_ADANCED_OPTIONS),
       nodeServer: z
