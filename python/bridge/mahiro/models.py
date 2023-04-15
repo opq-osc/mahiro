@@ -2,7 +2,8 @@ from pydantic import BaseModel
 from .send import Sender, AtUin, Image
 import requests
 from typing import Awaitable
-
+from termcolor import colored
+import asyncio
 
 class Msg(BaseModel):
     SubMsgType: int
@@ -99,6 +100,13 @@ class MessageContainer:
             print(f"register plugin [{id}] to node success")
         except Exception as e:
             print("register plugin to node error: ", e)
+            print('\n\n')
+            print(colored('------------- Important -------------', 'red'))
+            print(colored('Please start Mahiro node server first, ', 'red'))
+            print(colored('Then start Mahiro python bridge server.', 'red'))
+            print(colored('-------------------------------------', 'red'))
+            print('\n\n')
+            raise e
         
     def register_all_plugins(self):
         for key in self.instances:
@@ -118,6 +126,7 @@ class MessageContainer:
         self.friend_instances[id] = callback
 
     async def call_group(self, ctx: GroupMessage):
+        tasks = []
         available_plugins = ctx.configs.availablePlugins
         for key in available_plugins:
             if key not in self.instances:
@@ -125,11 +134,16 @@ class MessageContainer:
             # create mahiro
             mahiro = GroupMessageMahiro.create_group_message_mahiro(id=key, ctx=ctx)
             # call
-            await self.instances[key](mahiro)
+            tasks.append(self.instances[key](mahiro))
+        if len(tasks) > 0:
+            await asyncio.gather(*tasks)
 
     async def call_friend(self, ctx: FriendMessage):
+        tasks = []
         for key in self.friend_instances:
             # create mahiro
             mahiro = FriendMessageMahiro.create_friend_message_mahiro(id=key, ctx=ctx)
             # call
-            await self.friend_instances[key](mahiro)
+            tasks.append(self.friend_instances[key](mahiro))
+        if len(tasks) > 0:
+            await asyncio.gather(*tasks)
