@@ -18,7 +18,8 @@
     "build": "tsc --declarationMap false",
     "build:deps": "dora build",
     "prepublishOnly": "rimraf dist && pnpm build",
-    "push": "pnpm publish --registry https://registry.npmjs.com"
+    "push": "pnpm publish --registry https://registry.npmjs.com",
+    "tsc:check": "tsc --noEmit"
   },
   "dependencies": {
     "@keyvhq/core": "1.6.26",

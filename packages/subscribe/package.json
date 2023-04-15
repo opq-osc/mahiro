@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "tsc -w",
     "build": "tsc --declarationMap false",
-    "prepublishOnly": "rimraf dist && pnpm build"
+    "prepublishOnly": "rimraf dist && pnpm build",
+    "tsc:check": "tsc --noEmit"
   },
   "devDependencies": {
     "mahiro": "workspace:*"

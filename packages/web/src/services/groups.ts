@@ -10,6 +10,7 @@ export interface IGroup {
   plugins: number[]
   link_qqs: number[]
   expired_at: string
+  distribute: boolean
 }
 
 export const getGroupsList = async () => {

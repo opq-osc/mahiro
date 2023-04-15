@@ -7,7 +7,8 @@
   "main": "dist/index.html",
   "scripts": {
     "dev": "xn dev",
-    "build": "xn build"
+    "build": "xn build",
+    "tsc:check": "tsc --noEmit"
   },
   "devDependencies": {
     "@ant-design/icons": "^5.0.1",

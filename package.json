@@ -6,7 +6,9 @@
     "format": "rome format ./packages --write",
     "bootstrap": "tsx ./scripts/bootstrap.ts",
     "submodule:init": "git submodule update --init --recursive",
-    "submodule:update": "git submodule update --remote"
+    "submodule:update": "git submodule update --remote",
+    "tsc:check": "pnpm build:mahiro && pnpm -r tsc:check",
+    "build:mahiro": "pnpm --filter=mahiro build"
   },
   "engines": {
     "pnpm": "^8",

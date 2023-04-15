@@ -142,6 +142,8 @@ export class Database {
         table.string('expired_at')
         table.string('plugins')
         table.string('link_qqs')
+        // todo: 读写分离
+        table.boolean('distribute').defaultTo(false)
       })
     }
     const versionExists = await db.schema.hasTable(table.version)
@@ -269,6 +271,7 @@ export class Database {
         admins: toArrayNumber(g.admins),
         plugins: toArrayNumber(g.plugins),
         link_qqs: toArrayNumber(g.link_qqs),
+        distribute: g.distribute,
       }
       return mvc
     })

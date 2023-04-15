@@ -46,6 +46,7 @@ export interface IMvcGroup {
   expired_at: string
   plugins: number[]
   link_qqs: number[]
+  distribute: boolean
 }
 
 export type IDataCache<T> = Map<number, T>
