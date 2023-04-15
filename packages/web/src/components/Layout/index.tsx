@@ -98,6 +98,7 @@ const Internal = () => {
     <AntdLayout
       style={{
         height: '100vh',
+        overflow: 'hidden'
       }}
     >
       <AntdLayout.Sider theme="light" trigger={null} collapsible>
@@ -149,6 +150,7 @@ const Internal = () => {
           style={{
             background: '#fff',
             padding: 24,
+            overflow: 'auto'
           }}
         >
           <Outlet />
