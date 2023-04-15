@@ -13,7 +13,7 @@ try:
 except ImportError:
     import json
 
-from bridge.src.models import GroupMessageMahiro
+from bridge.mahiro import GroupMessageMahiro
 
 # ==========================================
 

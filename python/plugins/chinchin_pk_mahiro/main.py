@@ -1,6 +1,6 @@
 from plugins.chinchin_pk.src.main import message_processor, KEYWORDS
 from plugins.chinchin_pk.src.utils import get_object_values, create_match_func_factory
-from bridge.src.models import GroupMessageMahiro
+from bridge.mahiro import GroupMessageMahiro
 
 keywords = get_object_values(KEYWORDS)
 match_func = create_match_func_factory(fuzzy=True)

@@ -1,4 +1,4 @@
-from bridge.src.models import FriendMessageMahiro
+from bridge.mahiro import FriendMessageMahiro
 
 
 async def friend_simple_mahiro(mahiro: FriendMessageMahiro):

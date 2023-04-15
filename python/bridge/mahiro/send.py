@@ -52,6 +52,7 @@ class Sender:
         }
         if fast_image:
             json["fastImage"] = fast_image
+        print('send_to_group to', json['groupId'])
         return requests.post(
             self.__GROUP_URL,
             json=json,
@@ -72,6 +73,7 @@ class Sender:
         }
         if fast_image:
             json["fastImage"] = fast_image
+        print('send_to_friend to', json['userId'])
         requests.post(
             self.__FRIEND_URL,
             json=json,

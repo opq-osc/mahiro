@@ -5,7 +5,7 @@ from enum import Enum
 
 from dateutil.parser import parse
 
-from bridge.src.models import GroupMessageMahiro
+from bridge.mahiro import GroupMessageMahiro
 
 try:
     import ujson as json

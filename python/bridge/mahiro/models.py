@@ -99,12 +99,15 @@ class MessageContainer:
             print(f"register plugin [{id}] to node success")
         except Exception as e:
             print("register plugin to node error: ", e)
+        
+    def register_all_plugins(self):
+        for key in self.instances:
+            self.__register_plugin_to_node(id=key)
 
     def add_group(self, id: str, callback: Awaitable):
         """
         register group message plugin
         """
-        self.__register_plugin_to_node(id=id)
         self.instances[id] = callback
 
     def add_friend(self, id: str, callback: Awaitable):
