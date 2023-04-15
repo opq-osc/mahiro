@@ -8,7 +8,14 @@
     "submodule:init": "git submodule update --init --recursive",
     "submodule:update": "git submodule update --remote",
     "tsc:check": "pnpm build:mahiro && pnpm -r tsc:check",
-    "build:mahiro": "pnpm --filter=mahiro build"
+    "build:mahiro": "pnpm --filter=mahiro build",
+    "push": "vary push",
+    "vp": "vary vp",
+    "release": "vary release",
+    "release:only": "vary release:only",
+    "release:quick": "vary release:quick",
+    "clean:output": "vary clean:output",
+    "build": "pnpm -r --filter './packages/**' run build"
   },
   "engines": {
     "pnpm": "^8",
@@ -16,13 +23,15 @@
   },
   "packageManager": "pnpm@8.1.0",
   "devDependencies": {
+    "@changesets/cli": "^2.26.1",
     "@types/node": "^18.15.11",
     "@xn-sakina/mental": "^4.0.2",
+    "@xn-sakina/vary": "^1.0.2",
+    "prettier": "^2.8.7",
+    "rimraf": "^4.4.1",
     "rome": "^12.0.0",
     "tsx": "^3.12.6",
     "typescript": "^5.0.3",
-    "zx": "^7.2.1",
-    "prettier": "^2.8.7",
-    "rimraf": "^4.4.1"
+    "zx": "^7.2.1"
   }
 }
