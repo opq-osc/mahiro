@@ -20,6 +20,7 @@ import chalk from 'mahiro/compiled/chalk'
 import type { Mahiro } from '../core'
 import Keyv from '@keyvhq/core'
 import KeyvSQLite from '@keyvhq/sqlite'
+import { extract } from '@xn-sakina/mahiro-css'
 
 export class Database {
   private path!: string
@@ -301,6 +302,7 @@ export class Database {
   async getPluginListFromCache() {
     const cache = this.pluginCache
     const update = async () => {
+      this.logger.debug(`update plugin cache`)
       const plugins = await this.getPlugins()
       this.pluginCache = plugins.filter((p) => p.enabled)
       this.updateCacheTimeMap(this.cacheKeys.plugins)
@@ -315,7 +317,9 @@ export class Database {
   async getGroupMapFromCache(groupId: number) {
     const cache = this.groupCache.get(groupId)
     const update = async () => {
+      this.logger.debug(`update group cache`)
       const groups = await this.getGroups()
+      this.groupCache.clear()
       groups.forEach((g) => {
         this.groupCache.set(g.group_id, g)
       })
@@ -642,11 +646,22 @@ export class Database {
 
   async getPanel() {
     const finalPanels = this.panel.map(async (panel) => {
+      let content = isString(panel.content)
+        ? panel.content
+        : await panel.content()
+      try {
+        const css =
+          extract({
+            css: `@tailwind utilities;`,
+            code: content,
+          })?.css || ''
+        content = `<style>${css}</style>${content}`
+      } catch {
+        this.logger.warn(`[web] extract css failed: ${panel.name}`)
+      }
       return {
         ...panel,
-        content: isString(panel.content)
-          ? panel.content
-          : await panel.content(),
+        content,
       }
     })
     return Promise.all(finalPanels)

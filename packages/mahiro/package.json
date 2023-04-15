@@ -25,6 +25,7 @@
     "@keyvhq/redis": "1.6.28",
     "@keyvhq/sqlite": "1.6.28",
     "@xn-sakina/mahiro-web": "workspace:*",
+    "@xn-sakina/mahiro-css": "workspace:*",
     "axios": "1.3.4",
     "better-sqlite3": "8.2.0",
     "consola": "3.0.0-3",

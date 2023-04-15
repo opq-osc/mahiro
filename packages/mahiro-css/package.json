@@ -1,0 +1,16 @@
+{
+  "name": "@xn-sakina/mahiro-css",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc --declarationMap false",
+    "prepublishOnly": "rimraf dist && pnpm build"
+  },
+  "dependencies": {
+    "deepmerge": "4.3.1",
+    "postcss": "8.4.21",
+    "tailwindcss": "3.3.1"
+  }
+}
