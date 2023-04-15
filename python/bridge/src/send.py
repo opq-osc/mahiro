@@ -21,15 +21,15 @@ class Sender:
     # from qq
     qq: int
 
-    GROUP_URL = f"{UP_STREAM_URL}/api/v1/recive/group"
-    FRIEND_URL = f"{UP_STREAM_URL}/api/v1/recive/friend"
+    __GROUP_URL = f"{UP_STREAM_URL}/api/v1/recive/group"
+    __FRIEND_URL = f"{UP_STREAM_URL}/api/v1/recive/friend"
     REGISTER_PLUGIN_URL = f"{UP_STREAM_URL}/api/v1/panel/plugin/register"
 
     def __init__(self, id: str, qq: int):
         self.id = id
         self.qq = qq
 
-    def create_configs(self):
+    def __create_configs(self):
         return {"id": self.id}
 
     def send_to_group(
@@ -48,12 +48,12 @@ class Sender:
                 "AtUinLists": ats,
             },
             "qq": self.qq,
-            "configs": self.create_configs(),
+            "configs": self.__create_configs(),
         }
         if fast_image:
             json["fastImage"] = fast_image
         return requests.post(
-            Sender.GROUP_URL,
+            self.__GROUP_URL,
             json=json,
         )
 
@@ -68,11 +68,11 @@ class Sender:
             "userId": user_id,
             "msg": {"Content": msg, "Images": imgs},
             "qq": self.qq,
-            "configs": self.create_configs(),
+            "configs": self.__create_configs(),
         }
         if fast_image:
             json["fastImage"] = fast_image
         requests.post(
-            Sender.FRIEND_URL,
+            self.__FRIEND_URL,
             json=json,
         )

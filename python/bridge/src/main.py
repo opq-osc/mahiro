@@ -1,31 +1,20 @@
 from fastapi import FastAPI
-from .models import GroupMessage, FriendMessage, GroupMessageContainer
-
-# plugins
-from plugins.chinchin_pk_mahiro.main import chinchin_pk
-from plugins.opqqq_plugins_mahiro.src.bot_good_morning import bot_good_morning
-from plugins.opqqq_plugins_mahiro.src.bot_sign_in import bot_sign_in
+from .models import GroupMessage, FriendMessage, MessageContainer
 
 app = FastAPI()
 
-container = GroupMessageContainer()
-
-# load plugins
-# TODO: auto import all plugins and dynamic call
-container.add(id="牛了个牛", callback=chinchin_pk)
-container.add(id="早晚安", callback=bot_good_morning)
-container.add(id="签到", callback=bot_sign_in)
+container = MessageContainer()
 
 
 @app.post("/recive/group")
 async def recive_group(data: GroupMessage):
-    await container.call(ctx=data)
+    await container.call_group(ctx=data)
 
-    # response
     return {"code": 200}
 
 
 @app.post("/recive/friend")
 async def recive_friend(data: FriendMessage):
-    # todo
+    await container.call_friend(ctx=data)
+
     return {"code": 200}

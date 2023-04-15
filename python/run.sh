@@ -3,4 +3,4 @@
 if [[ "$MAHIRO_PYTHON_PORT" == "" ]]; then
     MAHIRO_PYTHON_PORT=8099
 fi
-uvicorn bridge.src.main:app --reload --port $MAHIRO_PYTHON_PORT --host 0.0.0.0
+uvicorn example.src.main:app --reload --port $MAHIRO_PYTHON_PORT --host 0.0.0.0
