@@ -65,7 +65,7 @@ class GroupMessageMahiro:
 # friend msg
 class FriendMessage(BaseModel):
     userId: int
-    userNickname: str = ""
+    userName: str = ""
     msg: Msg
     qq: int
 
