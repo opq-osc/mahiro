@@ -5,7 +5,9 @@
 
 # Mahiro
 
-**Mahiro** is a JavaScript SDK for OPQBot that provides message management, sending and receiving, gateway interception, rate limiting, filtering, and other functionalities.
+**Mahiro** is a JavaScript SDK for OPQBot that provides message management, 
+
+sending and receiving, gateway interception, rate limiting, filtering, and other functionalities.
 
 </div>
 
