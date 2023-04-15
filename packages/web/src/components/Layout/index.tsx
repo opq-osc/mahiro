@@ -38,6 +38,18 @@ const Logo = styled.div`
   cursor: default;
   text-align: center;
   border-inline-end: 1px solid rgba(5, 5, 5, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  > img {
+    max-width: 100%;
+    width: 50px;
+    aspect-ratio: 1/1;
+    user-select: none;
+    pointer-events: none;
+  }
 `
 
 const Version = styled.div`
@@ -103,7 +115,8 @@ const Internal = () => {
     >
       <AntdLayout.Sider theme="light" trigger={null} collapsible>
         <Logo>
-          Mahiro
+          <img src="/favicon.png" alt='mahiro' />
+          <span>Mahiro</span>
           <Version>{version}</Version>
         </Logo>
         <Menu
