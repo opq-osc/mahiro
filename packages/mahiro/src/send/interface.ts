@@ -148,6 +148,24 @@ export interface ISendMsgResponse {
   Data: null
 }
 
+export interface ILoginResponseData {
+  BQrsig: string
+  QrUrl: string
+  BQrpic: string
+  BQBase64rpic: string
+  ScanStatus: number
+  ScanDwUin: number
+  DwExpireTime: number
+  DwQueryTime: number
+}
+
+// /v1/login/getqrcode?json=1
+export interface ILoginResponse {
+  CgiBaseResponse: ICgiBaseResponse
+  ResponseData: ILoginResponseData
+  Data: null
+}
+
 export enum EFuncName {
   MagicCgiCmd = 'MagicCgiCmd',
 }

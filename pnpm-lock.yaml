@@ -208,6 +208,10 @@ importers:
         version: link:../mahiro
 
   packages/web:
+    dependencies:
+      qs:
+        specifier: 6.11.1
+        version: registry.npmjs.org/qs@6.11.1
     devDependencies:
       '@ant-design/icons':
         specifier: ^5.0.1
@@ -221,6 +225,9 @@ importers:
       '@types/node':
         specifier: ^18.15.11
         version: registry.npmjs.org/@types/node@18.15.11
+      '@types/qs':
+        specifier: ^6.9.7
+        version: registry.npmjs.org/@types/qs@6.9.7
       '@types/react':
         specifier: ^18.0.33
         version: registry.npmjs.org/@types/react@18.0.33

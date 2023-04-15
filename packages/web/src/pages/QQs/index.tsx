@@ -1,9 +1,11 @@
 import { useQQsList } from '@/hooks/useQQsList'
-import { useRobotServerInfo } from '@/hooks/useRobotServerInfo'
+import { ILoginReq, useRobotServerInfo } from '@/hooks/useRobotServerInfo'
 import { SyncOutlined } from '@ant-design/icons'
 import {
   Alert,
   Button,
+  Input,
+  InputNumber,
   Modal,
   Row,
   Space,
@@ -14,6 +16,7 @@ import {
   message,
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
+import { isNumber } from 'lodash'
 import { useState } from 'react'
 import { useHref, useNavigate } from 'react-router-dom'
 
@@ -39,10 +42,28 @@ export const QQs = () => {
   const { loading, getLoginQrcode } = useRobotServerInfo()
   const [qrcode, setQrcode] = useState<string>('')
 
+  const [reuseQQ, setReuseQQ] = useState<number>()
+  const [deviceInfo, setDeviceInfo] = useState<string>()
+
   const refreshQrcode = async () => {
-    const q = await getLoginQrcode()
+    const params: ILoginReq = {}
+    if (isNumber(reuseQQ)) {
+      params.qq = reuseQQ
+    }
+    if (deviceInfo?.length) {
+      params.devicename = deviceInfo
+    }
+    const q = await getLoginQrcode(params)
     if (q?.length) {
       setQrcode(q)
+      const extraLabel = `${
+        params?.qq ? `指定账号：${params.qq}` : '未指定该账号'
+      }, ${
+        params?.devicename
+          ? `指定设备信息：${params?.devicename}`
+          : '未指定设备信息'
+      }`
+      message.success(`获取成功 ( ${extraLabel} )`)
     } else {
       message.error('获取失败')
     }
@@ -122,6 +143,9 @@ export const QQs = () => {
         open={visible}
         onCancel={() => {
           setVisible(false)
+          // clear input data
+          setReuseQQ(undefined)
+          setDeviceInfo(undefined)
         }}
         okButtonProps={{
           style: {
@@ -150,14 +174,46 @@ export const QQs = () => {
           </Row>
           <Row justify="center">
             <Spin spinning={loading}>
-              <img
-                style={{
-                  aspectRatio: '1/1',
-                  width: '100%',
-                }}
-                src={qrcode}
-              />
+              <Space direction="vertical" align="center">
+                <InputNumber
+                  min={0}
+                  precision={0}
+                  placeholder="请输入账号"
+                  value={reuseQQ}
+                  onChange={(nv) => {
+                    setReuseQQ(nv as any)
+                  }}
+                  style={{ width: 250 }}
+                />
+                <Input
+                  placeholder="指定设备信息，可不填写"
+                  value={deviceInfo}
+                  onChange={(e) => {
+                    setDeviceInfo(e.target.value)
+                  }}
+                  style={{ width: 250 }}
+                />
+                <img
+                  style={{
+                    aspectRatio: '1/1',
+                    width: 180,
+                  }}
+                  src={qrcode}
+                />
+              </Space>
             </Spin>
+          </Row>
+          <Row>
+            <Alert
+              message={
+                <Space direction="vertical">
+                  <div>
+                    注：过期重登录时，若想复用上次的设备信息，请填写账号后重新刷新登录二维码，若不填写默认随机新设备登录
+                  </div>
+                  <div>{`    如想自定义设备信息，请自行填写`}</div>
+                </Space>
+              }
+            />
           </Row>
         </div>
       </Modal>
