@@ -1,6 +1,6 @@
 {
   "name": "@xn-sakina/mahiro-css",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -8,8 +8,7 @@
   ],
   "scripts": {
     "dev": "tsc -w",
-    "build": "tsc --declarationMap false",
-    "prepublishOnly": "rimraf dist && pnpm build",
+    "build": "rimraf dist && tsc --declarationMap false",
     "tsc:check": "tsc --noEmit"
   },
   "dependencies": {
