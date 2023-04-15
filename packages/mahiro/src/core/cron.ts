@@ -22,6 +22,7 @@ export class CronJob {
     )
     const task = nodeCron.schedule(cron, callback, {
       timezone: 'Asia/Shanghai',
+      scheduled: false
     })
     this.tasks.push(task)
     task.start()
