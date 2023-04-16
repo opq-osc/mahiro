@@ -7,9 +7,9 @@ Mahiro 自带方便执行定时任务的方法。
 
 ```ts
   let count = 1
-  mahiro.cron.registerCronJob('*/10 * * * * *', (data) => {
+  mahiro.cron.registerCronJob('*/10 * * * * *', () => {
     mahiro.sendGroupMessage({
-      groupId: data.groupId,
+      groupId: 123456789,
       msg: {
         Content: `每隔 10 秒我就会发送一次消息，当前是 ${count++}`
       },
