@@ -9,6 +9,17 @@ export const request = axios.create({
   timeout: 10 * 1e3,
 })
 
+export const MAHIRO_TOKEN_KEY = 'MAHIRO_AUTH_TOKEN'
+
+request.interceptors.request.use((config) => {
+  // add x-mahiro-auth header
+  const token = localStorage.getItem(MAHIRO_TOKEN_KEY) || ''
+  if (token?.length) {
+    config.headers['x-mahiro-token'] = token
+  }
+  return config
+})
+
 request.interceptors.response.use(
   (response) => {
     const path = response.config.url

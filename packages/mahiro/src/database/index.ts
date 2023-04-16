@@ -23,6 +23,7 @@ import Keyv from '@keyvhq/core'
 import KeyvSQLite from '@keyvhq/sqlite'
 import KeyvRedis from '@keyvhq/redis'
 import { extract } from '@xn-sakina/mahiro-css'
+import express from 'express'
 
 export class Database {
   private path!: string
@@ -489,7 +490,34 @@ export class Database {
     return []
   }
 
+  private createAuthMiddleware() {
+    return (
+      req: express.Request,
+      res: express.Response,
+      next: express.NextFunction,
+    ) => {
+      const isStartWithApi = req.path.startsWith('/api')
+      if (!isStartWithApi) {
+        return next()
+      }
+      const authHeader = process.env.MAHIRO_AUTH_TOKEN
+      if (!authHeader?.length) {
+        return next()
+      }
+      const header = req.headers?.['x-mahiro-token'] as string
+      if (header === authHeader) {
+        return next()
+      }
+      this.logger.warn(
+        `[Admin Manager] Unauthorized request from ${req?.ip} to ${req.path}`,
+      )
+      res.status(401).send('Unauthorized')
+    }
+  }
+
   async createMiddleware(app: Express) {
+    // auth
+    app.use(this.createAuthMiddleware())
     // get plugins list
     app.get(DATABASE_APIS.getPlugins, async (req, res, next) => {
       res.status(200)
