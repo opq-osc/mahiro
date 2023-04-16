@@ -27,7 +27,7 @@ async def chinchin_pk(mahiro: GroupMessageMahiro):
     if is_at_msg:
         if not match_func(keywords=keywords, text=content):
             return
-        target = ats[0].QQUid
+        target = ats[0].Uin
         message_processor(
             message=content,
             qq=from_user,
