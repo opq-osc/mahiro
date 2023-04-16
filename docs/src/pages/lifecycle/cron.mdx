@@ -1,0 +1,25 @@
+
+# 定时任务
+
+Mahiro 自带方便执行定时任务的方法。
+
+## `cron.registerCronJob`
+
+```ts
+  let count = 1
+  mahiro.cron.registerCronJob('*/10 * * * * *', (data) => {
+    mahiro.sendGroupMessage({
+      groupId: data.groupId,
+      msg: {
+        Content: `每隔 10 秒我就会发送一次消息，当前是 ${count++}`
+      },
+    })
+  })
+```
+
+通过返回值可以随时解除：
+
+```ts
+  const stop = mahiro.cron.registerCronJob()
+  stop()
+```

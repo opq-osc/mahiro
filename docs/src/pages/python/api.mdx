@@ -1,0 +1,67 @@
+# API
+
+## Group
+
+### `mahiro.ctx`
+
+消息上下文
+
+```python
+  # OPQ 消息体
+  mahiro.ctx.msg
+  # 消息来源
+  mahiro.ctx.{userId, userNickname, groupId, groupNickname}
+  # Bot 账号
+  mahiro.ctx.qq
+```
+
+### `mahiro.sender`
+
+发送消息方法
+
+```python
+  # 文本消息
+  mahiro.sender.send_to_group(group_id, msg="text")
+
+  # 图片消息
+  mahiro.sender.send_to_group(
+    group_id, 
+    # 支持路径，url，base 64
+    fast_image="/User/path/to/image.png",
+    fast_image="http://domain.com/image.jpg",
+    fast_image="data:image/jpeg;base64,/9....,
+  )
+```
+
+## Friend
+
+### `mahiro.ctx`
+
+消息上下文
+
+```python
+  # OPQ 消息体
+  mahiro.ctx.msg
+  # 消息来源
+  mahiro.ctx.{userId, userName}
+  # Bot 账号
+  mahiro.ctx.qq
+```
+
+### `mahiro.sender`
+
+发送消息方法
+
+```python
+  # 文本消息
+  mahiro.sender.send_to_friend(group_id, msg="text")
+
+  # 图片消息
+  mahiro.sender.send_to_friend(
+    group_id, 
+    # 支持路径，url，base 64
+    fast_image="/User/path/to/image.png",
+    fast_image="http://domain.com/image.jpg",
+    fast_image="data:image/jpeg;base64,/9....,
+  )
+```

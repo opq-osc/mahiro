@@ -1,0 +1,84 @@
+# 拦截器
+
+拦截器运行的时机在所有插件处理完消息后，决定向外发送消息之前。
+
+在这个阶段，你可以过滤掉消息，进行一些消息检查等。
+
+## 配置拦截器
+
+### `advancedOptions.interceptors`
+
+在初始化时，通过 `advancedOptions.interceptors` 配置：
+
+```ts
+const mahiro = await Mahiro.start({
+  advancedOptions: {
+    interceptors: [
+      // 支持加载包或函数
+      '@xn-sakina/mahiro-interceptor',
+      InterceptorFunction,
+    ],
+  },
+})
+
+function InterceptorFunction(ctx) {
+  return true
+}
+```
+
+## 内置拦截器
+
+### `securityCopilotInterceptor`
+
+默认情况下，若不配置 `advancedOptions.interceptors` ，将启用内置的安全拦截器，具有以下默认规则：
+
+- 真 AT 检测警告
+- 私发消息警告
+- 连续发送 3 次相同消息，第 4 次阻断
+- 连续 2 次对同目标发送相同的图片，第 2 次阻断
+- `1s` 内连续发送 2 条消息，第 3 条消息随机延时 1-2s
+
+通过配置空数组可禁用内置拦截器：
+
+```ts
+advancedOptions: {
+  interceptors: []
+}
+```
+
+内置拦截器位置：
+
+```ts
+import { securityCopilotInterceptor } from 'mahiro/dist/interceptors/securityCopilot'
+
+advancedOptions: {
+  interceptors: [
+    securityCopilotInterceptor,
+    // other custom Interceptors...
+  ]
+}
+```
+
+## 编写拦截器
+
+### `registerInterceptor`
+
+```ts
+mahiro.registerInterceptor((ctx) => {
+  const {
+    // 发送消息数据
+    data,
+    // 历史消息栈
+    stack,
+    // ...
+  } = ctx
+
+  // 如果上一条消息和本条都是发给同一个人，阻断
+  const prevMsg = stack[stack.length - 1]?.msg
+  if (ctx.data?.CgiRequest?.ToUin === prevMsg?.CgiRequest?.ToUin) {
+    return false
+  }
+
+  return true
+})
+```

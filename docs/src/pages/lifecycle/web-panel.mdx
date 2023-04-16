@@ -1,0 +1,32 @@
+# 仪表盘
+
+Mahiro 支持注册独立的 Web 区块到管理系统中。
+
+## `db.registerWebPanel`
+
+返回的 HTML 片段支持直接使用 Tailwind css ，在 Mahiro 管理面板 > 超级仪表盘 可查看注册后的结果。
+
+```ts
+mahiro.db.registerWebPanel({
+  name: '发图数据',
+  content: async () => {
+    // support tailwind css
+    return /* html */ `
+<div class="px-2 flex flex-col">
+  <h3>发图次数</h3>
+  <span>${await mahiro.db.redisKV.get('image-counts')}</span>
+</div>
+`
+  },
+})
+
+// 记录发图次数
+mahiro.registerInterceptor(async (ctx) => {
+  const isImage = ctx.data?.CgiRequest?.Images?.length
+  if (isImage) {
+    const count = await mahiro.db.redisKV.get('image-counts')
+    const nextCount = Number(count) + 1
+    await mahiro.db.redisKV.set('image-counts', String(nextCount))
+  }
+})
+```

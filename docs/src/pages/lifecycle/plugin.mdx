@@ -1,0 +1,40 @@
+# 插件
+
+Mahiro 支持直接加载外部插件，一般情况下，通过 npm 包来分发。
+
+## 使用插件
+
+### `use`
+
+```ts
+import { MahiroSubscribe } from '@xn-sakina/mahiro-subscribe'
+
+// 使用 订阅 插件
+mahiro.use(MahiroSubscribe())
+```
+
+## 编写插件
+
+```ts
+import type { IMahiroGroupMi1ddleware, IMahiroUse } from 'mahiro'
+
+export interface IMahiroCuteOpts {
+  // options...
+}
+
+export const MahiroCutePlugin = (opts: IMahiroCuteOpts = {}) => {
+  const use: IMahiroUse = () => {
+    const logger = mahiro.logger.withTag(
+      'mahiro-cute'
+    ) as typeof mahiro.logger
+
+    logger.info(`Mahiro Cute Plugin start ...`)
+
+    // ...
+    mahiro.onGroupMessage()
+
+    logger.success(`Mahiro Cute Plugin start successful`)
+  }
+  return use
+}
+```

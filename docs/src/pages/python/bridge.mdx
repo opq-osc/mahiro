@@ -1,0 +1,91 @@
+
+# Python Bridge
+
+## 什么是 Python Bridge ?
+
+Python Bridge 与 Mahiro 的 Nodejs 服务通信，接收每次收到的消息，经 Python 逻辑处理后，发送需要发送的内容，起到中转消息的作用。
+
+## 安装
+
+```bash
+  pip install --upgrade mahiro
+```
+
+## 使用
+
+### 项目结构
+
+项目结构如下：
+
+```bash
+ - my-mahiro-python
+   - main.py               # 主程序
+   - group_sign_in.py      # 群消息演示
+   - friend_hello_world.py # 私发消息演示
+```
+
+```python filename="main.py"
+from mahiro import Mahiro
+
+mahiro = Mahiro()
+
+# load group plugins
+from group_sign_in import group_sign_in
+
+mahiro.container.add_group(id="签到", callback=group_sign_in)
+
+# load firend plugin
+from friend_hello_world import friend_hello_world
+
+mahiro.container.add_friend(id="私聊最简插件", callback=friend_hello_world)
+
+# run
+mahiro.run()
+```
+
+`mahiro` 提供了 `mahiro.ctx` 消息上下文，`mahiro.sender` 发送消息方法：
+
+```python filename="group_sign_in.py"
+from mahiro import GroupMessageMahiro
+
+async def group_sign_in(mahiro: GroupMessageMahiro):
+    ctx = mahiro.ctx
+    userGroup = ctx.groupId
+    msg = ctx.msg.Content.strip()
+    nickname = ctx.userNickname
+
+    if msg == "签到":
+        mahiro.sender.send_to_group(
+          group_id=userGroup,
+          msg="{}，你已经签到成功！".format(nickname)
+        )
+```
+
+```python filename="friend_hello_world.py"
+from mahiro import FriendMessageMahiro
+
+async def friend_hello_world(mahiro: FriendMessageMahiro):
+    ctx = mahiro.ctx
+    userId = ctx.userId
+    msg = ctx.msg.Content.strip()
+
+    if msg == "你好":
+        mahiro.sender.send_to_friend(
+          user_id=userId,
+          msg="你好!"
+        )
+```
+
+注意，我们仍需先在 Mahiro 管理面板配置该插件至群组后才可使用。
+
+### 启动项目
+
+```bash
+  python main.py
+```
+
+保证 Mahiro Nodejs 服务已经启动的前提下，启动 Bridge 即可，Bridge 将默认运行在 `8099` 端口，通过 `MAHIRO_PYTHON_PORT` 环境变量自定义。
+
+## 更多用法
+
+详见 [API](./api) 。

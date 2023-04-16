@@ -1,0 +1,15 @@
+# Mahiro 管理面板
+
+管理面板是 Mahiro 的核心功能，所有的群组、插件配置均需在面板统一管理。
+
+## 面板安全
+
+管理面板默认运行在 [`8098`](./resources#端口) 端口，使用结束后请及时关闭，防止外部渗透。
+
+你可以设定 `MAHIRO_AUTH_TOKEN` 来启动 Mahiro ：
+
+```bash
+  MAHIRO_AUTH_TOKEN=some-value pnpm tsx ./index.ts
+```
+
+在管理面板首页填写相同值后即可保证一定的访问安全性。

@@ -1,0 +1,95 @@
+# 常用 API
+
+## 初始化实例
+
+### `Mahiro.start`
+
+启动 Mahiro 实例。
+
+```ts
+  const mahiro = await Mahiro.start({
+    // 必填字段
+    qq: 123456789,
+
+    // 非必选字段
+    // 默认 本地
+    host: `127.0.0.1`,
+    // 默认 8086
+    port: 8086,
+
+    // 高级功能
+    advancedOptions: {}
+  })
+```
+
+## 监听消息
+
+### `onGroupMessage`
+
+监听群组消息。
+
+```ts
+  mahiro.onGroupMessage('Group Plugin', (data) => {
+    if (['ping', 'pong'].includes(data?.msg?.Content)) {
+      mahiro.sendGroupMessage({
+        groupId: data.groupId,
+        msg: {
+          Content: 'pong',
+        }
+      })
+    }
+  })
+```
+
+### `onFriendMessage`
+
+监听私人消息。
+
+```ts
+  mahiro.onFriendMessage('Friend Plugin', async (data) => {
+    if (data?.msg?.Content === '你是谁') {
+      mahiro.sendFriendMessage({
+        userId: data.userId,
+        msg: {
+          Content: 'Mahiro',
+        },
+      })
+    }
+  })
+```
+
+## 发送消息
+
+### `sendGroupMessage`
+
+发送群组消息。
+
+```ts
+  import { join } from 'path'
+
+  mahiro.sendGroupMessage({
+    groupId,
+    // 文本消息
+    msg: {
+      Content: "text"
+    },
+    // 发送图片：可以是 本地文件绝对路径 / Base64 / Url
+    fastImage: join(__dirname, './image.jpg')
+  })
+```
+
+### `sendFriendMessage`
+
+发送私人消息。
+
+```ts
+  mahiro.sendFriendMessage({
+    userId,
+    // 文本消息
+    msg: {
+      Content: "text"
+    },
+    // 发送图片：可以是 本地文件绝对路径 / Base64 / Url
+    fastImage: join(__dirname, './image.jpg')
+  })
+```

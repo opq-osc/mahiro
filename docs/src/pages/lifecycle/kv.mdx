@@ -1,0 +1,48 @@
+import { Callout } from 'nextra-theme-docs'
+
+# KV 存储
+
+Mahiro 支持两种 KV 存储策略，以应对不同场景：
+
+- `sqlite` ：默认启用，用于支持在全局、跨插件读写数据。
+- `redis` ：配置启用，用户防止并发数据冲突问题。
+
+## `db.kv` (sqlite)
+
+```ts
+// 写
+await mahiro.db.kv.set('key', 'value')
+
+// 读
+;(await mahiro.db.get('key')) === 'value'
+```
+
+<Callout type="error" emoji="️🚫">
+  注意并发写可能会发生冲突，如有写较多的场景，请使用 `redis`
+</Callout>
+
+## `db.redisKV` (redis)
+
+`redis` 需配置开启：
+
+```ts
+const mahiro = await Mahiro.start({
+  advancedOptions: {
+    redisKV: 'redis://0.0.0.0:6379',
+  },
+})
+```
+
+操作：
+
+```ts
+// 写
+await mahiro.db.redisKV.set('key', 'value')
+
+// 读
+;(await mahiro.db.redisKV.get('key')) === 'value'
+```
+
+<Callout type="info">
+  `redis` 默认无持久化，若你需要持久存储，推荐使用 [docker-compose](https://docs.opqbot.com/guide/docker-start.html#docker-compose) 管理容器，定时保留快照。
+</Callout>

@@ -53,7 +53,7 @@ const config: DocsThemeConfig = {
   },
   sidebar: {
     toggleButton: true,
-    defaultMenuCollapseLevel: 1,
+    defaultMenuCollapseLevel: 2,
     titleComponent({ title, type }) {
       if (type === 'separator') {
         return <span className="cursor-default">{title}</span>

@@ -1,0 +1,23 @@
+import { Callout } from 'nextra-theme-docs'
+
+# 资源占用
+
+Mahiro Nodejs 服务在本地占用两部分资源。
+
+## 数据库
+
+Mahiro 使用 `sqlite` 持久化存储配置数据，默认位置为执行命令目录下的 `mahiro.db` ，第一次启动会自动生成。
+
+<Callout type="warning" emoji="⚠️">
+  数据库包含了所有群组配置，插件配置，请妥善保管。
+</Callout>
+
+## 端口
+
+在使用 Mahiro 时，请确保相应端口不被占用。
+
+|Var|Port|Description|
+|:-:|:-:|:-|
+|`MAHIRO_NODE_URL`|`8098`|Mahiro 管理面板、服务自身占用端口|
+|`MAHIRO_PYTHON_PORT`|`8099`|[Python Bridge](./python/bridge) 服务默认占用端口|
+|-|`8086`|OPQBot 默认服务端口|

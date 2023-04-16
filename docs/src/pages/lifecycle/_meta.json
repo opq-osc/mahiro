@@ -1,0 +1,9 @@
+{
+  "api": "常用 API",
+  "plugin": "插件",
+  "cron": "定时任务",
+  "middleware": "中间件",
+  "interceptor": "拦截器",
+  "kv": "KV 存储",
+  "web-panel": "仪表盘"
+}

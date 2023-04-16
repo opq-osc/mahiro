@@ -1,0 +1,24 @@
+# 中间件
+
+中间件运行的时机在收到消息后的一开始，没有进入 [群组管理](../panel/group) 权限检验前。
+
+在这个阶段，你可以获取到原生的消息体，实现消息体修改，抛弃消息等。
+
+## `registerGroupMiddleware`
+
+注册群组消息中间件。
+
+```ts
+mahiro.registerGroupMiddleware((data) => {
+  const hasImage = data?.msg?.Images?.length
+  if (hasImage) {
+    return data
+  }
+  // 放弃处理所有没有图片的消息
+  return false
+})
+```
+
+## `registerFriendMiddleware`
+
+注册私人消息中间件。

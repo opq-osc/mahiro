@@ -1,0 +1,135 @@
+import { Callout } from 'nextra-theme-docs'
+
+# Quick Start
+
+## 准备环境
+
+Mahiro 本体需要运行在 Nodejs 上，若你需要使用 Python Bridge ，还需准备 Python 环境。
+
+我们推荐准备以下环境：
+
+- Node.js **_v18.x_**
+
+- Python **_v3.11+_**
+
+### 加速源
+
+若从零开始，请预设好 npm 加速源：
+
+```bash
+  npm config set registry https://registry.npmmirror.com/
+  npm i -g pnpm
+```
+
+## 启动
+
+### 创建项目
+
+我们将创建一个最简 Mahiro 项目：
+
+```bash
+  # 创建文件夹
+  mkdir my-mahiro
+  cd ./my-mahiro
+
+  # 初始化项目
+  pnpm init
+  pnpm add -D mahiro tsx
+```
+
+创建并编写 `index.ts` ：
+
+```ts filename="index.ts"
+import { Mahiro } from 'mahiro'
+
+const run = async () => {
+  const mahiro = await Mahiro.start({
+    host: '127.0.0.1', // 默认 localhost
+    port: 8086, // 默认 8086
+    qq: 12345678,
+  })
+
+  mahiro.onGroupMessage('Hello world Group', async (data) => {
+    if (data?.msg?.Content === 'Hello') {
+      mahiro.sendGroupMessage({
+        groupId: data.groupId,
+        msg: {
+          Content: 'Mahiro',
+        },
+      })
+    }
+  })
+
+  mahiro.onFriendMessage('Hello world Friend', (data) => {
+    if (data?.msg?.Content === 'Hello') {
+      mahiro.sendFriendMessage({
+        userId: data.userId,
+        msg: {
+          Content: 'Mahiro',
+        },
+      })
+    }
+  })
+}
+
+run()
+```
+
+最终目录结构如下：
+
+```bash filename="目录结构"
+ - my-mahiro
+   - package.json
+   - index.ts
+```
+
+启动程序：
+
+```bash
+  pnpm tsx ./index.ts
+```
+
+```bash filename="终端输出"
+      ___           ___           ___                       ___           ___
+     /__/\         /  /\         /__/\        ___          /  /\         /  /\
+    |  |::\       /  /::\        \  \:\      /  /\        /  /::\       /  /::\
+    |  |:|:\     /  /:/\:\        \__\:\    /  /:/       /  /:/\:\     /  /:/\:\
+  __|__|:|\:\   /  /:/~/::\   ___ /  /::\  /__/::\      /  /:/~/:/    /  /:/  \:\
+ /__/::::| \:\ /__/:/ /:/\:\ /__/\  /:/\:\ \__\/\:\__  /__/:/ /:/___ /__/:/ \__\:\
+ \  \:\~~\__\/ \  \:\/:/__\/ \  \:\/:/__\/    \  \:\/\ \  \:\/:::::/ \  \:\ /  /:/
+  \  \:\        \  \::/       \  \::/          \__\::/  \  \::/~~~~   \  \:\  /:/
+   \  \:\        \  \:\        \  \:\          /__/:/    \  \:\        \  \:\/:/
+    \  \:\        \  \:\        \  \:\         \__\/      \  \:\        \  \::/
+     \__\/         \__\/         \__\/                     \__\/         \__\/
+
+ℹ Mahiro is starting...
+ℹ Try connect...
+✔ WS Connected ws://127.0.0.1:8086/ws
+ℹ [Database] Connecting...
+ℹ [Database] Connected
+ℹ Register onGroupMessage:  [Node Server] Python Forward - Group Message
+ℹ Register onFriendMessage:  [Node Server] Python Forward - Friend Message
+ℹ [Web Site] Start at  http://localhost:8098
+```
+
+### 配置群组
+
+在 Mahiro 中，**一切均为白名单设计**，这是为了防止消息收发有非预期的情况，保证安全。
+
+故群组功能必须配置后才可使用，打开控制台打印的 Mahiro 面板地址：`http://localhost:8098` （注意放通防火墙与安全组，运行在服务器上时，请替换为服务器公网 IP）。
+
+在 **群组管理** 添加一个新的群组：
+
+<br />
+
+<img src="/imgs/config-group.webp" alt="config-group" width="100%" />
+
+至此，我们已经完成了最简的收发消息项目，你可以在对应群组发送 `Hello` 查看触发情况。
+
+<Callout type="info" emoji="ℹ️">
+  注：Friend 消息无限制设计，均为放通状态。
+</Callout>
+
+## 学到更多
+
+Mahiro 可以在消息的生命周期上进行干预，来做到拦截、限制等：
