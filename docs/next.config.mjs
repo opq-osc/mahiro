@@ -7,9 +7,15 @@ const withNextra = nextra({
   latex: true,
   flexsearch: {
     codeblock: false
-  }
+  },
 })
 
+/**
+ * @type {import('next').NextConfig}
+ */
 export default withNextra({
-  reactStrictMode: true
+  reactStrictMode: true,
+  images: {
+    unoptimized: true
+  }
 })
