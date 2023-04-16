@@ -18,16 +18,17 @@
     "build": "rimraf dist && tsc --declarationMap false",
     "build:deps": "dora build",
     "push": "pnpm publish --registry https://registry.npmjs.com",
-    "tsc:check": "tsc --noEmit"
+    "tsc:check": "tsc --noEmit",
+    "push:canary": "pnpm publish --no-git-checks --registry https://registry.npmjs.com --tag canary"
   },
   "dependencies": {
     "@keyvhq/core": "1.6.26",
     "@keyvhq/redis": "1.6.28",
     "@keyvhq/sqlite": "1.6.28",
-    "@xn-sakina/mahiro-web": "workspace:*",
+    "@vscode/sqlite3": "5.1.4-vscode",
     "@xn-sakina/mahiro-css": "workspace:*",
+    "@xn-sakina/mahiro-web": "workspace:*",
     "axios": "1.3.4",
-    "better-sqlite3": "8.2.0",
     "consola": "3.0.0-3",
     "cors": "2.8.5",
     "cronstrue": "2.26.0",
@@ -39,6 +40,8 @@
     "node-cron": "3.0.2",
     "qs": "6.11.1",
     "serve-static": "1.15.0",
+    "sqlite3": "^5.1.6",
+    "tar": "^6.1.13",
     "ws": "8.13.0",
     "zod": "3.21.4"
   },

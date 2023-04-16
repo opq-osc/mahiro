@@ -97,7 +97,7 @@ export class Database {
 
   private connect() {
     this.db = knex({
-      client: 'better-sqlite3',
+      client: 'sqlite3',
       connection: {
         filename: this.path,
       },
