@@ -14,7 +14,7 @@ Mahiro 支持两种 KV 存储策略，以应对不同场景：
 await mahiro.db.kv.set('key', 'value')
 
 // 读
-;(await mahiro.db.get('key')) === 'value'
+;(await mahiro.db.kv.get('key')) === 'value'
 ```
 
 <Callout type="error" emoji="️🚫">
