@@ -1,5 +1,11 @@
 # mahiro
 
+## 2.0.0
+
+### Major Changes
+
+- Fix `better-sqlite3` install very very slow, use sqlite3 instead.
+
 ## 1.2.0
 
 ### Minor Changes

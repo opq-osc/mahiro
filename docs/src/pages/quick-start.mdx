@@ -19,6 +19,8 @@ Mahiro 本体需要运行在 Nodejs 上，若你需要使用 Python Bridge ，�
 ```bash
   npm config set registry https://registry.npmmirror.com/
   npm i -g pnpm
+  echo "better_sqlite3_binary_host=https://registry.npmmirror.com/-/binary/better-sqlite3" >> ~/.npmrc
+  echo "better_sqlite3_binary_host_mirror=https://registry.npmmirror.com/-/binary/better-sqlite3" >> ~/.npmrc
 ```
 
 ## 启动
@@ -34,8 +36,15 @@ Mahiro 本体需要运行在 Nodejs 上，若你需要使用 Python Bridge ，�
 
   # 初始化项目
   pnpm init
+```
+
+安装依赖：
+
+```bash
   pnpm add -D mahiro tsx
 ```
+
+注：在第一次安装时，`sqlite` 编译需一定时间，请耐心等待，如 `better-sqlite3` 无法安装成功，请确保你配置了 [加速源](#加速源) 相关配置。
 
 创建并编写 `index.ts` ：
 
