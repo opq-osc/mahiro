@@ -3,9 +3,11 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "access": "public",
+  "linked": [],
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
+    "@xn-sakina/mahiro-docs",
     "simple",
     "@xn-sakina/mahiro-plugins"
   ],

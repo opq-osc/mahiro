@@ -1,5 +1,11 @@
 # @xn-sakina/mahiro-css
 
+## 1.2.0
+
+### Minor Changes
+
+- Support custom login account. Support `MAHIRO_AUTH_TOKEN`
+
 ## 1.1.0
 
 ### Minor Changes
