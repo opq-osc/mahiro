@@ -145,7 +145,7 @@ export class Mahiro {
     await this.connect()
     await this.connectDatabase()
     await this.startNodeServer()
-    this.registerInterceptors()
+    this.registerOptionsInterceptors()
     this.registerAdminManager()
     this.logger.success('Mahiro started')
     this.initialled = true
@@ -1022,7 +1022,7 @@ export class Mahiro {
     this.logger.info(`[Database] Connected`)
   }
 
-  private registerInterceptors() {
+  private registerOptionsInterceptors() {
     this.logger.debug(`[Interceptors] Registering...`)
     const interceptors = this.advancedOptions.interceptors
     for (let i = 0; i < interceptors.length; i++) {
@@ -1145,7 +1145,7 @@ export class Mahiro {
     await feature(this)
   }
 
-  async registerIntercepter(interceptor: IMahiroInterceptor) {
+  async registerInterceptor(interceptor: IMahiroInterceptor) {
     if (isString(interceptor)) {
       try {
         interceptor = require(interceptor)
