@@ -16,7 +16,7 @@ import { consola } from 'consola'
 import { toArrayNumber } from '../utils'
 import dayjs from 'dayjs'
 import { type Express } from 'express'
-import { isString, uniq } from 'lodash'
+import { isString, pick, uniq } from 'lodash'
 import chalk from 'mahiro/compiled/chalk'
 import type { Mahiro } from '../core'
 import Keyv from '@keyvhq/core'
@@ -691,7 +691,9 @@ export class Database {
   }
 
   getAccounts() {
-    return [this.mahiro.mainAccount, ...this.mahiro.sideAccounts]
+    return [this.mahiro.mainAccount, ...this.mahiro.sideAccounts].map((i) => {
+      return pick(i, ['url', 'qq', 'side', 'local', 'external'])
+    })
   }
 
   async registerWebPanel(panel: IMahiroWebPanel) {

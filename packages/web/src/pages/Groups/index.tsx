@@ -107,7 +107,7 @@ export const Groups = () => {
       width: 150,
       render: (col: number[]) => {
         const qqs = col || []
-        const currentUsingQQs = qqsQuery.data || []
+        const currentUsingQQs = qqsQuery.data?.map(i => i.qq) || []
         const filteredQQs: number[] = qqs.filter((i) => {
           return currentUsingQQs.includes(i)
         })

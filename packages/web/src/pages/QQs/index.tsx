@@ -11,6 +11,7 @@ import {
   Space,
   Spin,
   Table,
+  Tag,
   Tooltip,
   Typography,
   message,
@@ -22,16 +23,45 @@ import { useHref, useNavigate } from 'react-router-dom'
 
 export const QQs = () => {
   const query = useQQsList()
-  const dataSource = (query?.data || []).map((i) => {
-    return {
-      account: i,
-    }
-  })
+  const dataSource = query?.data || []
 
   const columns: ColumnsType<any> = [
     {
       title: '账号',
-      dataIndex: 'account',
+      dataIndex: 'qq',
+    },
+    {
+      title: '分布',
+      dataIndex: 'local',
+      render: (col) => {
+        return (
+          <Tooltip title="本地指服务与OPQ都在一起，远程指不在一个服务上">
+            <Tag color={col ? undefined : 'green'}>{col ? '本地' : '远程'}</Tag>
+          </Tooltip>
+        )
+      },
+    },
+    {
+      title: '定位',
+      dataIndex: 'side',
+      render: (col) => {
+        return (
+          <Tooltip title="主账号只有一个，其他全是伴生账号">
+            <Tag color={col ? 'yellow' : 'red'}>{col ? '边缘' : '主账号'}</Tag>
+          </Tooltip>
+        )
+      },
+    },
+    {
+      title: '层',
+      dataIndex: 'external',
+      render: (col) => {
+        return (
+          <Tooltip title="内部指一机多账号，外部指多机多账号">
+            <Tag color={col ? 'blue' : 'orange'}>{col ? '外部' : '内部'}</Tag>
+          </Tooltip>
+        )
+      },
     },
   ]
 
@@ -133,7 +163,7 @@ export const QQs = () => {
         size="small"
         dataSource={dataSource}
         columns={columns}
-        rowKey={(r) => r?.account}
+        rowKey={(r) => r?.qq}
         pagination={{
           hideOnSinglePage: true,
         }}

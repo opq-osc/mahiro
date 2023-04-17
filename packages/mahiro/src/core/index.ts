@@ -163,7 +163,7 @@ export class Mahiro {
     const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(
       parsed.hostname || '',
     )
-    this.logger.debug('[Local] Is local: ', isLocal, `ws: ${ws}`)
+    this.logger.debug('[Local] Is local: ', isLocal, ws)
     const url = `http://${parsed.hostname}:${parsed.port}`
     return {
       url,
@@ -332,7 +332,7 @@ export class Mahiro {
       const { ws } = account
       if (account.wsRetrying || account.wsConnected) {
         this.logger.debug(
-          `WS status retrying: ${account.wsRetrying}, connected: ${account.wsConnected}, ws: ${ws}`,
+          `WS status retrying: ${account.wsRetrying}, connected: ${account.wsConnected}, ${ws}`,
         )
         resolve()
         return
@@ -340,16 +340,16 @@ export class Mahiro {
       // create ws
       const wsIns = new WebSocket(ws)
       account.wsIns = wsIns
-      this.logger.info(`Try connect, ws: ${ws}`)
+      this.logger.info(`Try connect, ${ws}`)
 
       const retryConnect = (time: number = 5 * 1e3) => {
         if (account.wsRetrying || account.wsConnected) {
           this.logger.debug(
-            `Retry WS status retrying: ${account.wsRetrying}, connected: ${account.wsConnected}, ws: ${ws}`,
+            `Retry WS status retrying: ${account.wsRetrying}, connected: ${account.wsConnected}, ${ws}`,
           )
           return
         }
-        this.logger.warn(`Retry connect..., wait ${time} ms, ws: ${ws}`)
+        this.logger.warn(`Retry connect..., wait ${time} ms, ${ws}`)
         account.wsRetrying = true
         setTimeout(() => {
           account.wsRetrying = false
@@ -358,7 +358,7 @@ export class Mahiro {
       }
 
       wsIns.on('error', (err) => {
-        this.logger.error(`WS Error: ${err}, ws: ${ws}`)
+        this.logger.error(`WS Error: ${err}, ${ws}`)
       })
 
       wsIns.on('open', () => {
@@ -369,7 +369,7 @@ export class Mahiro {
 
       wsIns.on('message', (data: Buffer) => {
         const str = data.toString()
-        this.logger.debug(`WS Message: ${str}, ws: ${ws}`)
+        this.logger.debug(`WS Message: ${str}, ${ws}`)
         if (process.env.MAHIRO_ONLY_LOG_WS_MSG) {
           return
         }

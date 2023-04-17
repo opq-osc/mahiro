@@ -12,7 +12,8 @@ export const QQsSelect = ({
   onChange,
   ...props
 }: IQQsSelectProps) => {
-  const { data, isFetching } = useQQsList()
+  const { data: originData, isFetching } = useQQsList()
+  const data = originData?.map(i => i.qq)
   const options = (data || []).map((i) => {
     const color = randomColor(i)
     return {
