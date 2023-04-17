@@ -41,6 +41,9 @@ export interface IDataGroup {
 export interface IMvcGroup {
   id: number
   name: string
+  /**
+   * 群号
+   */
   group_id: number
   admins: number[]
   expired_at: string
