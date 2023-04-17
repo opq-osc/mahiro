@@ -16,7 +16,7 @@ import { consola } from 'consola'
 import { toArrayNumber } from '../utils'
 import dayjs from 'dayjs'
 import { type Express } from 'express'
-import { isString, pick, uniq } from 'lodash'
+import { isString, pick, toString, uniq } from 'lodash'
 import chalk from 'mahiro/compiled/chalk'
 import type { Mahiro } from '../core'
 import Keyv from '@keyvhq/core'
@@ -500,16 +500,17 @@ export class Database {
       if (!isStartWithApi) {
         return next()
       }
-      const authHeader = process.env.MAHIRO_AUTH_TOKEN
-      if (!authHeader?.length) {
+      let authHeader = process.env.MAHIRO_AUTH_TOKEN
+      if (authHeader === 'none') {
         return next()
       }
+      authHeader ||= toString(this.mahiro.mainAccount.qq)
       const header = req.headers?.['x-mahiro-token'] as string
       if (header === authHeader) {
         return next()
       }
       this.logger.warn(
-        `[Admin Manager] Unauthorized request from ${req?.ip} to ${req.path}`,
+        `[Admin Manager] Unauthorized request from ${req?.ip} to ${req.path}, default token is main account qq`,
       )
       res.status(401).send('Unauthorized')
     }
