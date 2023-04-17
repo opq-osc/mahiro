@@ -243,7 +243,7 @@ export class Database {
     return mvcPlugins
   }
 
-  async updatePlugin(plugin: Partial<IMvcPlugin>) {
+  async updatePlugin(plugin: Partial<IMvcPlugin> & Pick<IMvcPlugin, 'id'>) {
     const id = plugin.id!
     const has = await this.db.table(this.table.plugins).where({ id }).first()
     if (has) {
@@ -287,7 +287,7 @@ export class Database {
     return internalPluginIds
   }
 
-  async updateGroup(group: Partial<IMvcGroup>) {
+  async updateGroup(group: Partial<IMvcGroup> & Pick<IMvcGroup, 'id'>) {
     const id = group.id!
     const has = await this.db.table(this.table.groups).where({ id }).first()
     if (has) {
