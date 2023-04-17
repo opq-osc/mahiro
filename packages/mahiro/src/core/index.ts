@@ -179,8 +179,15 @@ export class Mahiro {
   }
 
   private checkInitOpts(opts: IMahiroOpts) {
+    // ensure qq number
+    const mainAccountEnv = process.env.MAHIRO_ACCOUNT_MAIN
+    if (!opts?.qq && !mainAccountEnv?.length) {
+      throw new Error(
+        `You must provide a 'qq' number or set env 'MAHIRO_ACCOUNT_MAIN'`,
+      )
+    }
     const sharedSchema = {
-      qq: z.number(),
+      qq: z.number().default(Number(mainAccountEnv)),
       advancedOptions: z
         .object({
           ignoreMyself: z

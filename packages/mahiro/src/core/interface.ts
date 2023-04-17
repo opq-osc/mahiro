@@ -63,7 +63,10 @@ export type IMahiroInterceptorFunction = (
 export type IMahiroInterceptor = string | IMahiroInterceptorFunction
 
 export interface IMahiroInitBase {
-  qq: number
+  /**
+   * @version 3.0.0 可以不填，通过 MAHIRO_ACCOUNT_MAIN 传递
+   */
+  qq?: number
   advancedOptions?: IMahiroAdvancedOptions
   nodeServer?: INodeServerOpts
 }
