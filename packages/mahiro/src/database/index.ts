@@ -646,7 +646,7 @@ export class Database {
           code: 200,
           data: {
             version,
-            robotUrl: this.mahiro.url,
+            robotUrl: this.mahiro.mainAccount.url,
           },
         })
       } catch (e: any) {
@@ -656,14 +656,14 @@ export class Database {
         })
       }
     })
-    // get all qqs
-    app.get(DATABASE_APIS.getAllQQs, async (req, res, next) => {
+    // get all accounts
+    app.get(DATABASE_APIS.getAllAccounts, async (req, res, next) => {
       res.status(200)
       try {
-        const qqs = this.getAllQQs()
+        const accounts = this.getAccounts()
         res.json({
           code: 200,
-          data: qqs,
+          data: accounts,
         })
       } catch (e: any) {
         res.json({
@@ -690,9 +690,8 @@ export class Database {
     })
   }
 
-  getAllQQs() {
-    const qqs = this.mahiro.allQQ
-    return qqs
+  getAccounts() {
+    return [this.mahiro.mainAccount, ...this.mahiro.sideAccounts]
   }
 
   async registerWebPanel(panel: IMahiroWebPanel) {

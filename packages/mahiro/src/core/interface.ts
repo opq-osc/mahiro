@@ -10,6 +10,8 @@ import { z } from 'zod'
 import { consola } from 'consola'
 import { securityCopilotInterceptor } from '../interceptors/securityCopilot'
 import type { Mahiro } from './'
+import { AxiosInstance } from 'axios'
+import type { WebSocket } from 'ws'
 
 export interface IMahiroAdvancedOptions {
   /**
@@ -32,16 +34,66 @@ export interface IMahiroAdvancedOptions {
 
   /**
    * 伴生bot，用于多Q场景
-   * @experiment 还没测试过
    * @default []
+   * @example
    */
-  sideQQs?: number[]
+  sideQQs?: Array<number | ISideAccount>
 
   /**
    * 启用 redis kv
    * @example 'redis://localhost:6379'
    */
   redisKV?: string
+}
+
+export interface IAccountWs {
+  ws: string
+  wsIns: WebSocket
+  wsRetrying: boolean
+  wsConnected: boolean
+}
+
+export interface IAccont extends IAccountWs {
+  url: string
+  qq: number
+  request: AxiosInstance
+  /**
+   * 消息栈
+   */
+  stack: IMahiroMsgStack
+  /**
+   * is side account
+   */
+  side: boolean
+  /**
+   * is server in local
+   * will auto transform local image to base64 when server not in local
+   */
+  local: boolean
+  /**
+   * is multi OPQ instance connect
+   */
+  external: boolean
+}
+
+export interface ISideAccount {
+  /**
+   * ws 和 host + port 二选一提供
+   */
+  qq: number
+  /**
+   * @example ws://100.0.0.1:9000/ws
+   */
+  ws?: `ws://${string}`
+  /**
+   * @default 0.0.0.0
+   * @example 100.0.0.1
+   */
+  host?: string
+  /**
+   * @default 8086
+   */
+  port?: number
 }
 
 export type IMahiroMsgStack = Map<number, IMahiroMsgHistory[]>
@@ -80,7 +132,7 @@ export const DEFAULT_ADANCED_OPTIONS: Required<IMahiroAdvancedOptions> = {
   databasePath: join(process.cwd(), 'mahiro.db'),
   interceptors: [securityCopilotInterceptor],
   sideQQs: [],
-  redisKV: ''
+  redisKV: '',
 }
 export interface IMahiroInitWithSimple extends IMahiroInitBase {
   /**

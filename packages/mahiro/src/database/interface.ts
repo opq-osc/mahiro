@@ -72,7 +72,7 @@ export const DATABASE_APIS = {
   deleteGroup: `${DATABASE_API_PREFIX}/group/delete`,
   registerPlugin: `${DATABASE_API_PREFIX}/plugin/register`,
   getVersion: `${DATABASE_API_PREFIX}/version`,
-  getAllQQs: `${DATABASE_API_PREFIX}/qq/all`,
+  getAllAccounts: `${DATABASE_API_PREFIX}/accounts`,
   getPanel: `${DATABASE_API_PREFIX}/panel`,
 } as const
 

@@ -4,8 +4,6 @@ import {
   ICallbacks,
   IFriendMessage,
   IGroupMessage,
-  IMahiroInitWithSimple,
-  IMahiroInitWithWs,
   IMahiroOpts,
   IOnFriendMessage,
   IOnGroupMessage,
@@ -19,7 +17,6 @@ import {
   apiSchema,
   IMahiroInterceptorContext,
   IMahiroInterceptorFunction,
-  IMahiroMsgStack,
   IMahiroUploadFileOpts,
   IApiMsg,
   asyncHookUtils,
@@ -32,11 +29,12 @@ import {
   IMahiroFriendMiddleware,
   IMahiroMiddleware,
   EMiddleware,
+  IAccont,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
 import WebSocket from 'ws'
-import axios, { type AxiosInstance } from 'axios'
+import axios from 'axios'
 import {
   EFuncName,
   ESendCmd,
@@ -69,27 +67,21 @@ import { AsyncLocalStorage } from 'async_hooks'
 import { existsSync } from 'fs'
 import { dirname, isAbsolute, join } from 'path'
 import serveStatic from 'serve-static'
-import { cloneDeep, isNil, isString, trim, uniq } from 'lodash'
+import { cloneDeep, isNil, isString, trim } from 'lodash'
 import { detectFileType, getFileBase64 } from '../utils/file'
 import { CronJob } from './cron'
 import { Utils } from './utils'
 
 export class Mahiro {
-  // base props
-  ws!: string
-  url!: string
-  // is server in local
-  isLocal = false
-  qq!: number
-  allQQ!: number[]
-  request!: AxiosInstance
+  opts!: IMahiroOpts
+
+  // accounts
+  mainAccount!: IAccont
+  sideAccounts!: IAccont[]
+
+  // logger
   logger = consola
   loggerWithInterceptor = consola.withTag('interceptor') as typeof consola
-
-  // ws instance
-  wsIns!: WebSocket
-  wsRetrying = false
-  wsConnected = false
 
   // more options
   advancedOptions!: Required<IMahiroAdvancedOptions>
@@ -120,8 +112,7 @@ export class Mahiro {
   // async context
   asyncLocalStorage = new AsyncLocalStorage()
 
-  // msg stack
-  msgStack: IMahiroMsgStack = new Map()
+  // msg stack global config
   msgStackConfig = {
     timeout: 3 * 60 * 1e3,
     max: 10,
@@ -135,14 +126,12 @@ export class Mahiro {
 
   constructor(opts: IMahiroOpts) {
     this.printLogo()
-    this.checkInitOpts(opts)
-    this.initUrl()
-    this.createRequest()
+    this.opts = opts
   }
 
   async run() {
     this.logger.info('Mahiro is starting...')
-    await this.connect()
+    await this.checkOptsAndConnect()
     await this.connectDatabase()
     await this.startNodeServer()
     this.registerOptionsInterceptors()
@@ -167,18 +156,23 @@ export class Mahiro {
     console.log()
   }
 
-  private initUrl() {
-    const parsed = parse(this.ws)
+  private getInitUrl(opts: { ws: string }) {
+    const { ws } = opts
+    const parsed = parse(ws)
     // check local
     const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(
       parsed.hostname || '',
     )
-    this.isLocal = isLocal
-    this.logger.debug('[Local] Is local: ', isLocal)
-    this.url = `http://${parsed.hostname}:${parsed.port}`
+    this.logger.debug('[Local] Is local: ', isLocal, `ws: ${ws}`)
+    const url = `http://${parsed.hostname}:${parsed.port}`
+    return {
+      url,
+      isLocal,
+    }
   }
 
-  private checkInitOpts(opts: IMahiroOpts) {
+  private async checkOptsAndConnect() {
+    const opts = this.opts
     // ensure qq number
     const mainAccountEnv = process.env.MAHIRO_ACCOUNT_MAIN
     if (!opts?.qq && !mainAccountEnv?.length) {
@@ -186,6 +180,21 @@ export class Mahiro {
         `You must provide a 'qq' number or set env 'MAHIRO_ACCOUNT_MAIN'`,
       )
     }
+
+    const sideQQschema = z.union([
+      z.number(),
+      z.union([
+        z.object({
+          qq: z.number(),
+          host: z.string().default(DEFAULT_NETWORK.host),
+          port: z.number().default(DEFAULT_NETWORK.port),
+        }),
+        z.object({
+          qq: z.number(),
+          ws: z.string().startsWith('ws://'),
+        }),
+      ]),
+    ])
     const sharedSchema = {
       qq: z.number().default(Number(mainAccountEnv)),
       advancedOptions: z
@@ -201,7 +210,9 @@ export class Mahiro {
               z.union([z.string(), z.custom((v) => typeof v === 'function')]),
             )
             .default(DEFAULT_ADANCED_OPTIONS.interceptors),
-          sideQQs: z.array(z.number()).default(DEFAULT_ADANCED_OPTIONS.sideQQs),
+          sideQQs: z
+            .array(sideQQschema)
+            .default(DEFAULT_ADANCED_OPTIONS.sideQQs),
           redisKV: z.string().default(DEFAULT_ADANCED_OPTIONS.redisKV),
         })
         .default(DEFAULT_ADANCED_OPTIONS),
@@ -225,14 +236,88 @@ export class Mahiro {
     ])
 
     const result = schema.parse(opts)
-    // qq
-    const mainQQ = (this.qq = result.qq)
-    const sideQQs = result.advancedOptions.sideQQs || []
-    if (sideQQs.includes(mainQQ)) {
-      throw new Error('Side QQs cannot contain main QQ')
+
+    // init main account
+    // @ts-ignore
+    const mainAccountWs = result?.ws?.length
+      ? // @ts-ignore
+        result.ws
+      : // @ts-ignore
+        `ws://${result.host}:${result.port}/ws`
+    const { url: mainAccountUrl, isLocal: mainAccountIsLocal } =
+      this.getInitUrl({ ws: mainAccountWs })
+    const mainAccountQQ = result.qq
+    const mainRequest = this.createRequest({
+      qq: mainAccountQQ,
+    })
+    const mainAccount: IAccont = {
+      ws: mainAccountWs,
+      url: mainAccountUrl,
+      qq: mainAccountQQ,
+      request: mainRequest,
+      wsConnected: false,
+      wsRetrying: false,
+      wsIns: null!,
+      stack: new Map(),
+      local: mainAccountIsLocal,
+      side: false,
+      external: false,
     }
-    // sideQQs
-    this.allQQ = uniq([mainQQ, ...sideQQs])
+    this.logger.debug(`[Main] ${JSON.stringify(mainAccount)}`)
+    await this.createConnect(mainAccount)
+    this.mainAccount = mainAccount
+
+    // side accounts
+    const sideAccounts: IAccont[] = []
+    const sideQQs = result.advancedOptions.sideQQs || []
+    for await (const item of sideQQs) {
+      const isInternalSide = typeof item === 'number'
+      const sideQQ = typeof item === 'number' ? item : item.qq
+      const isRepeat =
+        item === mainAccountQQ || sideAccounts.some((v) => v.qq == item)
+      if (isRepeat) {
+        throw new Error(`Side account ${sideQQ} is repeat! Please check it.`)
+      }
+      if (isInternalSide) {
+        // repeat check
+        sideAccounts.push({
+          ...this.mainAccount,
+          stack: new Map(),
+          wsIns: null!,
+          wsConnected: true,
+          wsRetrying: false,
+          qq: item,
+        })
+        this.logger.debug(`[Side(${item}]: reuse main account info`)
+      } else {
+        // @ts-ignore
+        const sideWs = item?.ws ? item.ws : `ws://${item.host}:${item.port}/ws`
+        const { url: sideUrl, isLocal: sideIsLocal } = this.getInitUrl({
+          ws: sideWs,
+        })
+        const sideRequest = this.createRequest({
+          qq: sideQQ,
+        })
+        const sideAccount: IAccont = {
+          ws: sideWs,
+          url: sideUrl,
+          qq: sideQQ,
+          request: sideRequest,
+          wsConnected: false,
+          wsRetrying: false,
+          wsIns: null!,
+          stack: new Map(),
+          local: sideIsLocal,
+          side: true,
+          external: !isInternalSide,
+        }
+        this.logger.debug(`[Side(${sideQQ})] ${JSON.stringify(sideAccount)}`)
+        await this.createConnect(sideAccount)
+        sideAccounts.push(sideAccount)
+      }
+    }
+    this.sideAccounts = sideAccounts
+
     // advancedOptions
     this.advancedOptions =
       result.advancedOptions as Required<IMahiroAdvancedOptions>
@@ -240,84 +325,85 @@ export class Mahiro {
     // nodeServer
     this.nodeServer = result.nodeServer as Required<INodeServerOpts>
     this.logger.debug('Node server options: ', this.nodeServer)
-
-    // ws
-    const withWs = result as IMahiroInitWithWs
-    if (withWs?.ws?.length) {
-      this.ws = withWs.ws
-      return
-    }
-    const withSimple = result as IMahiroInitWithSimple
-    if (withSimple?.host?.length && withSimple?.port) {
-      this.ws = `ws://${withSimple.host}:${withSimple.port}/ws`
-      return
-    }
-
-    throw new Error('Invalid opts')
   }
 
-  private async connect() {
-    let resolve = () => {}
-    const promise = new Promise((_resolve, _) => {
-      resolve = _resolve as any
-    })
-    this.wsRetrying = false
-    this.logger.info('Try connect...')
-    const ws: WebSocket = (this.wsIns = new WebSocket(this.ws))
-
-    const retryConnect = (time: number = 5 * 1e3) => {
-      if (this.wsRetrying) {
+  private async createConnect(account: IAccont) {
+    return new Promise<void>((resolve, _reject) => {
+      const { ws } = account
+      if (account.wsRetrying || account.wsConnected) {
+        this.logger.debug(
+          `WS status retrying: ${account.wsRetrying}, connected: ${account.wsConnected}, ws: ${ws}`,
+        )
+        resolve()
         return
       }
-      this.logger.warn('Retry connect..., wait ', time, 'ms')
-      this.wsRetrying = true
-      setTimeout(() => {
-        this.connect()
-      }, time)
-    }
+      // create ws
+      const wsIns = new WebSocket(ws)
+      account.wsIns = wsIns
+      this.logger.info(`Try connect, ws: ${ws}`)
 
-    ws.on('error', (err) => {
-      this.logger.error(`WS Error: `, err)
-    })
-
-    ws.on('open', () => {
-      this.logger.success('WS Connected', this.ws)
-      this.wsConnected = true
-      resolve()
-    })
-
-    ws.on('message', (data: Buffer) => {
-      const str = data.toString()
-      this.logger.debug('WS Message: ', str)
-      if (process.env.MAHIRO_ONLY_LOG_WS_MSG) {
-        return
+      const retryConnect = (time: number = 5 * 1e3) => {
+        if (account.wsRetrying || account.wsConnected) {
+          this.logger.debug(
+            `Retry WS status retrying: ${account.wsRetrying}, connected: ${account.wsConnected}, ws: ${ws}`,
+          )
+          return
+        }
+        this.logger.warn(`Retry connect..., wait ${time} ms, ws: ${ws}`)
+        account.wsRetrying = true
+        setTimeout(() => {
+          account.wsRetrying = false
+          this.createConnect(account)
+        }, time)
       }
-      try {
-        const json = JSON.parse(str)
-        this.triggerListener(json)
-      } catch (e) {
-        this.logger.error('WS message parse error: ', e)
+
+      wsIns.on('error', (err) => {
+        this.logger.error(`WS Error: ${err}, ws: ${ws}`)
+      })
+
+      wsIns.on('open', () => {
+        this.logger.success(`WS Connected: ${ws}`)
+        account.wsConnected = true
+        resolve()
+      })
+
+      wsIns.on('message', (data: Buffer) => {
+        const str = data.toString()
+        this.logger.debug(`WS Message: ${str}, ws: ${ws}`)
+        if (process.env.MAHIRO_ONLY_LOG_WS_MSG) {
+          return
+        }
+        try {
+          const json = JSON.parse(str)
+          this.triggerListener(json)
+        } catch (e) {
+          this.logger.error('WS message parse error: ', e)
+        }
+      })
+
+      wsIns.on('close', () => {
+        this.logger.warn('WS Closed')
+        account.wsConnected = false
+        retryConnect()
+      })
+
+      // debug
+      if (process.env.MAHIRO_IGNORE_CONNECT) {
+        this.logger.debug('MAHIRO_IGNORE_CONNECT :: Ignore connect')
+        resolve()
       }
     })
+  }
 
-    ws.on('close', () => {
-      this.logger.warn('WS Closed')
-      this.wsConnected = false
-      retryConnect()
-    })
-
-    // debug
-    if (process.env.MAHIRO_IGNORE_CONNECT) {
-      this.logger.debug('MAHIRO_IGNORE_CONNECT :: Ignore connect')
-      resolve()
-    }
-
-    return promise
+  private isRegisteredAccount(qq: number) {
+    return (
+      qq === this.mainAccount.qq || this.sideAccounts.some((v) => v.qq === qq)
+    )
   }
 
   private async triggerListener(json: IMsg) {
     const { CurrentPacket, CurrentQQ } = json
-    const isValidQQ = this.allQQ.includes(CurrentQQ)
+    const isValidQQ = this.isRegisteredAccount(CurrentQQ)
     if (!isValidQQ) {
       this.logger.error(
         'CurrentQQ not match: ',
@@ -384,7 +470,7 @@ export class Mahiro {
         },
       } as IGroupMessage
       // ignore myself and all side qq
-      const isBot = this.allQQ.includes(data.userId)
+      const isBot = this.isRegisteredAccount(data.userId)
       if (ignoreMyself && isBot) {
         return
       }
@@ -484,7 +570,7 @@ export class Mahiro {
         qq: CurrentQQ,
       } satisfies IFriendMessage
       // ignore myself and all side qq
-      const isBot = this.allQQ.includes(data.userId)
+      const isBot = this.isRegisteredAccount(data.userId)
       if (ignoreMyself && isBot) {
         return
       }
@@ -550,12 +636,19 @@ export class Mahiro {
     return asyncHookUtils.parse(this.asyncLocalStorage.getStore())
   }
 
+  private getAccount(qq: number) {
+    if (qq === this.mainAccount.qq) {
+      return this.mainAccount
+    }
+    return this.sideAccounts.find((account) => account.qq === qq)!
+  }
+
   private getUseQQ(opts: { specifiedQQ?: number }) {
     const { specifiedQQ } = opts
     let useQQ = specifiedQQ
     if (!useQQ) {
       const asyncContext = this.getAsyncContext()
-      const mainQQ = this.qq
+      const mainQQ = this.mainAccount.qq
       if (!asyncContext?.qq) {
         this.logger.info(`No context, will use main qq (${mainQQ})`)
         useQQ = mainQQ
@@ -568,18 +661,19 @@ export class Mahiro {
   }
 
   private async sendApi(opts: ISendApiOpts) {
-    if (!this.wsConnected) {
-      this.logger.error('WS not connected, send api failed')
+    const { CgiRequest, qq } = opts
+    const account = this.getAccount(qq)
+    if (!account.wsConnected) {
+      this.logger.error(`WS not connected, send api failed, account(${qq})`)
       return
     }
-    const { CgiRequest, qq } = opts
     const params = {
       funcname: EFuncName.MagicCgiCmd,
       timeout: 10,
       qq,
     } satisfies ISendParams
     const stringifyParams = qs.stringify(params)
-    const sendMsgUrl = `${this.url}/v1/LuaApiCaller?${stringifyParams}`
+    const sendMsgUrl = `${account.url}/v1/LuaApiCaller?${stringifyParams}`
     const data: ISendMsg = {
       CgiCmd: ESendCmd.send,
       CgiRequest,
@@ -592,35 +686,39 @@ export class Mahiro {
         params,
         data,
         logger: this.loggerWithInterceptor,
-        stack: cloneDeep(this.msgStack.get(CgiRequest.ToUin) || []),
+        stack: cloneDeep(account.stack.get(CgiRequest.ToUin) || []),
       }
       for await (const inter of interceptors) {
         const notDrop = await inter(context)
         if (!notDrop) {
-          this.logger.info('[Interceptor] Drop message: ', JSON.stringify(data))
+          this.logger.info(
+            `[Interceptor] Drop message, account(${qq}) : `,
+            JSON.stringify(data),
+          )
           return
         }
       }
     }
     try {
-      const res = await this.request.post(sendMsgUrl, data)
+      const res = await account.request.post(sendMsgUrl, data)
       // push to stack
-      this.pushMsgToStack(data)
+      this.pushMsgToStack({ account, data })
       if (res?.data) {
         return res.data as ISendMsgResponse
       }
     } catch (e) {
-      this.logger.error('Send api error: ', e)
+      this.logger.error(`Send api error, account(${qq}) : `, e)
     }
   }
 
   private async uploadFile(opts: IMahiroUploadFileOpts) {
-    if (!this.wsConnected) {
-      this.logger.error('WS not connected, upload file failed')
+    const { file, commandId, qq } = opts
+    const account = this.getAccount(qq)
+    if (!account.wsConnected) {
+      this.logger.error(`WS not connected, upload file failed, account(${qq})`)
       return
     }
-    const { file, commandId, qq } = opts
-    this.logger.debug('[Upload File] Will upload file: ', file)
+    this.logger.debug(`[Upload File] Will upload file, account(${qq}): `, file)
     let { filePath, fileUrl } = detectFileType(file)
     let Base64Buf: string | undefined
     // check file
@@ -628,46 +726,53 @@ export class Mahiro {
     const hasFileUrl = !!fileUrl?.length
     if (hasFilePath) {
       if (!existsSync(filePath!)) {
-        this.logger.error(`File not exists: ${filePath}`)
+        this.logger.error(`File not exists, account(${qq}): ${filePath}`)
         return
       }
       if (!isAbsolute(filePath!)) {
-        this.logger.error(`File path must be absolute: ${filePath}`)
+        this.logger.error(
+          `File path must be absolute, account(${qq}): ${filePath}`,
+        )
         return
       }
-      if (!this.isLocal) {
+      if (!account.local) {
         // filePath auto convert to url when server not in local
         const base64 = await getFileBase64(filePath!)
         if (!base64) {
           this.logger.error(
-            `[Upload File] The server is not in local, auto convert file to base64 failed: ${filePath}`,
+            `[Upload File] The server is not in local, auto convert file to base64 failed, account(${qq}): ${filePath}`,
           )
           return
         }
         this.logger.debug(
-          `[Upload File] The server is not in local, auto convert file to base64 success: ${filePath}`,
+          `[Upload File] The server is not in local, auto convert file to base64 success, account(${qq}): ${filePath}`,
         )
         hasFilePath = false
         Base64Buf = base64
         this.logger.debug(
-          `[Upload File] base64 preview : ${base64.slice(0, 20)}...`,
+          `[Upload File] base64 preview, account(${qq}): ${base64.slice(
+            0,
+            20,
+          )}...`,
         )
       }
     } else if (hasFileUrl) {
       const isUrl = fileUrl!.startsWith('http')
       const isData = fileUrl!.startsWith('data:')
       if (!isUrl && !isData) {
-        this.logger.error(`File url must be http or data: ${fileUrl}`)
+        this.logger.error(
+          `File url must be http or data, account(${qq}): ${fileUrl}`,
+        )
         return
       }
     } else {
       this.logger.error(
-        'File absolute path or url required (e.g. /path/to/file or http://example.com/file.png or data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB)',
+        `File absolute path or url required (e.g. /path/to/file or http://example.com/file.png or data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB), account(${qq})`,
       )
       return
     }
     this.logger.debug('[Upload File] Will use qq: ', qq)
-    const uploadUrl = `${this.url}/v1/upload?qq=${qq}`
+    const uploadUrl = `${account.url}/v1/upload?qq=${qq}`
     const data: IUploadFile = {
       CgiCmd: ESendCmd.upload,
       CgiRequest: {
@@ -686,11 +791,11 @@ export class Mahiro {
       },
     }
     try {
-      const res = await this.request.post(uploadUrl, data)
+      const res = await account.request.post(uploadUrl, data)
       const json = res?.data as ISendMsgResponse | undefined
       if (json) {
         this.logger.debug(
-          '[Upload File] Upload file success: ',
+          `[Upload File] Upload file success, account(${qq}): `,
           file,
           'response: ',
           json,
@@ -698,15 +803,16 @@ export class Mahiro {
         return json as ISendMsgResponse
       }
     } catch (e) {
-      this.logger.error('Upload file error: ', e)
+      this.logger.error(`Upload file error, account(${qq}): `, e)
     }
   }
 
-  private pushMsgToStack(data: ISendMsg) {
+  private pushMsgToStack(opts: { account: IAccont; data: ISendMsg }) {
+    const { account, data } = opts
     const to = data.CgiRequest?.ToUin
     if (to) {
       const { max, timeout } = this.msgStackConfig
-      const stack = this.msgStack.get(to) || []
+      const stack = account.stack.get(to) || []
       // check expired
       const now = Date.now()
       while (!!stack.length) {
@@ -728,7 +834,7 @@ export class Mahiro {
         msg: data,
       })
       // max length
-      this.msgStack.set(to, stack)
+      account.stack.set(to, stack)
     }
   }
 
@@ -966,7 +1072,7 @@ export class Mahiro {
     this.logger.debug(`[Node Server] Python Forward - ${path}: `, data)
     const url = `${base}${path}`
     try {
-      const res = await this.request.post(url, data)
+      const res = await this.mainAccount.request.post(url, data)
       if (res.status !== 200) {
         this.logger.error(
           `[Node Server] Python Forward - ${path} status error: `,
@@ -1050,6 +1156,7 @@ export class Mahiro {
 
   private registerAdminManager() {
     this.logger.debug(`[Admin Manager] Registering...`)
+    // todo: can config this
     const cmd = {
       open: /^\.open (.+)/,
       close: /^\.close (.+)/,
@@ -1117,13 +1224,14 @@ export class Mahiro {
     this.logger.debug(`[Admin Manager] Registered`)
   }
 
-  private createRequest() {
-    const ins = (this.request = axios.create({
+  private createRequest(opts: { qq: number }) {
+    const { qq } = opts
+    const ins = axios.create({
       timeout: 20 * 1000,
       headers: {
         'content-type': 'application/json',
       },
-    }))
+    })
     ins.interceptors.response.use(
       (response) => {
         const res = response.data as Partial<ISendMsgResponse>
@@ -1131,9 +1239,9 @@ export class Mahiro {
         const hasErrorCode = errorCode !== ECgiBaseRes.success
         const hasErrorMsg = res?.CgiBaseResponse?.ErrMsg?.length
         if (hasErrorCode && hasErrorMsg) {
+          const url = response.request?.responseURL
           this.logger.error(
-            `[Response] Error(code: ${errorCode}) : `,
-            res?.CgiBaseResponse?.ErrMsg,
+            `[Response] Account(${qq}), URL(${url}), Error(code: ${errorCode}), ErrMsg(${res?.CgiBaseResponse?.ErrMsg})`,
           )
           return Promise.reject(res?.CgiBaseResponse?.ErrMsg)
         }
@@ -1143,6 +1251,7 @@ export class Mahiro {
         return Promise.reject(err)
       },
     )
+    return ins
   }
 
   async use(feature: IMahiroUse) {
