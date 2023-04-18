@@ -118,6 +118,30 @@ const config: DocsThemeConfig = {
       // },
     } as any
   },
+  head: function useHead() {
+    const { title } = useConfig()
+    const og = `https://mahiro.opqbot.com/og.jpg`
+
+    return (
+      <>
+        <meta name="theme-color" content="#fff" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+          name="og:description"
+          content="Mahiro is a JavaScript SDK for OPQBot"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={og} />
+        <meta name="twitter:site:domain" content="mahiro.opqbot.com" />
+        <meta name="twitter:url" content="https://mahiro.opqbot.com" />
+        <meta
+          name="og:title"
+          content={title ? title + ' – Mahiro' : 'Mahiro'}
+        />
+        <meta name="og:image" content={og} />
+      </>
+    )
+  },
   footer: {
     text: (
       <span>
