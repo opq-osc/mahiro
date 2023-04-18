@@ -24,6 +24,7 @@ import KeyvSQLite from '@keyvhq/sqlite'
 import KeyvRedis from '@keyvhq/redis'
 import { extract } from '@xn-sakina/mahiro-css'
 import express from 'express'
+import { SERVER_ROUTES } from '../core/interface'
 
 export class Database {
   private path!: string
@@ -490,6 +491,10 @@ export class Database {
     return []
   }
 
+  private getToken() {
+    return process.env.MAHIRO_AUTH_TOKEN || toString(this.mahiro.mainAccount.qq)
+  }
+
   private createAuthMiddleware() {
     return (
       req: express.Request,
@@ -500,11 +505,17 @@ export class Database {
       if (!isStartWithApi) {
         return next()
       }
-      let authHeader = process.env.MAHIRO_AUTH_TOKEN
-      if (authHeader === 'none') {
+      const authHeader = this.getToken()
+      // exclude python apis
+      // todo: use a better way to check python api auth
+      const excludePaths: string[] = [
+        DATABASE_APIS.registerPlugin,
+        SERVER_ROUTES.recive.friend,
+        SERVER_ROUTES.recive.group,
+      ]
+      if (authHeader === 'none' || excludePaths.includes(req.path)) {
         return next()
       }
-      authHeader ||= toString(this.mahiro.mainAccount.qq)
       const header = req.headers?.['x-mahiro-token'] as string
       if (header === authHeader) {
         return next()

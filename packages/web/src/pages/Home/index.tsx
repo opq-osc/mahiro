@@ -43,8 +43,7 @@ export const Home = () => {
                 maxWidth: 400,
               }}
             >
-              设定 MAHIRO_AUTH_TOKEN=xxx 来启动 mahiro
-              可以限制面板接口访问权限，此处填写相同值即可，否则请及时关闭面板端口，防止外部渗透
+              {`填写 MAHIRO_AUTH_TOKEN 才能使用面板，默认为主账号，运行时指定 MAHIRO_AUTH_TOKEN=xxx 可以自定义`}
             </div>
           }
         />
