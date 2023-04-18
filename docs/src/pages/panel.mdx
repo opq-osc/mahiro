@@ -1,3 +1,5 @@
+import { Callout } from 'nextra-theme-docs'
+
 # Mahiro 管理面板
 
 管理面板是 Mahiro 的核心功能，所有的群组、插件配置均需在面板统一管理。
@@ -6,10 +8,18 @@
 
 管理面板默认运行在 [`8098`](./resources#端口) 端口，使用结束后请及时关闭，防止外部渗透。
 
-你可以设定 `MAHIRO_AUTH_TOKEN` 来启动 Mahiro ：
+默认 `MAHIRO_AUTH_TOKEN` 的值为当前主账号，通过填写主账号后才可以使用面板。
+
+### 自定义
+
+设定 `MAHIRO_AUTH_TOKEN` 来启动 Mahiro 即可自定义：
 
 ```bash
-  MAHIRO_AUTH_TOKEN=some-value pnpm tsx ./index.ts
+  MAHIRO_AUTH_TOKEN=some-value pnpm mahiro ./index.ts
 ```
 
 在管理面板首页填写相同值后即可保证一定的访问安全性。
+
+<Callout type="error" emoji="️🚫">
+  通过设定 `MAHIRO_AUTH_TOKEN=none` 来关闭，强烈不推荐这样做，如面板需开放，请使用 nginx 反向代理，检验只有你知道的自定义请求头。
+</Callout>
