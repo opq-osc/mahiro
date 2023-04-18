@@ -1,5 +1,16 @@
 # mahiro
 
+## 3.0.0
+
+### Major Changes
+
+- Add multi accounts configs
+
+### Patch Changes
+
+- Updated dependencies
+  - @xn-sakina/mahiro-web@2.0.0
+
 ## 2.0.0
 
 ### Major Changes

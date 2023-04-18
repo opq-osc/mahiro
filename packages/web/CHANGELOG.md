@@ -1,5 +1,11 @@
 # @xn-sakina/mahiro-web
 
+## 2.0.0
+
+### Major Changes
+
+- Add multi accounts configs
+
 ## 1.2.0
 
 ### Minor Changes
