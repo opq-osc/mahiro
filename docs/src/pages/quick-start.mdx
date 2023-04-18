@@ -45,7 +45,7 @@ Mahiro 本体需要运行在 Nodejs 上，若你需要使用 Python Bridge ，�
 安装依赖：
 
 ```bash
-  pnpm add -D mahiro tsx
+  pnpm add -D mahiro
 ```
 
 注：在第一次安装时，`sqlite` 编译需一定时间，请耐心等待，如无法安装成功，请确保你配置了 [加速源](#加速源) 相关配置。
@@ -99,7 +99,7 @@ run()
 启动程序：
 
 ```bash
-  pnpm tsx ./index.ts
+  pnpm mahiro ./index.ts
 ```
 
 ```bash filename="终端输出"
@@ -131,7 +131,9 @@ run()
 
 故群组功能必须配置后才可使用，打开控制台打印的 Mahiro 面板地址：`http://localhost:8098` （注意放通防火墙与安全组，运行在服务器上时，请替换为服务器公网 IP）。
 
-在 **群组管理** 添加一个新的群组：
+在首页输入当前主账号，获得面板访问权限。
+
+之后在 **群组管理** 添加一个新的群组：
 
 <br />
 
