@@ -1,5 +1,11 @@
 # mahiro
 
+## 3.0.1
+
+### Patch Changes
+
+- Fix python server response code not 200
+
 ## 3.0.0
 
 ### Major Changes
