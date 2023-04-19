@@ -1072,7 +1072,10 @@ export class Mahiro {
     this.logger.debug(`[Node Server] Python Forward - ${path}: `, data)
     const url = `${base}${path}`
     try {
-      const res = await this.mainAccount.request.post(url, data)
+      const res = await this.mainAccount.request.post(url, data, {
+        validateStatus: () => true,
+        timeout: 10 * 1e3,
+      })
       if (res.status !== 200) {
         this.logger.error(
           `[Node Server] Python Forward - ${path} status error: `,
@@ -1081,14 +1084,13 @@ export class Mahiro {
       }
       if (res.data?.code !== 200) {
         this.logger.error(
-          `[Node Server] Python Forward - ${path} response code error: `,
-          res.data?.code,
+          `[Node Server] Python Forward - ${path} response code error: ${res.data?.code},`,
         )
       }
       return res.data
     } catch (e) {
       // python 掉了，需要清掉外部插件
-      this.logger.debug(
+      this.logger.warn(
         `[Node Server] Python Forward Offline, will clear plugins`,
       )
       this.db.clearExternalPlugins()
