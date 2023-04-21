@@ -1,7 +1,7 @@
 import os
 import requests
-from pydantic import BaseModel
 from typing import List
+from pydantic import BaseModel
 
 UP_STREAM_URL = os.environ.get("MAHIRO_NODE_URL", "http://0.0.0.0:8098")
 MAHIRO_TOKEN_HEADER = "x-mahiro-token"

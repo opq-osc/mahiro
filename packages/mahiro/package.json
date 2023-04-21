@@ -62,5 +62,8 @@
     "@xn-sakina/dora": "^1.0.0",
     "chalk": "^5.2.0",
     "mahiro": "workspace:*"
+  },
+  "mahiroConfigs": {
+    "requiredPythonMahiroVersion": "1.5.0"
   }
 }

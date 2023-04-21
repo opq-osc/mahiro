@@ -1,11 +1,11 @@
-from pydantic import BaseModel
-from .send import Sender, AtUin, Image, MAHIRO_TOKEN_HEADER
-import requests
-from typing import Awaitable, List, Dict
-from termcolor import colored
-import asyncio
 import time
+import requests
+import asyncio
+from termcolor import colored
+from pydantic import BaseModel
+from typing import Awaitable, List, Dict
 
+from .send import Sender, AtUin, Image, MAHIRO_TOKEN_HEADER
 
 class Msg(BaseModel):
     SubMsgType: int
@@ -35,8 +35,12 @@ class GroupMessage(BaseModel):
     groupId: int
     groupNickname: str = ""
     msg: Msg
-    qq: int
+    # internal fields
     configs: GroupMessageConfigs
+    # bot qq
+    qq: int
+    # opq raw data
+    raw: dict = {}
 
 
 class GroupMessageExtra:
@@ -69,7 +73,10 @@ class FriendMessage(BaseModel):
     userId: int
     userName: str = ""
     msg: Msg
+    # bot qq
     qq: int
+    # opq raw data
+    raw: dict = {}
 
 
 class FriendMessageMahiro:

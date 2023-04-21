@@ -27,7 +27,6 @@ import { extract } from '@xn-sakina/mahiro-css'
 import express from 'express'
 import {
   PYTHON_SERVER_APIS,
-  SERVER_ROUTES,
   __UNSTABLE_PYTHON_SERVER_BASE,
 } from '../core/interface'
 

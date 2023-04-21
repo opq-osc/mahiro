@@ -32,6 +32,8 @@ import {
   IAccont,
   __UNSTABLE_PYTHON_SERVER_BASE,
   PYTHON_SERVER_APIS,
+  ISendToPythonData,
+  IPythonHealthResponse,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -73,6 +75,7 @@ import { cloneDeep, isNil, isString, trim } from 'lodash'
 import { detectFileType, getFileBase64 } from '../utils/file'
 import { CronJob } from './cron'
 import { Utils } from './utils'
+import { getMahiroConfigs } from '../utils/mahiroConfigs'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -127,6 +130,9 @@ export class Mahiro {
 
   // utils
   utils = new Utils()
+
+  // other configs
+  otherConfigs = getMahiroConfigs()
 
   constructor(opts: IMahiroOpts) {
     this.printLogo()
@@ -1010,8 +1016,11 @@ export class Mahiro {
         return
       }
       try {
-        const res = await this.mainAccount.request.get(url)
-        if (res?.data?.code !== 200) {
+        const res = (await this.mainAccount.request.get(url))?.data as
+          | IPythonHealthResponse
+          | undefined
+        this.checkPythonRequiredVersion(res?.version)
+        if (res?.code !== 200) {
           throw new Error('Health check failed')
         }
         this.pythonServerRetryCount = 0
@@ -1118,10 +1127,7 @@ export class Mahiro {
     })
   }
 
-  private async sendToPython(opts: {
-    path: string
-    data: Record<string, any>
-  }) {
+  private async sendToPython(opts: { path: string; data: ISendToPythonData }) {
     const { path, data } = opts
     this.logger.debug(`[Node Server] Python Forward - ${path}: `, data)
     const url = `${this.pythonServerUrl}${path}`
@@ -1159,7 +1165,10 @@ export class Mahiro {
       async (data, raw) => {
         await this.sendToPython({
           path: PYTHON_SERVER_APIS.sendGroupMsg,
-          { ...data, rawData: raw },
+          data: {
+            ...data,
+            raw,
+          },
         })
       },
       {
@@ -1169,7 +1178,10 @@ export class Mahiro {
     this.onFriendMessage(`${prefix}Friend Message`, async (data, raw) => {
       await this.sendToPython({
         path: PYTHON_SERVER_APIS.sendGroupMsg,
-        { ...data, rawData: raw },
+        data: {
+          ...data,
+          raw,
+        },
       })
     })
   }
@@ -1368,5 +1380,20 @@ export class Mahiro {
       }
     }
     return data
+  }
+
+  private checkPythonRequiredVersion(version?: string) {
+    const needVersion = this.otherConfigs.requiredPythonMahiroVersion
+    if (version !== needVersion) {
+      this.logger.error(
+        `Python mahiro version not match, required: ${chalk.bold.blue(
+          needVersion,
+        )}, current: ${chalk.bold.red(
+          version,
+        )}, please update python mahiro by "${chalk.green(
+          'pip install --upgrade mahiro',
+        )}"`,
+      )
+    }
   }
 }

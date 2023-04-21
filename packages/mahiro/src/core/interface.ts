@@ -159,16 +159,19 @@ export interface IGroupMessageConfigs {
   availablePlugins: string[]
 }
 
-export interface IGroupMessage {
-  groupId: number
-  groupName: string
-  userId: number
-  userNickname: string
+export interface IMahiroMsgBase {
   msg: IMsgBody
   /**
    * from bot qq
    */
   qq: number
+}
+
+export interface IGroupMessage extends IMahiroMsgBase {
+  groupId: number
+  groupName: string
+  userId: number
+  userNickname: string
   /**
    * 高级配置，一般用于内部
    */
@@ -182,14 +185,9 @@ export interface IOnGroupMessage {
   (useful: IGroupMessage, raw: IMsg): CallbackReturn
 }
 
-export interface IFriendMessage {
+export interface IFriendMessage extends IMahiroMsgBase {
   userId: number
   userName: string
-  msg: IMsgBody
-  /**
-   * from bot qq
-   */
-  qq: number
 }
 
 export interface IOnFriendMessage {
@@ -376,3 +374,16 @@ export const PYTHON_SERVER_APIS = {
   noticeMahiroStarted: `/recive/started`,
   health: `/recive/health`,
 } as const
+
+export interface ISendToPythonData extends IMahiroMsgBase {
+  raw: IMsg
+  /**
+   * maybe extends group or friend message
+   */
+  [key: string]: any
+}
+
+export interface IPythonHealthResponse {
+  code: number
+  version: string
+}

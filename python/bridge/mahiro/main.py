@@ -1,7 +1,9 @@
-from fastapi import FastAPI
-from .models import GroupMessage, FriendMessage, MessageContainer, Auth
-import uvicorn
 import os
+import uvicorn
+from fastapi import FastAPI
+
+from .models import GroupMessage, FriendMessage, MessageContainer, Auth
+from .version import __VERSION__
 
 app = FastAPI()
 
@@ -33,7 +35,7 @@ async def recive_auth(data: Auth):
 
 @app.get("/recive/health")
 async def recive_health():
-    return {"code": 200}
+    return {"code": 200, "version": __VERSION__}
 
 
 MAHIRO_PYTHON_PORT = os.getenv("MAHIRO_PYTHON_PORT", 8099)

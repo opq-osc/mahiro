@@ -1,5 +1,6 @@
 import io
 from setuptools import find_packages, setup
+from .mahiro.version import __VERSION__
 
 def read_files(files):
     data = []
@@ -13,7 +14,7 @@ setup(
     description="Python bridge for Mahiro",
     long_description=read_files(["README.md"]),
     long_description_content_type="text/markdown",
-    version="1.3.0",
+    version=__VERSION__,
     author="fz6m",
     author_email="i@fz6m.com",
     url="https://github.com/opq-osc/mahiro",
