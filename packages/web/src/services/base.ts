@@ -9,6 +9,8 @@ export const request = axios.create({
   timeout: 10 * 1e3,
 })
 
+window.__mahiro_request__ = request
+
 export const MAHIRO_TOKEN_KEY = 'MAHIRO_AUTH_TOKEN'
 
 request.interceptors.request.use((config) => {
