@@ -1,5 +1,12 @@
 # mahiro
 
+## 5.0.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @xn-sakina/mahiro-web@2.1.1
+
 ## 5.0.0
 
 ### Minor Changes

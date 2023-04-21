@@ -1,5 +1,11 @@
 # @xn-sakina/mahiro-web
 
+## 2.1.1
+
+### Patch Changes
+
+- improve mobile styles
+
 ## 2.1.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @xn-sakina/mahiro-subscribe
 
+## 5.0.1
+
+### Patch Changes
+
+- mahiro@5.0.1
+
 ## 5.0.0
 
 ### Patch Changes
