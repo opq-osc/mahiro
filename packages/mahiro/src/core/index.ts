@@ -1156,20 +1156,20 @@ export class Mahiro {
     const prefix = `[Node Server] Python Forward - `
     this.onGroupMessage(
       `${prefix}Group Message`,
-      async (data) => {
+      async (data, raw) => {
         await this.sendToPython({
           path: PYTHON_SERVER_APIS.sendGroupMsg,
-          data,
+          { ...data, rawData: raw },
         })
       },
       {
         internal: true,
       },
     )
-    this.onFriendMessage(`${prefix}Friend Message`, async (data) => {
+    this.onFriendMessage(`${prefix}Friend Message`, async (data, raw) => {
       await this.sendToPython({
         path: PYTHON_SERVER_APIS.sendGroupMsg,
-        data,
+        { ...data, rawData: raw },
       })
     })
   }
