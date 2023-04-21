@@ -54,11 +54,11 @@
 
 ```python
   # 文本消息
-  mahiro.sender.send_to_friend(group_id, msg="text")
+  mahiro.sender.send_to_friend(user_id, msg="text")
 
   # 图片消息
   mahiro.sender.send_to_friend(
-    group_id, 
+    user_id, 
     # 支持路径，url，base 64
     fast_image="/User/path/to/image.png",
     fast_image="http://domain.com/image.jpg",
