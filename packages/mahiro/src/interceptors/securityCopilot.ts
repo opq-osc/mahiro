@@ -12,8 +12,15 @@ export const securityCopilotInterceptor = async (
   const CgiRequest = data?.CgiRequest
   const content = CgiRequest?.Content
 
+  // [new] 警告 At new version
+  const hasNewAT = CgiRequest?.AtUinLists?.length
+  if (hasNewAT) {
+    const danger = chalk.red('Use "AtUinLists" is very dangerous')
+    logger.warn(`[Security Copilot] ${danger}, please use @{nickname} instead.`)
+  }
+
   if (content?.length) {
-    // 禁 At
+    // [legacy] 警告 At
     const hasRawAT = ~content.indexOf('[ATUSER(')
     if (hasRawAT) {
       const danger = chalk.red('Use raw [ATUSER()] is very dangerous')
@@ -76,7 +83,8 @@ export const securityCopilotInterceptor = async (
       if (prevImages?.length) {
         const isLengthEqual = currentImages.length === prevImages?.length
         if (isLengthEqual) {
-          const isTargetEqual = ctx.data?.CgiRequest?.ToUin === prevMsg?.CgiRequest?.ToUin
+          const isTargetEqual =
+            ctx.data?.CgiRequest?.ToUin === prevMsg?.CgiRequest?.ToUin
           if (isTargetEqual) {
             const isImageEqual = isEqual(
               currentImages.map((i) => i?.FileMd5),
