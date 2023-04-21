@@ -77,6 +77,7 @@ export const DATABASE_APIS = {
   getVersion: `${DATABASE_API_PREFIX}/version`,
   getAllAccounts: `${DATABASE_API_PREFIX}/accounts`,
   getPanel: `${DATABASE_API_PREFIX}/panel`,
+  getLoginQrcode: `${DATABASE_API_PREFIX}/login/getqrcode`,
 } as const
 
 export interface IMahiroWebPanel {

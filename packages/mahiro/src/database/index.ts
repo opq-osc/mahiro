@@ -658,7 +658,6 @@ export class Database {
           code: 200,
           data: {
             version,
-            robotUrl: this.mahiro.mainAccount.url,
           },
         })
       } catch (e: any) {
@@ -700,6 +699,36 @@ export class Database {
         })
       }
     })
+    // get login qrcode
+    app.post(DATABASE_APIS.getLoginQrcode, async (req, res, next) => {
+      res.status(200)
+      try {
+        const { query = '' } = req.body
+        const qrcodeString = await this.getQrcode(query)
+        res.json({
+          code: 200,
+          data: qrcodeString,
+        })
+      } catch (e: any) {
+        res.json({
+          code: 500,
+          message: e?.message || 'Internal Server Error',
+        })
+      }
+    })
+  }
+
+  private async getQrcode(query: string) {
+    const url = `${this.mahiro.mainAccount.url}/v1/login/getqrcode${
+      query?.length ? `?${query}` : ''
+    }`
+    this.logger.debug(`[web] get qrcode from ${url}`)
+    const res = await this.mahiro.mainAccount.request.get(url)
+    const text = res.data || ''
+    const qrcode = text?.match(/<img (?:.+?)src="(.+?)"(?:.+)\/>/)?.[1] as
+      | string
+      | undefined
+    return qrcode
   }
 
   getAccounts() {

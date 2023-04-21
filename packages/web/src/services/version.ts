@@ -2,7 +2,6 @@ import { request } from './base'
 
 export interface IVersionInfo {
   version: string
-  robotUrl: string
 }
 
 export const getVersion = async () => {

@@ -1,9 +1,9 @@
 import { useQQsList } from '@/hooks/useQQsList'
-import { ILoginReq, useRobotServerInfo } from '@/hooks/useRobotServerInfo'
 import { SyncOutlined } from '@ant-design/icons'
 import {
   Alert,
   Button,
+  Form,
   Input,
   InputNumber,
   Modal,
@@ -17,9 +17,13 @@ import {
   message,
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import { isNumber } from 'lodash'
+import { isEmpty, isNumber } from 'lodash'
 import { useState } from 'react'
 import { useHref, useNavigate } from 'react-router-dom'
+import { SafeImage } from './SafeImage'
+import qs from 'qs'
+import { ILoginReq, getQrcode } from '@/services/login'
+import { useMutation } from '@tanstack/react-query'
 
 export const QQs = () => {
   const query = useQQsList()
@@ -69,11 +73,14 @@ export const QQs = () => {
   const navigate = useNavigate()
 
   const [visible, setVisible] = useState(false)
-  const { loading, getLoginQrcode } = useRobotServerInfo()
-  const [qrcode, setQrcode] = useState<string>('')
 
   const [reuseQQ, setReuseQQ] = useState<number>()
   const [deviceInfo, setDeviceInfo] = useState<string>()
+  const [qrcode, setQrcode] = useState<string>()
+
+  const qrcodeMutation = useMutation({
+    mutationFn: getQrcode,
+  })
 
   const refreshQrcode = async () => {
     const params: ILoginReq = {}
@@ -83,9 +90,12 @@ export const QQs = () => {
     if (deviceInfo?.length) {
       params.devicename = deviceInfo
     }
-    const q = await getLoginQrcode(params)
-    if (q?.length) {
-      setQrcode(q)
+    const queryString = isEmpty(params) ? '' : qs.stringify(params)
+    const result = await qrcodeMutation.mutateAsync({
+      query: queryString,
+    })
+    if (result?.length) {
+      setQrcode(result)
       const extraLabel = `${
         params?.qq ? `指定账号：${params.qq}` : '未指定该账号'
       }, ${
@@ -197,44 +207,65 @@ export const QQs = () => {
                   refreshQrcode()
                 }}
                 size="small"
-                loading={loading}
+                loading={qrcodeMutation.isLoading}
                 icon={<SyncOutlined />}
               />
             </Tooltip>
           </Row>
           <Row justify="center">
-            <Spin spinning={loading}>
-              <Space direction="vertical" align="center">
-                <InputNumber
-                  min={0}
-                  precision={0}
-                  placeholder="请输入账号"
-                  value={reuseQQ}
-                  onChange={(nv) => {
-                    setReuseQQ(nv as any)
-                  }}
-                  style={{ width: 250 }}
-                />
-                <Input
-                  placeholder="指定设备信息，可不填写"
-                  value={deviceInfo}
-                  onChange={(e) => {
-                    setDeviceInfo(e.target.value)
-                  }}
-                  style={{ width: 250 }}
-                />
-                <img
+            <Spin spinning={qrcodeMutation.isLoading}>
+              <Form
+                labelCol={{
+                  span: 6,
+                }}
+              >
+                <Form.Item label="账号">
+                  <InputNumber
+                    min={0}
+                    precision={0}
+                    placeholder="请输入账号"
+                    value={reuseQQ}
+                    onChange={(nv) => {
+                      setReuseQQ(nv as any)
+                    }}
+                    style={{ width: 250 }}
+                  />
+                </Form.Item>
+                <Form.Item label="设备信息">
+                  <Input
+                    placeholder="指定设备信息，可不填写"
+                    value={deviceInfo}
+                    onChange={(e) => {
+                      setDeviceInfo(e.target.value)
+                    }}
+                    style={{ width: 250 }}
+                  />
+                </Form.Item>
+              </Form>
+              <Row
+                style={{
+                  paddingBottom: 20,
+                }}
+                justify="center"
+              >
+                <SafeImage
                   style={{
                     aspectRatio: '1/1',
-                    width: 180,
                   }}
+                  width={180}
+                  height={180}
                   src={qrcode}
                 />
-              </Space>
+              </Row>
             </Spin>
           </Row>
-          <Row>
+          <Row
+            style={{
+              padding: '0 10px',
+            }}
+          >
             <Alert
+              showIcon
               message={
                 <Space direction="vertical">
                   <div>
