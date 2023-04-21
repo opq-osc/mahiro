@@ -1,6 +1,6 @@
 import io
 from setuptools import find_packages, setup
-from .mahiro.version import __VERSION__
+from mahiro.version import __VERSION__
 
 def read_files(files):
     data = []

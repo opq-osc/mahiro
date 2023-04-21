@@ -1,5 +1,11 @@
 # mahiro
 
+## 6.0.0
+
+### Minor Changes
+
+- Support send raw msg to python
+
 ## 5.0.1
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @xn-sakina/mahiro-subscribe
 
+## 6.0.0
+
+### Patch Changes
+
+- Updated dependencies
+  - mahiro@6.0.0
+
 ## 5.0.1
 
 ### Patch Changes
