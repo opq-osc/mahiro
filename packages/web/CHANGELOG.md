@@ -1,5 +1,11 @@
 # @xn-sakina/mahiro-web
 
+## 2.1.0
+
+### Minor Changes
+
+- Improve python bridge dynamic register plugins
+
 ## 2.0.0
 
 ### Major Changes

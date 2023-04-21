@@ -1,5 +1,16 @@
 # mahiro
 
+## 5.0.0
+
+### Minor Changes
+
+- Improve python bridge dynamic register plugins
+
+### Patch Changes
+
+- Updated dependencies
+  - @xn-sakina/mahiro-web@2.1.0
+
 ## 3.0.1
 
 ### Patch Changes
