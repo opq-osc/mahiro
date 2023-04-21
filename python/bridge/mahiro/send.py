@@ -1,6 +1,7 @@
 import os
 import requests
 from pydantic import BaseModel
+from typing import List
 
 UP_STREAM_URL = os.environ.get("MAHIRO_NODE_URL", "http://0.0.0.0:8098")
 MAHIRO_TOKEN_HEADER = "x-mahiro-token"
@@ -45,8 +46,8 @@ class Sender:
         self,
         group_id: int,
         msg: str = "",
-        imgs: list[Image] = [],
-        ats: list[AtUin] = [],
+        imgs: List[Image] = [],
+        ats: List[AtUin] = [],
         fast_image: str = None,
     ):
         json = {
@@ -73,7 +74,7 @@ class Sender:
         self,
         user_id: int,
         msg: str = "",
-        imgs: list[Image] = [],
+        imgs: List[Image] = [],
         fast_image: str = None,
     ):
         json = {

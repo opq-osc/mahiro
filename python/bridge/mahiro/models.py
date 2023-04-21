@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from .send import Sender, AtUin, Image, MAHIRO_TOKEN_HEADER
 import requests
-from typing import Awaitable, Callable
+from typing import Awaitable, List, Dict
 from termcolor import colored
 import asyncio
 import time
@@ -10,8 +10,8 @@ import time
 class Msg(BaseModel):
     SubMsgType: int
     Content: str = ""
-    AtUinLists: list[AtUin] = []
-    Images: list[Image] = []
+    AtUinLists: List[AtUin] = []
+    Images: List[Image] = []
     # todo: add types
     Video: dict = {}
     Voice: dict = {}
@@ -26,7 +26,7 @@ class SubMsgType:
 
 # group msg
 class GroupMessageConfigs(BaseModel):
-    availablePlugins: list[str] = []
+    availablePlugins: List[str] = []
 
 
 class GroupMessage(BaseModel):
@@ -87,8 +87,8 @@ class FriendMessageMahiro:
 
 
 class MessageContainer:
-    instances: dict[str, Awaitable] = {}
-    friend_instances: dict[str, Awaitable] = {}
+    instances: Dict[str, Awaitable] = {}
+    friend_instances: Dict[str, Awaitable] = {}
     __token: str = ""
 
     def __init__(self):
@@ -114,7 +114,7 @@ class MessageContainer:
             )
         except Exception as e:
             print(colored("get token error: ", "red"), e)
-            print('Retry after 5 seconds...')
+            print("Retry after 5 seconds...")
             time.sleep(5)
             self.want_get_token()
 
