@@ -13,7 +13,7 @@ setup(
     description="Python bridge for Mahiro",
     long_description=read_files(["README.md"]),
     long_description_content_type="text/markdown",
-    version="1.2.0",
+    version="1.3.0",
     author="fz6m",
     author_email="i@fz6m.com",
     url="https://github.com/opq-osc/mahiro",
