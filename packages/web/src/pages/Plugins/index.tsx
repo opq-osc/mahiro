@@ -34,6 +34,7 @@ export const Plugins = () => {
     {
       title: '插件名称',
       dataIndex: 'name',
+      width: 300,
     },
     {
       title: '状态',
@@ -72,6 +73,8 @@ export const Plugins = () => {
     {
       title: '操作',
       dataIndex: 'action',
+      fixed: 'right',
+      width: 80,
       render: (_, row) => {
         const isInternal = row?.internal
         return (
@@ -147,13 +150,13 @@ export const Plugins = () => {
       </Row>
       <Table
         loading={query.isFetching}
-        size="small"
         rowKey={(r) => r?.id}
         dataSource={query.data || []}
         columns={columns}
         pagination={{
           hideOnSinglePage: true,
         }}
+        scroll={{ x: 600 }}
       />
       <Modal
         title="编辑插件"

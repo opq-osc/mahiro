@@ -9,14 +9,18 @@ import {
   MessageTwoTone,
   ApiTwoTone,
   DashboardTwoTone,
+  LeftCircleTwoTone,
+  RightCircleTwoTone,
 } from '@ant-design/icons'
 import { useCallback, useEffect, useState } from 'react'
 import zhCN from 'antd/locale/zh_CN'
 import { useVersion } from '@/stores/global'
 import { useVersionGet } from '@/hooks/useVersionGet'
+import styles from './index.module.scss'
 
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
+import { medias } from '@/constants/media'
 dayjs.locale('zh-cn')
 
 const queryClient = new QueryClient({
@@ -28,7 +32,7 @@ const queryClient = new QueryClient({
   },
 })
 
-const Logo = styled.div`
+const Logo = styled.div<{ collapsed: boolean }>`
   color: #b080fe;
   font-family: Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans',
     source-sans-pro, sans-serif;
@@ -49,6 +53,22 @@ const Logo = styled.div`
     aspect-ratio: 1/1;
     user-select: none;
     pointer-events: none;
+
+    ${medias.mobile} {
+      width: 30px;
+    }
+  }
+
+  ${(props) => {
+    if (props?.collapsed) {
+      return `
+        font-size: 0;
+      `
+    }
+  }}
+
+  ${medias.mobile} {
+    font-size: 0;
   }
 `
 
@@ -59,7 +79,6 @@ const Version = styled.div`
   font-style: italic;
   letter-spacing: 0.3px;
 `
-
 const themeColor = '#B080FE'
 export const Layout = () => {
   return (
@@ -81,6 +100,9 @@ export const Layout = () => {
 const Internal = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const [collapsed, setCollapsed] = useState(() => {
+    return window.innerWidth < 768
+  })
 
   useVersionGet()
   const [versionInfo] = useVersion()
@@ -112,10 +134,33 @@ const Internal = () => {
       style={{
         height: '100vh',
         overflow: 'hidden',
+        backgroundColor: '#fff',
       }}
     >
-      <AntdLayout.Sider theme="light" trigger={null} collapsible>
-        <Logo>
+      <AntdLayout.Sider
+        theme="light"
+        collapsible
+        collapsedWidth={50}
+        collapsed={collapsed}
+        onCollapse={(collapsed) => {
+          setCollapsed(collapsed)
+        }}
+        trigger={
+          <div
+            style={{
+              transform: 'scale(1.2)',
+            }}
+          >
+            {!collapsed ? (
+              <LeftCircleTwoTone twoToneColor={themeColor} />
+            ) : (
+              <RightCircleTwoTone twoToneColor={themeColor} />
+            )}
+          </div>
+        }
+        className={styles.sider}
+      >
+        <Logo collapsed={collapsed}>
           <img src="/favicon.png" alt="mahiro" />
           <span>Mahiro</span>
           <Version>{version}</Version>

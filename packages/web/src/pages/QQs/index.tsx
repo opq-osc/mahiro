@@ -214,49 +214,63 @@ export const QQs = () => {
           </Row>
           <Row justify="center">
             <Spin spinning={qrcodeMutation.isLoading}>
-              <Form
-                labelCol={{
-                  span: 6,
-                }}
-              >
-                <Form.Item label="账号">
-                  <InputNumber
-                    min={0}
-                    precision={0}
-                    placeholder="请输入账号"
-                    value={reuseQQ}
-                    onChange={(nv) => {
-                      setReuseQQ(nv as any)
-                    }}
-                    style={{ width: 250 }}
-                  />
-                </Form.Item>
-                <Form.Item label="设备信息">
-                  <Input
-                    placeholder="指定设备信息，可不填写"
-                    value={deviceInfo}
-                    onChange={(e) => {
-                      setDeviceInfo(e.target.value)
-                    }}
-                    style={{ width: 250 }}
-                  />
-                </Form.Item>
-              </Form>
-              <Row
+              <div
                 style={{
-                  paddingBottom: 20,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  flexDirection: 'column',
                 }}
-                justify="center"
               >
-                <SafeImage
-                  style={{
-                    aspectRatio: '1/1',
+                <Form
+                  labelCol={{
+                    span: 6,
                   }}
-                  width={180}
-                  height={180}
-                  src={qrcode}
-                />
-              </Row>
+                  wrapperCol={{
+                    style: {
+                      textAlign: 'center',
+                    }
+                  }}
+                >
+                  <Form.Item label="账号">
+                    <InputNumber
+                      min={0}
+                      precision={0}
+                      placeholder="请输入账号"
+                      value={reuseQQ}
+                      onChange={(nv) => {
+                        setReuseQQ(nv as any)
+                      }}
+                      style={{ width: 250 }}
+                    />
+                  </Form.Item>
+                  <Form.Item label="设备信息">
+                    <Input
+                      placeholder="指定设备信息，可不填写"
+                      value={deviceInfo}
+                      onChange={(e) => {
+                        setDeviceInfo(e.target.value)
+                      }}
+                      style={{ width: 250 }}
+                    />
+                  </Form.Item>
+                </Form>
+                <Row
+                  style={{
+                    paddingBottom: 20,
+                  }}
+                  justify="center"
+                >
+                  <SafeImage
+                    style={{
+                      aspectRatio: '1/1',
+                    }}
+                    width={180}
+                    height={180}
+                    src={qrcode}
+                  />
+                </Row>
+              </div>
             </Spin>
           </Row>
           <Row

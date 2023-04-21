@@ -62,7 +62,6 @@ export const Groups = () => {
       title: '群组名称',
       dataIndex: 'name',
       width: 170,
-      fixed: 'left',
     },
     {
       title: '群号',
@@ -198,7 +197,6 @@ export const Groups = () => {
       <Table
         scroll={{ x: 1300 }}
         loading={query.isFetching}
-        size="small"
         dataSource={query?.data || []}
         columns={columns}
         rowKey={(r) => r?.id}
