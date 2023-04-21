@@ -30,6 +30,8 @@ import {
   IMahiroMiddleware,
   EMiddleware,
   IAccont,
+  __UNSTABLE_PYTHON_SERVER_BASE,
+  PYTHON_SERVER_APIS,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -89,7 +91,9 @@ export class Mahiro {
   // node server
   app!: express.Express
   nodeServer!: Required<INodeServerOpts>
-  pythonServerCannotConnect = false
+  pythonServerUrl!: string
+  pythonServerChecker!: NodeJS.Timeout
+  pythonServerRetryCount = 0
 
   // listeners
   callback: ICallbacks = {
@@ -325,6 +329,9 @@ export class Mahiro {
     // nodeServer
     this.nodeServer = result.nodeServer as Required<INodeServerOpts>
     this.logger.debug('Node server options: ', this.nodeServer)
+    // init python server url
+    this.pythonServerUrl = `${__UNSTABLE_PYTHON_SERVER_BASE}:${this.nodeServer.pythonPort}`
+    this.logger.debug('Python server url: ', this.pythonServerUrl)
   }
 
   private async createConnect(account: IAccont) {
@@ -974,6 +981,8 @@ export class Mahiro {
     this.addBaseServerMiddleware()
     this.addBaseServerRoutes()
     this.registryPythonForward()
+    this.noticeToPythonMahiroStarted()
+    this.startPythonServerHealthCheck()
     this.startWebSite()
     return new Promise<void>((resolve, _) => {
       app.listen(port, () => {
@@ -981,6 +990,52 @@ export class Mahiro {
         resolve()
       })
     })
+  }
+
+  async startPythonServerHealthCheck() {
+    this.logger.debug('[Python] Start health check')
+    if (this.pythonServerChecker) {
+      // clear old timer
+      clearInterval(this.pythonServerChecker)
+    }
+    // start new timer
+    const url = `${this.pythonServerUrl}${PYTHON_SERVER_APIS.health}`
+    const checker = async () => {
+      // if max retry count, stop check
+      if (this.pythonServerRetryCount > 10) {
+        this.logger.debug(`[Python] Max retry count, stop health check`)
+        // reset
+        this.pythonServerRetryCount = 0
+        clearInterval(this.pythonServerChecker)
+        return
+      }
+      try {
+        const res = await this.mainAccount.request.get(url)
+        if (res?.data?.code !== 200) {
+          throw new Error('Health check failed')
+        }
+        this.pythonServerRetryCount = 0
+      } catch {
+        // offline
+        this.logger.debug(
+          `[Python] Health check failed, clear all python plugins, retry count: ${this.pythonServerRetryCount}`,
+        )
+        // clear all python plugins
+        this.db.clearExternalPlugins()
+        // add counts
+        this.pythonServerRetryCount++
+      }
+    }
+    this.pythonServerChecker = setInterval(checker, 3 * 1e3)
+  }
+
+  private async noticeToPythonMahiroStarted() {
+    this.logger.debug('[Python] Notice mahiro started')
+    try {
+      await this.db.sendAuthTokenToPython({ once: true })
+    } catch {
+      this.logger.debug('[Python] Notice mahiro started failed')
+    }
   }
 
   private startWebSite() {
@@ -1068,9 +1123,8 @@ export class Mahiro {
     data: Record<string, any>
   }) {
     const { path, data } = opts
-    const base = `http://0.0.0.0:${this.nodeServer.pythonPort}`
     this.logger.debug(`[Node Server] Python Forward - ${path}: `, data)
-    const url = `${base}${path}`
+    const url = `${this.pythonServerUrl}${path}`
     try {
       const res = await this.mainAccount.request.post(url, data, {
         validateStatus: () => true,
@@ -1094,23 +1148,17 @@ export class Mahiro {
         `[Node Server] Python Forward Offline, will clear plugins`,
       )
       this.db.clearExternalPlugins()
-      // warn only once
-      if (!this.pythonServerCannotConnect) {
-        // only log once
-        this.logger.warn(`[Node Server] Python Forward - Failed`)
-        this.pythonServerCannotConnect = true
-      }
+      this.logger.debug(`[Node Server] Python Forward - Failed`)
     }
   }
 
   private registryPythonForward() {
     const prefix = `[Node Server] Python Forward - `
-    const pathWithGroup = `/recive/group`
     this.onGroupMessage(
       `${prefix}Group Message`,
       async (data) => {
         await this.sendToPython({
-          path: pathWithGroup,
+          path: PYTHON_SERVER_APIS.sendGroupMsg,
           data,
         })
       },
@@ -1118,10 +1166,9 @@ export class Mahiro {
         internal: true,
       },
     )
-    const pathWithFriend = `/recive/friend`
     this.onFriendMessage(`${prefix}Friend Message`, async (data) => {
       await this.sendToPython({
-        path: pathWithFriend,
+        path: PYTHON_SERVER_APIS.sendGroupMsg,
         data,
       })
     })

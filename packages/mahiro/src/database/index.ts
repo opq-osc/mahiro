@@ -9,6 +9,7 @@ import {
   IMahiroWebPanel,
   IMvcGroup,
   IMvcPlugin,
+  MAHIRO_TOKEN_HEADER,
   getCacheTime,
 } from './interface'
 import knex from 'knex'
@@ -16,7 +17,7 @@ import { consola } from 'consola'
 import { toArrayNumber } from '../utils'
 import dayjs from 'dayjs'
 import { type Express } from 'express'
-import { isString, pick, toString, uniq } from 'lodash'
+import { isNumber, isString, pick, toString, uniq } from 'lodash'
 import chalk from 'mahiro/compiled/chalk'
 import type { Mahiro } from '../core'
 import Keyv from '@keyvhq/core'
@@ -24,7 +25,11 @@ import KeyvSQLite from '@keyvhq/sqlite'
 import KeyvRedis from '@keyvhq/redis'
 import { extract } from '@xn-sakina/mahiro-css'
 import express from 'express'
-import { SERVER_ROUTES } from '../core/interface'
+import {
+  PYTHON_SERVER_APIS,
+  SERVER_ROUTES,
+  __UNSTABLE_PYTHON_SERVER_BASE,
+} from '../core/interface'
 
 export class Database {
   private path!: string
@@ -506,17 +511,12 @@ export class Database {
         return next()
       }
       const authHeader = this.getToken()
-      // exclude python apis
-      // todo: use a better way to check python api auth
-      const excludePaths: string[] = [
-        DATABASE_APIS.registerPlugin,
-        SERVER_ROUTES.recive.friend,
-        SERVER_ROUTES.recive.group,
-      ]
+      // exclude python get auth token apis
+      const excludePaths: string[] = [DATABASE_APIS.getAuthToken]
       if (authHeader === 'none' || excludePaths.includes(req.path)) {
         return next()
       }
-      const header = req.headers?.['x-mahiro-token'] as string
+      const header = req.headers?.[MAHIRO_TOKEN_HEADER] as string
       if (header === authHeader) {
         return next()
       }
@@ -716,6 +716,60 @@ export class Database {
         })
       }
     })
+    // send token to python server
+    app.get(DATABASE_APIS.getAuthToken, async (req, res, next) => {
+      setTimeout(() => {
+        this.sendAuthTokenToPython()
+      }, 1 * 1e3)
+      res.status(200)
+      res.json({
+        code: 200,
+        data: 'ok',
+      })
+    })
+  }
+
+  async sendAuthTokenToPython(
+    opts: {
+      once?: boolean
+      retry?: number
+    } = {},
+  ) {
+    const { once = false, retry } = opts
+    if (isNumber(retry) && retry > 10) {
+      this.logger.error(
+        `Retry times exceed 10, stop retry send auth token to python server`,
+      )
+      return
+    }
+    const url = `${this.mahiro.pythonServerUrl}${PYTHON_SERVER_APIS.sendAuthToken}`
+    this.logger.debug(`Send auth token to python server, ${url}`)
+    try {
+      const res = await this.mahiro.mainAccount.request.post(url, {
+        token: this.getToken(),
+      })
+      if (res?.data?.code === 200) {
+        // start python health check
+        this.mahiro.startPythonServerHealthCheck()
+      }
+    } catch (e: any) {
+      if (once) {
+        this.logger.debug(
+          `[Once] Send auth token to python server failed, ${e?.message}`,
+        )
+        return
+      }
+      const retryCount = retry || 0
+      this.logger.error(
+        `Send auth token to python server failed, ${e?.message}, Retry count: ${retryCount}`,
+      )
+      this.logger.info(`Retry after 2s`)
+      setTimeout(() => {
+        this.sendAuthTokenToPython({
+          retry: retryCount + 1,
+        })
+      }, 2 * 1e3)
+    }
   }
 
   private async getQrcode(query: string) {

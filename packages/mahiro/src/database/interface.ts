@@ -78,6 +78,9 @@ export const DATABASE_APIS = {
   getAllAccounts: `${DATABASE_API_PREFIX}/accounts`,
   getPanel: `${DATABASE_API_PREFIX}/panel`,
   getLoginQrcode: `${DATABASE_API_PREFIX}/login/getqrcode`,
+
+  // no auth apis
+  getAuthToken: `${DATABASE_API_PREFIX}/auth/gettoken`,
 } as const
 
 export interface IMahiroWebPanel {
@@ -87,3 +90,4 @@ export interface IMahiroWebPanel {
 }
 
 export const DEFAULT_REDIS_KV_NAMESPACE = 'mahiro-redis-kv'
+export const MAHIRO_TOKEN_HEADER = 'x-mahiro-token'

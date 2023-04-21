@@ -1,9 +1,11 @@
 from pydantic import BaseModel
-from .send import Sender, AtUin, Image
+from .send import Sender, AtUin, Image, MAHIRO_TOKEN_HEADER
 import requests
-from typing import Awaitable
+from typing import Awaitable, Callable
 from termcolor import colored
 import asyncio
+import time
+
 
 class Msg(BaseModel):
     SubMsgType: int
@@ -55,10 +57,10 @@ class GroupMessageMahiro:
         self.extra = extra
 
     @staticmethod
-    def create_group_message_mahiro(id: str, ctx: GroupMessage):
+    def create_group_message_mahiro(id: str, ctx: GroupMessage, token: str):
         is_text = ctx.msg.SubMsgType == SubMsgType.mixed
         extra = GroupMessageExtra(is_text=is_text)
-        sender = Sender(id=id, qq=ctx.qq)
+        sender = Sender(id=id, qq=ctx.qq, token=token)
         return GroupMessageMahiro(ctx=ctx, sender=sender, extra=extra)
 
 
@@ -77,37 +79,45 @@ class FriendMessageMahiro:
     def __init__(self, ctx: FriendMessage, sender: Sender):
         self.ctx = ctx
         self.sender = sender
-    
+
     @staticmethod
-    def create_friend_message_mahiro(id: str, ctx: FriendMessage):
-        sender = Sender(id=id, qq=ctx.qq)
+    def create_friend_message_mahiro(id: str, ctx: FriendMessage, token: str):
+        sender = Sender(id=id, qq=ctx.qq, token=token)
         return FriendMessageMahiro(ctx=ctx, sender=sender)
 
 
 class MessageContainer:
     instances: dict[str, Awaitable] = {}
     friend_instances: dict[str, Awaitable] = {}
+    __token: str = ""
 
     def __init__(self):
         pass
 
+    def set_token(self, token: str):
+        self.__token = token
+
     def __register_plugin_to_node(self, id: str):
+        headers = {}
+        headers[MAHIRO_TOKEN_HEADER] = self.__token
+        requests.post(
+            Sender.REGISTER_PLUGIN_URL,
+            json={"name": id},
+            headers=headers,
+        )
+        print(f"register plugin [{id}] to node success")
+
+    def want_get_token(self):
         try:
-            requests.post(
-                Sender.REGISTER_PLUGIN_URL,
-                json={"name": id},
+            requests.get(
+                Sender.GET_TOKEN_URL,
             )
-            print(f"register plugin [{id}] to node success")
         except Exception as e:
-            print("register plugin to node error: ", e)
-            print('\n\n')
-            print(colored('------------- Important -------------', 'red'))
-            print(colored('Please start Mahiro node server first, ', 'red'))
-            print(colored('Then start Mahiro python bridge server.', 'red'))
-            print(colored('-------------------------------------', 'red'))
-            print('\n\n')
-            raise e
-        
+            print(colored("get token error: ", "red"), e)
+            print('Retry after 5 seconds...')
+            time.sleep(5)
+            self.want_get_token()
+
     def register_all_plugins(self):
         for key in self.instances:
             self.__register_plugin_to_node(id=key)
@@ -132,7 +142,9 @@ class MessageContainer:
             if key not in self.instances:
                 continue
             # create mahiro
-            mahiro = GroupMessageMahiro.create_group_message_mahiro(id=key, ctx=ctx)
+            mahiro = GroupMessageMahiro.create_group_message_mahiro(
+                id=key, ctx=ctx, token=self.__token
+            )
             # call
             tasks.append(self.instances[key](mahiro))
         if len(tasks) > 0:
@@ -142,8 +154,14 @@ class MessageContainer:
         tasks = []
         for key in self.friend_instances:
             # create mahiro
-            mahiro = FriendMessageMahiro.create_friend_message_mahiro(id=key, ctx=ctx)
+            mahiro = FriendMessageMahiro.create_friend_message_mahiro(
+                id=key, ctx=ctx, token=self.__token
+            )
             # call
             tasks.append(self.friend_instances[key](mahiro))
         if len(tasks) > 0:
             await asyncio.gather(*tasks)
+
+
+class Auth(BaseModel):
+    token: str

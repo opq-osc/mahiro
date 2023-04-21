@@ -365,3 +365,14 @@ export enum EMiddleware {
   group = 'middleware-group',
   friend = 'middleware-friend',
 }
+
+export const __UNSTABLE_PYTHON_SERVER_BASE =
+  process.env.MAHIRO_UNSTABLE_PYTHON_SERVER_BASE || `http://0.0.0.0`
+
+export const PYTHON_SERVER_APIS = {
+  sendGroupMsg: `/recive/group`,
+  sendFriendMsg: `/recive/friend`,
+  sendAuthToken: `/recive/auth`,
+  noticeMahiroStarted: `/recive/started`,
+  health: `/recive/health`,
+} as const

@@ -1,11 +1,12 @@
 from fastapi import FastAPI
-from .models import GroupMessage, FriendMessage, MessageContainer
+from .models import GroupMessage, FriendMessage, MessageContainer, Auth
 import uvicorn
 import os
 
 app = FastAPI()
 
 g_container = MessageContainer()
+
 
 @app.post("/recive/group")
 async def recive_group(data: GroupMessage):
@@ -21,11 +22,25 @@ async def recive_friend(data: FriendMessage):
     return {"code": 200}
 
 
+@app.post("/recive/auth")
+async def recive_auth(data: Auth):
+    print("Auth token received")
+    g_container.set_token(data.token)
+    print("Registering all plugins to node...")
+    g_container.register_all_plugins()
+    return {"code": 200}
+
+
+@app.get("/recive/health")
+async def recive_health():
+    return {"code": 200}
+
+
 MAHIRO_PYTHON_PORT = os.getenv("MAHIRO_PYTHON_PORT", 8099)
 
-class Mahiro:
 
-    container = g_container
+class Mahiro:
+    container: MessageContainer = g_container
 
     def __init__(self):
         pass
@@ -37,6 +52,7 @@ class Mahiro:
         reload: bool = False,
     ):
         print("Mahiro Python Bridge is running on port", port)
-        print('Registering all plugins...')
-        self.container.register_all_plugins()
+        # trigger get token url
+        print("Triggering get token...")
+        self.container.want_get_token()
         uvicorn.run(app=app, port=port, host=host, reload=reload)
