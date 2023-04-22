@@ -749,7 +749,7 @@ export class Mahiro {
         if (!notDrop) {
           this.logger.info(
             `[Interceptor] Drop message, account(${qq}) : `,
-            JSON.stringify(data),
+            JSON.stringify(data).slice(0, 100),
           )
           return
         }
@@ -774,7 +774,10 @@ export class Mahiro {
       this.logger.error(`WS not connected, upload file failed, account(${qq})`)
       return
     }
-    this.logger.debug(`[Upload File] Will upload file, account(${qq}): `, file)
+    this.logger.debug(
+      `[Upload File] Will upload file, account(${qq}): `,
+      file.slice(0, 100),
+    )
     let { filePath, fileUrl, base64: Base64Buf } = await detectFileType(file)
     // check file
     let hasFilePath = !!filePath?.length
@@ -861,9 +864,9 @@ export class Mahiro {
       if (json) {
         this.logger.debug(
           `[Upload File] Upload file success, account(${qq}): `,
-          file,
+          file.slice(0, 100),
           'response: ',
-          json,
+          JSON.stringify(json).slice(0, 100),
         )
         return json as ISendMsgResponse
       }
@@ -1149,7 +1152,7 @@ export class Mahiro {
         apiSchema.sendGroupMessage.parse(json)
         this.logger.debug(
           '[Node Server] Recive group message: ',
-          JSON.stringify(json),
+          JSON.stringify(json).slice(0, 100),
         )
         await this.sendGroupMessage(json)
         res.json({
@@ -1170,7 +1173,7 @@ export class Mahiro {
         apiSchema.sendFriendMessage.parse(json)
         this.logger.debug(
           '[Node Server] Recive friend message: ',
-          JSON.stringify(json),
+          JSON.stringify(json).slice(0, 100),
         )
         await this.sendFriendMessage(json)
         res.json({
@@ -1208,7 +1211,7 @@ export class Mahiro {
         )
       }
       return res.data
-    } catch (e) {
+    } catch {
       // python 掉了，需要清掉外部插件
       this.logger.warn(
         `[Node Server] Python Forward Offline, will clear plugins`,
@@ -1428,7 +1431,7 @@ export class Mahiro {
       this.logger.debug(
         `[Middlewares] Call middleware: ${name}, with data: ${JSON.stringify(
           data,
-        )}`,
+        ).slice(0, 100)}`,
       )
       if (newData) {
         data = newData
