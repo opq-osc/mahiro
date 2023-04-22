@@ -1,5 +1,11 @@
 # mahiro
 
+## 7.0.0
+
+### Minor Changes
+
+- Support session
+
 ## 6.0.0
 
 ### Minor Changes
