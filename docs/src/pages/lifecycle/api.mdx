@@ -110,7 +110,7 @@
     {
       matched: async (data) => {
         if (data?.msg?.Content === '你是谁') {
-          ins.sendGroupMessage({
+          mahiro.sendGroupMessage({
             groupId: data.groupId,
             msg: {
               Content: '你再问问',
@@ -125,7 +125,7 @@
     {
       matched: async (data) => {
         if (data?.msg?.Content === '你是谁') {
-          ins.sendGroupMessage({
+          mahiro.sendGroupMessage({
             groupId: data.groupId,
             msg: {
               Content: '我是 Mahiro',
