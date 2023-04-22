@@ -10,6 +10,8 @@ import figlet from 'figlet'
 import cron from 'node-cron'
 import cronstrue from 'cronstrue'
 import knex from 'knex'
+import fileType from 'mahiro/compiled/file-type'
+import isBase64 from 'is-base64'
 
 // keyv
 import Keyv from '@keyvhq/core'
@@ -32,4 +34,6 @@ export class Utils {
   Keyv = Keyv
   KeyvSQLite = KeyvSQLite
   KeyvRedis = KeyvRedis
+  fileType = fileType
+  isBase64 = isBase64
 }

@@ -77,6 +77,7 @@ import { CronJob } from './cron'
 import { Utils } from './utils'
 import { getMahiroConfigs } from '../utils/mahiroConfigs'
 import { Session } from './session'
+import bodyParser from 'body-parser'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -774,11 +775,11 @@ export class Mahiro {
       return
     }
     this.logger.debug(`[Upload File] Will upload file, account(${qq}): `, file)
-    let { filePath, fileUrl } = detectFileType(file)
-    let Base64Buf: string | undefined
+    let { filePath, fileUrl, base64: Base64Buf } = await detectFileType(file)
     // check file
     let hasFilePath = !!filePath?.length
     const hasFileUrl = !!fileUrl?.length
+    let hasBase64 = !!Base64Buf?.length
     if (hasFilePath) {
       if (!existsSync(filePath!)) {
         this.logger.error(`File not exists, account(${qq}): ${filePath}`)
@@ -802,7 +803,9 @@ export class Mahiro {
         this.logger.debug(
           `[Upload File] The server is not in local, auto convert file to base64 success, account(${qq}): ${filePath}`,
         )
+        // we assume a base64
         hasFilePath = false
+        hasBase64 = true
         Base64Buf = base64
         this.logger.debug(
           `[Upload File] base64 preview, account(${qq}): ${base64.slice(
@@ -813,13 +816,14 @@ export class Mahiro {
       }
     } else if (hasFileUrl) {
       const isUrl = fileUrl!.startsWith('http')
-      const isData = fileUrl!.startsWith('data:')
-      if (!isUrl && !isData) {
+      if (!isUrl) {
         this.logger.error(
           `File url must be http or data, account(${qq}): ${fileUrl}`,
         )
         return
       }
+    } else if (hasBase64) {
+      // pass
     } else {
       this.logger.error(
         `File absolute path or url required (e.g. /path/to/file or http://example.com/file.png or data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB), account(${qq})`,
@@ -828,6 +832,12 @@ export class Mahiro {
     }
     this.logger.debug('[Upload File] Will use qq: ', qq)
     const uploadUrl = `${account.url}/v1/upload?qq=${qq}`
+    if (!hasFilePath && !hasFileUrl && !hasBase64) {
+      this.logger.error(
+        `[Upload File] Must provide file path or file url or base64, account(${qq})`,
+      )
+      return
+    }
     const data: IUploadFile = {
       CgiCmd: ESendCmd.upload,
       CgiRequest: {
@@ -1120,7 +1130,11 @@ export class Mahiro {
   private addBaseServerMiddleware() {
     this.logger.debug('[Node Server] Add base middleware')
     const app = this.app
-    app.use(express.json())
+    app.use(
+      bodyParser.json({
+        limit: '10mb',
+      }),
+    )
     app.use(cors())
   }
 
