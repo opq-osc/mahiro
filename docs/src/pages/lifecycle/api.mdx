@@ -93,3 +93,60 @@
     fastImage: join(__dirname, './image.jpg')
   })
 ```
+
+## 连续对话
+
+### 启用
+
+使用连续对话功能需依赖 redis ，请参考 [KV 存储](./kv#dbrediskv-redis) 开启 `redisKV` 。
+
+### 示例
+
+当注册 `onGroupMessage` / `onFriendMessage` 的第二个参数为数组时，可使用 session 连续对话功能，通过每个对象的 `matched` 返回值决定是否推进至下一阶段。
+
+```ts
+  mahiro.onGroupMessage('session', [
+    // stage 1
+    {
+      matched: async (data) => {
+        if (data?.msg?.Content === '你是谁') {
+          ins.sendGroupMessage({
+            groupId: data.groupId,
+            msg: {
+              Content: '你再问问',
+            },
+          })
+          return true
+        }
+        return false
+      }
+    },
+    // stage 2
+    {
+      matched: async (data) => {
+        if (data?.msg?.Content === '你是谁') {
+          ins.sendGroupMessage({
+            groupId: data.groupId,
+            msg: {
+              Content: '我是 Mahiro',
+            },
+          })
+          return false
+        }
+        return false
+      }
+    }
+  ])
+```
+
+#### `matched`
+
+1. 当返回 `true` 时，下一条消息将在下一阶段进行匹配。
+
+2. 当返回 `false` 时，中断。
+
+3. 最后一阶段的返回值不重要，因为没有下一阶段，对话结束了。
+
+#### TTL
+
+过期时间由 `MAHIRO_SESSION_TTL` 环境变量指定（单位 `ms`），默认 `10000`（`10s`）。
