@@ -71,11 +71,12 @@ import { AsyncLocalStorage } from 'async_hooks'
 import { existsSync } from 'fs'
 import { dirname, isAbsolute, join } from 'path'
 import serveStatic from 'serve-static'
-import { cloneDeep, isNil, isString, trim } from 'lodash'
+import { cloneDeep, isFunction, isNil, isString, trim } from 'lodash'
 import { detectFileType, getFileBase64 } from '../utils/file'
 import { CronJob } from './cron'
 import { Utils } from './utils'
 import { getMahiroConfigs } from '../utils/mahiroConfigs'
+import { Session } from './session'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -134,6 +135,9 @@ export class Mahiro {
   // other configs
   otherConfigs = getMahiroConfigs()
 
+  // session
+  session!: Session
+
   constructor(opts: IMahiroOpts) {
     this.printLogo()
     this.opts = opts
@@ -143,11 +147,18 @@ export class Mahiro {
     this.logger.info('Mahiro is starting...')
     await this.checkOptsAndConnect()
     await this.connectDatabase()
+    this.initSession()
     await this.startNodeServer()
     this.registerOptionsInterceptors()
     this.registerAdminManager()
     this.logger.success('Mahiro started')
     this.initialled = true
+  }
+
+  private initSession() {
+    this.session = new Session({
+      mahiro: this,
+    })
   }
 
   static async start(opts: IMahiroOpts) {
@@ -562,8 +573,23 @@ export class Mahiro {
         }
         withContext({
           name,
-          cb: () => {
-            plugin(data, json)
+          cb: async () => {
+            const args = [data, json] as any
+            const isFunc = isFunction(plugin)
+            if (isFunc) {
+              plugin.apply(null, args)
+              return
+            }
+            const isSession = Array.isArray(plugin)
+            if (isSession) {
+              // botId-groupId-userId
+              const sessionId = `${CurrentQQ}-${data.groupId}-${data.userId}`
+              await this.session.callSession({
+                id: sessionId,
+                args,
+                sessions: plugin,
+              })
+            }
           },
         })
       })
@@ -635,8 +661,24 @@ export class Mahiro {
         ([name, plugin]) => {
           withContext({
             name,
-            cb: () => {
-              plugin(data, json)
+            // todo: extract this to a function
+            cb: async () => {
+              const args = [data, json] as any
+              const isFunc = isFunction(plugin)
+              if (isFunc) {
+                plugin.apply(null, args)
+                return
+              }
+              const isSession = Array.isArray(plugin)
+              if (isSession) {
+                // botId-userId
+                const sessionId = `${CurrentQQ}-${data.userId}`
+                await this.session.callSession({
+                  id: sessionId,
+                  args,
+                  sessions: plugin,
+                })
+              }
             },
           })
         },
@@ -864,6 +906,8 @@ export class Mahiro {
     if (has) {
       throw new Error(`Plugin ${name} has been registered`)
     } else {
+      // check schema if callback is session
+      await this.session.isSession(callback)
       this.callback.onGroupMessage[name] = callback
     }
     // register to database
@@ -882,6 +926,8 @@ export class Mahiro {
     if (has) {
       throw new Error(`Plugin ${name} has been registered`)
     } else {
+      // check schema if callback is session
+      await this.session.isSession(callback)
       this.callback.onFreindMessage[name] = callback
     }
     // TODO: can manage friends plugins in database

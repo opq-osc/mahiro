@@ -179,20 +179,39 @@ export interface IGroupMessage extends IMahiroMsgBase {
 }
 
 export type CancelListener = () => void
-export type CallbackReturn = void | Promise<void>
+export type CallbackReturn<T> = T | Promise<T>
 
-export interface IOnGroupMessage {
-  (useful: IGroupMessage, raw: IMsg): CallbackReturn
-}
+export type IMessageSession<T> = Array<{
+  matched: T
+}>
+
+export type IOnAbstractMessage<T, K> = (
+  useful: T,
+  raw: IMsg,
+) => CallbackReturn<K>
+
+export type IOnGroupMessageFunc = IOnAbstractMessage<IGroupMessage, void>
+export type IOnGroupMessageSessionMatcher = IOnAbstractMessage<
+  IGroupMessage,
+  boolean
+>
+export type IOnGroupMessage =
+  | IOnGroupMessageFunc
+  | IMessageSession<IOnGroupMessageSessionMatcher>
 
 export interface IFriendMessage extends IMahiroMsgBase {
   userId: number
   userName: string
 }
 
-export interface IOnFriendMessage {
-  (useful: IFriendMessage, raw: IMsg): CallbackReturn
-}
+export type IOnFriendMessageFunc = IOnAbstractMessage<IFriendMessage, void>
+export type IOnFriendMessageSessionMatcher = IOnAbstractMessage<
+  IFriendMessage,
+  boolean
+>
+export type IOnFriendMessage =
+  | IOnFriendMessageFunc
+  | IMessageSession<IOnFriendMessageSessionMatcher>
 
 export interface ICallbacks {
   onGroupMessage: Record<string, IOnGroupMessage>
@@ -386,4 +405,16 @@ export interface ISendToPythonData extends IMahiroMsgBase {
 export interface IPythonHealthResponse {
   code: number
   version: string
+}
+
+export interface ISessionData {
+  stage: number
+}
+
+export const getMahiroSessionTTL = () => {
+  const env = process.env.MAHIRO_SESSION_TTL
+  if (env?.length) {
+    return parseInt(env, 10)
+  }
+  return 10 * 1e3
 }
