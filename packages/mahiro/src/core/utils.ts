@@ -10,7 +10,7 @@ import figlet from 'figlet'
 import cron from 'node-cron'
 import cronstrue from 'cronstrue'
 import knex from 'knex'
-import fileType from 'mahiro/compiled/file-type'
+import * as fileType from 'mahiro/compiled/file-type'
 import isBase64 from 'is-base64'
 
 // keyv
