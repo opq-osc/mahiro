@@ -1,0 +1,24 @@
+{
+  "name": "@xn-sakina/mahiro-png2jpg",
+  "version": "1.0.0",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "rimraf dist && tsc --declarationMap false",
+    "tsc:check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "mahiro": "workspace:*"
+  },
+  "peerDependencies": {
+    "mahiro": "latest"
+  },
+  "dependencies": {
+    "@napi-rs/image": "1.6.1",
+    "tmp-promise": "3.0.3"
+  }
+}
