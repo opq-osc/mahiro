@@ -67,6 +67,9 @@ importers:
       '@types/node':
         specifier: ^18.15.11
         version: registry.npmjs.org/@types/node@18.15.11
+      '@xn-sakina/mahiro-png2jpg':
+        specifier: workspace:*
+        version: link:../../packages/png2jpg
       '@xn-sakina/mahiro-subscribe':
         specifier: workspace:*
         version: link:../../packages/subscribe
@@ -214,6 +217,19 @@ importers:
         version: registry.npmjs.org/tailwindcss@3.3.1(postcss@8.4.21)
 
   packages/plugins: {}
+
+  packages/png2jpg:
+    dependencies:
+      '@napi-rs/image':
+        specifier: 1.6.1
+        version: registry.npmjs.org/@napi-rs/image@1.6.1
+      tmp-promise:
+        specifier: 3.0.3
+        version: registry.npmjs.org/tmp-promise@3.0.3
+    devDependencies:
+      mahiro:
+        specifier: workspace:*
+        version: link:../mahiro
 
   packages/subscribe:
     dependencies:
@@ -3566,6 +3582,158 @@ packages:
       '@types/react': registry.npmjs.org/@types/react@18.0.33
       react: registry.npmjs.org/react@18.2.0
     dev: true
+
+  registry.npmjs.org/@napi-rs/image-android-arm-eabi@1.6.1:
+    resolution: {integrity: sha512-06GgTsnTzd+LQbj1EVciU4kOP7dUL40y3+vZkMe5yYNNdL8F199tnDxGodL8UYjHKrz+shKdZxjzq3ppE12dNg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-android-arm-eabi/-/image-android-arm-eabi-1.6.1.tgz}
+    name: '@napi-rs/image-android-arm-eabi'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [arm]
+    os: [android]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image-android-arm64@1.6.1:
+    resolution: {integrity: sha512-RjjupJNodv1beIHEIk6CPwzzQHexy9G1KT/xce3PDV+r2RwOaZ5uisAoZeUQMpJ7U9yM8qEqBYJ0ZJRxOL3IyA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-android-arm64/-/image-android-arm64-1.6.1.tgz}
+    name: '@napi-rs/image-android-arm64'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [android]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image-darwin-arm64@1.6.1:
+    resolution: {integrity: sha512-7SDYifSZPDa1TnDAxh641Qp8bB6XwLRMzboqlib9VVfW4B+xG8USTFX+pyc7AGA6Qt9YDx0fCTstGTdQZ4x0Vg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-darwin-arm64/-/image-darwin-arm64-1.6.1.tgz}
+    name: '@napi-rs/image-darwin-arm64'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image-darwin-x64@1.6.1:
+    resolution: {integrity: sha512-JESPPgW1IVKyMk/jzLmbbE/WcJ9GliUljWNpTaZftTISPibQ0kXLFWITTpvKKGXOi1wqHw2HNo+xPwaBViRYPQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-darwin-x64/-/image-darwin-x64-1.6.1.tgz}
+    name: '@napi-rs/image-darwin-x64'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image-freebsd-x64@1.6.1:
+    resolution: {integrity: sha512-uHe50MR6fHROzrOVv2lKowo0fnm51rZFQUgjBrb4U7sRof5MH6yXkiikd0zEVbqbK16JybCJhx8JMxg1fStOSw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-freebsd-x64/-/image-freebsd-x64-1.6.1.tgz}
+    name: '@napi-rs/image-freebsd-x64'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [freebsd]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image-linux-arm-gnueabihf@1.6.1:
+    resolution: {integrity: sha512-MioNufx/KaMg4ksisp2/5fwnKj+Le0jF9DKgdckVKd/OnHASTATYQN4akXXejMgcDdKyiInGtmcHK1N4Z29HKQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-linux-arm-gnueabihf/-/image-linux-arm-gnueabihf-1.6.1.tgz}
+    name: '@napi-rs/image-linux-arm-gnueabihf'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [arm]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image-linux-arm64-gnu@1.6.1:
+    resolution: {integrity: sha512-TIq7dgKs15r1JdBxJYKf6YVAydtsoOEdBvfWITd8zIN1VAM3J0B5/efCDf9TWOSeh5j6Do2HrgzUWa0SF8wakA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-linux-arm64-gnu/-/image-linux-arm64-gnu-1.6.1.tgz}
+    name: '@napi-rs/image-linux-arm64-gnu'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image-linux-arm64-musl@1.6.1:
+    resolution: {integrity: sha512-vSF6bNrWbKADS4lnapX7dwYwLCduG2HMhDzLx/q8a7eDVDfqXCvAhRTcvOeNkQRQ7vmzyYpu3qsjI36IK7Y60w==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-linux-arm64-musl/-/image-linux-arm64-musl-1.6.1.tgz}
+    name: '@napi-rs/image-linux-arm64-musl'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image-linux-x64-gnu@1.6.1:
+    resolution: {integrity: sha512-a0ChzvNRF4uwSGCnBuLDFTGrBHlaltEeRsd1kU4c7+d27qs7LFi89oDrVXItM/t+OVD4svPx4zyUQXtHHuVU7w==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-linux-x64-gnu/-/image-linux-x64-gnu-1.6.1.tgz}
+    name: '@napi-rs/image-linux-x64-gnu'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image-linux-x64-musl@1.6.1:
+    resolution: {integrity: sha512-4mZ0pGP3tFidnKqVhbon48jX0+BddAE2ZiEtfXNypOx25pizVec1sSgHACKgFV9Yn0bVEGZozjxYeoERCUkdyA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-linux-x64-musl/-/image-linux-x64-musl-1.6.1.tgz}
+    name: '@napi-rs/image-linux-x64-musl'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image-win32-ia32-msvc@1.6.1:
+    resolution: {integrity: sha512-0XNbGAv17xYfo2mrS8jSVpJN8nJrdqimr/1aUojPO9HdYIdKYBNWz1o5qulolaPJqa+T72yEevnuhkgmLxJLsA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-win32-ia32-msvc/-/image-win32-ia32-msvc-1.6.1.tgz}
+    name: '@napi-rs/image-win32-ia32-msvc'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [ia32]
+    os: [win32]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image-win32-x64-msvc@1.6.1:
+    resolution: {integrity: sha512-hvQT+YID51JSxr9HbxmhKa8Y4jZh+4nxJZ33H0NhT/xFd6bGa4+EcIjMNqixKU8PmO9BYjEVH8FWHev6AEvp4A==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image-win32-x64-msvc/-/image-win32-x64-msvc-1.6.1.tgz}
+    name: '@napi-rs/image-win32-x64-msvc'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@napi-rs/image@1.6.1:
+    resolution: {integrity: sha512-idrYU7POm9T7dcZVkWN8kpFYNIj0XaT20LtTzwWGZsR5Dhsce0hxwVGnKg2Kq/Z/AhHkR6MDagkOX5qTl5LjoQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/image/-/image-1.6.1.tgz}
+    name: '@napi-rs/image'
+    version: 1.6.1
+    engines: {node: '>= 10'}
+    optionalDependencies:
+      '@napi-rs/image-android-arm-eabi': registry.npmjs.org/@napi-rs/image-android-arm-eabi@1.6.1
+      '@napi-rs/image-android-arm64': registry.npmjs.org/@napi-rs/image-android-arm64@1.6.1
+      '@napi-rs/image-darwin-arm64': registry.npmjs.org/@napi-rs/image-darwin-arm64@1.6.1
+      '@napi-rs/image-darwin-x64': registry.npmjs.org/@napi-rs/image-darwin-x64@1.6.1
+      '@napi-rs/image-freebsd-x64': registry.npmjs.org/@napi-rs/image-freebsd-x64@1.6.1
+      '@napi-rs/image-linux-arm-gnueabihf': registry.npmjs.org/@napi-rs/image-linux-arm-gnueabihf@1.6.1
+      '@napi-rs/image-linux-arm64-gnu': registry.npmjs.org/@napi-rs/image-linux-arm64-gnu@1.6.1
+      '@napi-rs/image-linux-arm64-musl': registry.npmjs.org/@napi-rs/image-linux-arm64-musl@1.6.1
+      '@napi-rs/image-linux-x64-gnu': registry.npmjs.org/@napi-rs/image-linux-x64-gnu@1.6.1
+      '@napi-rs/image-linux-x64-musl': registry.npmjs.org/@napi-rs/image-linux-x64-musl@1.6.1
+      '@napi-rs/image-win32-ia32-msvc': registry.npmjs.org/@napi-rs/image-win32-ia32-msvc@1.6.1
+      '@napi-rs/image-win32-x64-msvc': registry.npmjs.org/@napi-rs/image-win32-x64-msvc@1.6.1
+    dev: false
 
   registry.npmjs.org/@napi-rs/simple-git-android-arm-eabi@0.1.8:
     resolution: {integrity: sha512-JJCejHBB1G6O8nxjQLT4quWCcvLpC3oRdJJ9G3MFYSCoYS8i1bWCWeU+K7Br+xT+D6s1t9q8kNJAwJv9Ygpi0g==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@napi-rs/simple-git-android-arm-eabi/-/simple-git-android-arm-eabi-0.1.8.tgz}
@@ -18172,6 +18340,14 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
+  registry.npmjs.org/tmp-promise@3.0.3:
+    resolution: {integrity: sha512-RwM7MoPojPxsOBYnyd2hy0bxtIlVrihNs9pj5SUvY8Zz1sQcQG2tG1hSr8PDxfgEB8RNKDhqbIlroIarSNDNsQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/tmp-promise/-/tmp-promise-3.0.3.tgz}
+    name: tmp-promise
+    version: 3.0.3
+    dependencies:
+      tmp: registry.npmjs.org/tmp@0.2.1
+    dev: false
+
   registry.npmjs.org/tmp@0.0.33:
     resolution: {integrity: sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/tmp/-/tmp-0.0.33.tgz}
     name: tmp
@@ -18180,6 +18356,15 @@ packages:
     dependencies:
       os-tmpdir: registry.npmjs.org/os-tmpdir@1.0.2
     dev: true
+
+  registry.npmjs.org/tmp@0.2.1:
+    resolution: {integrity: sha512-76SUhtfqR2Ijn+xllcI5P1oyannHNHByD80W1q447gU3mp9G9PSpGdWmjUOHRDPiHYacIk66W7ubDTuPF3BEtQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/tmp/-/tmp-0.2.1.tgz}
+    name: tmp
+    version: 0.2.1
+    engines: {node: '>=8.17.0'}
+    dependencies:
+      rimraf: registry.npmjs.org/rimraf@3.0.2
+    dev: false
 
   registry.npmjs.org/to-fast-properties@2.0.0:
     resolution: {integrity: sha512-/OaKK0xYrs3DmxRYqL/yDc+FxFUVYhDlXMhRmv3z915w2HF1tnN1omB354j8VUGO/hbRzyD6Y3sA7v7GS/ceog==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/to-fast-properties/-/to-fast-properties-2.0.0.tgz}

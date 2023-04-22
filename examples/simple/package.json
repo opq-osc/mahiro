@@ -10,6 +10,7 @@
     "@xn-sakina/mental": "^4.0.2",
     "mahiro": "workspace:*",
     "typescript": "^5.0.3",
-    "@xn-sakina/mahiro-subscribe": "workspace:*"
+    "@xn-sakina/mahiro-subscribe": "workspace:*",
+    "@xn-sakina/mahiro-png2jpg": "workspace:*"
   }
 }

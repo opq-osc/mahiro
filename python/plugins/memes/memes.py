@@ -26,6 +26,7 @@ async def memes(mahiro: GroupMessageMahiro):
     if not is_text:
         return
     
+    output = None
     msg = mahiro.ctx.msg.Content.strip()
     if msg.startswith(good_news_prefix):
         text = msg.replace(good_news_prefix, '')
@@ -34,10 +35,8 @@ async def memes(mahiro: GroupMessageMahiro):
         text = msg.replace(bad_news_prefix, '')
         output = bad_news(None, [text], None)
     if output:
-        file_name = f'{mahiro.ctx.userId}.jpg'
-        file_path = cache_dir / file_name
-        byte_save(output, file_path)
+        base64_str = byte_to_base64(output)
         mahiro.sender.send_to_group(
             group_id=mahiro.ctx.groupId,
-            fast_image=file_path.as_posix()
+            fast_image=base64_str
         )

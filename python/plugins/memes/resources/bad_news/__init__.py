@@ -22,4 +22,4 @@ def bad_news(images, texts: List[str], args):
         )
     except ValueError:
         pass
-    return frame.save_jpg()
+    return frame.save_png()
