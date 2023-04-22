@@ -123,7 +123,7 @@ export const QQs = () => {
           }}
           level={4}
         >
-          {`QQ管理（测试版）`}
+          {`账号管理（测试版）`}
         </Typography.Title>
       </Row>
       <Row style={{ padding: '5px 0 10px 0' }}>

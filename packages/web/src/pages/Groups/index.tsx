@@ -71,7 +71,7 @@ export const Groups = () => {
     {
       title: '管理员',
       dataIndex: 'admins',
-      width: 150,
+      width: 160,
       render: (col) => {
         return <ListView value={col} />
       },
@@ -79,7 +79,7 @@ export const Groups = () => {
     {
       title: '过期时间',
       dataIndex: 'expired_at',
-      width: 170,
+      width: 180,
       render: (col) => {
         const ins = dayjs(col)
         const nowIns = dayjs()
@@ -103,7 +103,7 @@ export const Groups = () => {
     {
       title: '绑定账号',
       dataIndex: 'link_qqs',
-      width: 150,
+      width: 160,
       render: (col: number[]) => {
         const qqs = col || []
         const currentUsingQQs = qqsQuery.data?.map(i => i.qq) || []

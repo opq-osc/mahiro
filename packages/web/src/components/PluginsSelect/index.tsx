@@ -53,7 +53,7 @@ export const PluginsSelect = ({
       return <span>-</span>
     }
     return (
-      <Space>
+      <Space wrap>
         {opts.map((i) => {
           return <Fragment key={i.value}>{i.label}</Fragment>
         })}
