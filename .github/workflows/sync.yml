@@ -31,4 +31,4 @@ jobs:
       - name: Sync dependencies
         run: |
           npm i -g cnpm
-          cnpm sync mahiro @xn-sakina/mahiro-css @xn-sakina/mahiro-subscribe @xn-sakina/mahiro-web
+          cnpm sync mahiro @xn-sakina/mahiro-css @xn-sakina/mahiro-subscribe @xn-sakina/mahiro-web @xn-sakina/mahiro-png2jpg

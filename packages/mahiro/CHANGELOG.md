@@ -1,5 +1,11 @@
 # mahiro
 
+## 7.2.0
+
+### Minor Changes
+
+- Fix base64 and publish compress plugin
+
 ## 7.1.0
 
 ### Minor Changes
