@@ -826,7 +826,17 @@ export class Mahiro {
         return
       }
     } else if (hasBase64) {
-      // pass
+      // cannot prefix with data: protocol
+      const withDataPrefix = Base64Buf!.startsWith('data:')
+      if (withDataPrefix) {
+        this.logger.error(
+          `Base64 cannot prefix with data:, account(${qq}): ${Base64Buf?.slice(
+            0,
+            10,
+          )}`,
+        )
+        return
+      }
     } else {
       this.logger.error(
         `File absolute path or url required (e.g. /path/to/file or http://example.com/file.png or data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB), account(${qq})`,
