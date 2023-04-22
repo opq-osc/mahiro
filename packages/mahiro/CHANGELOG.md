@@ -1,5 +1,16 @@
 # mahiro
 
+## 7.1.0
+
+### Minor Changes
+
+- Auto detect base64 url and auto add data prefix
+
+### Patch Changes
+
+- Updated dependencies
+  - @xn-sakina/mahiro-web@2.2.0
+
 ## 7.0.0
 
 ### Minor Changes

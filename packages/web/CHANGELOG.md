@@ -1,5 +1,11 @@
 # @xn-sakina/mahiro-web
 
+## 2.2.0
+
+### Minor Changes
+
+- Auto detect base64 url and auto add data prefix
+
 ## 2.1.1
 
 ### Patch Changes
