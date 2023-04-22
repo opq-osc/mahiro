@@ -1,3 +1,5 @@
+import { Callout } from 'nextra-theme-docs'
+
 # API
 
 ## Group
@@ -65,3 +67,13 @@
     fast_image="data:image/jpeg;base64,/9....,
   )
 ```
+
+## 其他
+
+### 连续对话
+
+目前没有实现直接的 API ，但你可以自行存储对话的阶段数据，来自己实现连续对话。
+
+<Callout type="warning" emoji="⚠️">
+  <div style={{ fontSize: 14 }}>由于 Python Bridge 是一种转发方式，从而兼容一些 Python 插件的运作。<br /> 在未来，我们更推荐直接编写 JavaScript 代码，以便获得更好的性能，完美与 Mahiro 洽和，接入更丰富的功能。 </div>
+</Callout>
