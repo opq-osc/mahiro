@@ -34,6 +34,7 @@ import {
   PYTHON_SERVER_APIS,
   ISendToPythonData,
   IPythonHealthResponse,
+  IOnNativeEvent,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -71,7 +72,7 @@ import { AsyncLocalStorage } from 'async_hooks'
 import { existsSync } from 'fs'
 import { dirname, isAbsolute, join } from 'path'
 import serveStatic from 'serve-static'
-import { cloneDeep, isFunction, isNil, isString, trim } from 'lodash'
+import { cloneDeep, isEmpty, isFunction, isNil, isString, trim } from 'lodash'
 import { detectFileType, getFileBase64 } from '../utils/file'
 import { CronJob } from './cron'
 import { Utils } from './utils'
@@ -104,6 +105,7 @@ export class Mahiro {
   callback: ICallbacks = {
     onGroupMessage: {},
     onFreindMessage: {},
+    onNativeEvent: {},
   }
 
   // middlewares
@@ -477,6 +479,39 @@ export class Mahiro {
 
     const { ignoreMyself } = this.advancedOptions
 
+    // onNativeEvent
+    const hasNativeEvent = !isEmpty(this.callback.onNativeEvent)
+    if (hasNativeEvent) {
+      const withContextForNativeEvent = (opts: {
+        name: string
+        cb: (...args: any[]) => any
+      }) => {
+        const { name, cb } = opts
+        const timestamp = Date.now()
+        const contextId = asyncHookUtils.hash({
+          time: timestamp,
+          name,
+          qq: CurrentQQ,
+          from: EAsyncContextFrom.native,
+        })
+        return new Promise<void>((resolve, _) => {
+          this.logger.debug(`Run context (hasNativeEvent): ${contextId}`)
+          this.asyncLocalStorage.run(contextId, async () => {
+            await cb()
+            resolve()
+          })
+        })
+      }
+      Object.entries(this.callback.onNativeEvent).forEach(([name, func]) => {
+        withContextForNativeEvent({
+          name,
+          cb: async () => {
+            await func(json)
+          },
+        })
+      })
+    }
+
     // onGroupMessage
     const isGroupMsg =
       MsgHead?.FromType === EFromType.group &&
@@ -519,7 +554,7 @@ export class Mahiro {
           from: EAsyncContextFrom.group,
         })
         return new Promise<void>((resolve, _) => {
-          this.logger.debug(`Run context: ${contextId}`)
+          this.logger.debug(`Run context (isGroupMsg): ${contextId}`)
           this.asyncLocalStorage.run(contextId, async () => {
             await cb()
             resolve()
@@ -633,7 +668,7 @@ export class Mahiro {
           from: EAsyncContextFrom.friend,
         })
         return new Promise<void>((resolve, _) => {
-          this.logger.debug(`Run context: ${contextId}`)
+          this.logger.debug(`Run context (isFriendMsg): ${contextId}`)
           this.asyncLocalStorage.run(contextId, async () => {
             await cb()
             resolve()
@@ -927,7 +962,7 @@ export class Mahiro {
       ICallbacks['onGroupMessage']
     >
     if (has) {
-      throw new Error(`Plugin ${name} has been registered`)
+      throw new Error(`onGroupMessage ${name} has been registered`)
     } else {
       // check schema if callback is session
       await this.session.isSession(callback)
@@ -947,7 +982,7 @@ export class Mahiro {
       ICallbacks['onFreindMessage']
     >
     if (has) {
-      throw new Error(`Plugin ${name} has been registered`)
+      throw new Error(`onFriendMessage ${name} has been registered`)
     } else {
       // check schema if callback is session
       await this.session.isSession(callback)
@@ -956,6 +991,22 @@ export class Mahiro {
     // TODO: can manage friends plugins in database
     const unlistener: CancelListener = () => {
       delete this.callback.onFreindMessage[name]
+    }
+    return unlistener
+  }
+
+  async onNativeEvent(name: string, callback: IOnNativeEvent) {
+    this.logger.info(`Register ${chalk.yellow('onNativeEvent')}: `, name)
+    const has = this.callback.onNativeEvent[name] as any as Partial<
+      ICallbacks['onNativeEvent']
+    >
+    if (has) {
+      throw new Error(`onNativeEvent ${name} has been registered`)
+    } else {
+      this.callback.onNativeEvent[name] = callback
+    }
+    const unlistener: CancelListener = () => {
+      delete this.callback.onNativeEvent[name]
     }
     return unlistener
   }

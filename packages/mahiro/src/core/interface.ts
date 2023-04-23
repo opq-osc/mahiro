@@ -216,7 +216,13 @@ export type IOnFriendMessage =
 export interface ICallbacks {
   onGroupMessage: Record<string, IOnGroupMessage>
   onFreindMessage: Record<string, IOnFriendMessage>
+  /**
+   * native event (origin ws message)
+   */
+  onNativeEvent: Record<string, any>
 }
+
+export type IOnNativeEvent = (event: IMsg) => CallbackReturn<void>
 
 export type IApiMsg = Pick<ICgiRequest, 'Content' | 'AtUinLists' | 'Images'>
 
@@ -322,6 +328,7 @@ export const SERVER_ROUTES = {
 export enum EAsyncContextFrom {
   group = 'group',
   friend = 'friend',
+  native = 'native',
 }
 
 export interface IAsyncContext {
