@@ -35,6 +35,7 @@ import {
   ISendToPythonData,
   IPythonHealthResponse,
   IOnNativeEvent,
+  IMahiroNativeMiddleware,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -72,7 +73,7 @@ import { AsyncLocalStorage } from 'async_hooks'
 import { existsSync } from 'fs'
 import { dirname, isAbsolute, join } from 'path'
 import serveStatic from 'serve-static'
-import { cloneDeep, isEmpty, isFunction, isNil, isString, trim } from 'lodash'
+import { cloneDeep, isFunction, isNil, isString, trim } from 'lodash'
 import { detectFileType, getFileBase64 } from '../utils/file'
 import { CronJob } from './cron'
 import { Utils } from './utils'
@@ -112,6 +113,7 @@ export class Mahiro {
   middlewares: IMiddlewares = {
     group: [],
     friend: [],
+    native: [],
   }
 
   // db
@@ -428,7 +430,8 @@ export class Mahiro {
     )
   }
 
-  private async triggerListener(json: IMsg) {
+  private async triggerListener(_json: IMsg) {
+    let json = cloneDeep(_json)
     const { CurrentPacket, CurrentQQ } = json
     const isValidQQ = this.isRegisteredAccount(CurrentQQ)
     if (!isValidQQ) {
@@ -477,41 +480,56 @@ export class Mahiro {
       `Content: ${MsgBody?.Content || ''}`,
     )
 
-    const { ignoreMyself } = this.advancedOptions
-
-    // onNativeEvent
-    const hasNativeEvent = !isEmpty(this.callback.onNativeEvent)
-    if (hasNativeEvent) {
-      const withContextForNativeEvent = (opts: {
-        name: string
-        cb: (...args: any[]) => any
-      }) => {
-        const { name, cb } = opts
-        const timestamp = Date.now()
-        const contextId = asyncHookUtils.hash({
-          time: timestamp,
-          name,
-          qq: CurrentQQ,
-          from: EAsyncContextFrom.native,
-        })
-        return new Promise<void>((resolve, _) => {
-          this.logger.debug(`Run context (hasNativeEvent): ${contextId}`)
-          this.asyncLocalStorage.run(contextId, async () => {
-            await cb()
-            resolve()
-          })
-        })
-      }
-      Object.entries(this.callback.onNativeEvent).forEach(([name, func]) => {
-        withContextForNativeEvent({
-          name,
-          cb: async () => {
-            await func(json)
-          },
+    // handle native phase
+    const withContextForNativeEvent = (opts: {
+      name: string
+      cb: (...args: any[]) => any
+    }) => {
+      const { name, cb } = opts
+      const timestamp = Date.now()
+      const contextId = asyncHookUtils.hash({
+        time: timestamp,
+        name,
+        qq: CurrentQQ,
+        from: EAsyncContextFrom.native,
+      })
+      return new Promise<void>((resolve, _) => {
+        this.logger.debug(`Run context (hasNativeEvent): ${contextId}`)
+        this.asyncLocalStorage.run(contextId, async () => {
+          await cb()
+          resolve()
         })
       })
     }
+    // call native middlewares
+    const nativeMiddlewares = this.middlewares.native
+    if (nativeMiddlewares.length) {
+      await withContextForNativeEvent({
+        name: EMiddleware.native,
+        cb: async () => {
+          const newData = await this.callMiddlewares({
+            data: json,
+            middlewares: this.middlewares.native,
+          })
+          json = newData
+        },
+      })
+    }
+    if (!json) {
+      this.logger.warn('Native middleware return null, will ignore it')
+      return
+    }
+    // onNativeEvent
+    Object.entries(this.callback.onNativeEvent).forEach(([name, func]) => {
+      withContextForNativeEvent({
+        name,
+        cb: async () => {
+          await func(json)
+        },
+      })
+    })
 
+    const { ignoreMyself } = this.advancedOptions
     // onGroupMessage
     const isGroupMsg =
       MsgHead?.FromType === EFromType.group &&
@@ -1470,6 +1488,13 @@ export class Mahiro {
         middleware?.name || 'unknown'
       }`,
     )
+    const clear = () => {
+      const index = this.middlewares.group.indexOf(middleware)
+      if (~index) {
+        this.middlewares.group.splice(index, 1)
+      }
+    }
+    return clear
   }
 
   async registerFriendMiddleware(middleware: IMahiroFriendMiddleware) {
@@ -1479,6 +1504,29 @@ export class Mahiro {
         middleware?.name || 'unknown'
       }`,
     )
+    const clear = () => {
+      const index = this.middlewares.friend.indexOf(middleware)
+      if (~index) {
+        this.middlewares.friend.splice(index, 1)
+      }
+    }
+    return clear
+  }
+
+  async registerNativeMiddleware(middleware: IMahiroNativeMiddleware) {
+    this.middlewares.native.push(middleware)
+    this.logger.debug(
+      `[Middlewares] Registering native middleware: ${
+        middleware?.name || 'unknown'
+      }`,
+    )
+    const clear = () => {
+      const index = this.middlewares.native.indexOf(middleware)
+      if (~index) {
+        this.middlewares.native.splice(index, 1)
+      }
+    }
+    return clear
   }
 
   private async callMiddlewares(opts: {
@@ -1487,6 +1535,10 @@ export class Mahiro {
   }) {
     let data = opts.data
     for await (const middleware of opts.middlewares) {
+      if (!middleware) {
+        this.logger.debug(`[Middlewares] Skip nil middleware`)
+        continue
+      }
       const newData = await middleware(data)
       const name = middleware?.name || 'unknown'
       this.logger.debug(

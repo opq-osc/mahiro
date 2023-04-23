@@ -375,6 +375,7 @@ export interface IMahiroUse {
 export interface IMiddlewares {
   group: IMahiroGroupMiddleware[]
   friend: IMahiroFriendMiddleware[]
+  native: IMahiroNativeMiddleware[]
 }
 
 export type IMahiroMiddleware<T = any> = (
@@ -385,9 +386,12 @@ export type IMahiroGroupMiddleware = IMahiroMiddleware<IGroupMessage>
 
 export type IMahiroFriendMiddleware = IMahiroMiddleware<IFriendMessage>
 
+export type IMahiroNativeMiddleware = IMahiroMiddleware<IMsg>
+
 export enum EMiddleware {
   group = 'middleware-group',
   friend = 'middleware-friend',
+  native = 'middleware-native',
 }
 
 export const __UNSTABLE_PYTHON_SERVER_BASE =
