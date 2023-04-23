@@ -35,3 +35,25 @@ Mahiro 对 OPQ 原生消息进行特征识别，分发至 群组、私人 两种
 消息若未被拦截器拦截，最终将被真正发送。
 
 </Steps>
+
+## API 调用顺序
+
+<Steps>
+
+### registerNativeMiddleware
+
+ - 顺序：按注册顺序瀑布调用
+
+### onNativeEvent
+
+ - 顺序：并发
+
+### registerGroupMiddleware / registerFriendMiddleware / ...
+
+ - 顺序：按注册顺序瀑布调用
+
+### onGroupMessage / onFriendMessage / ...
+
+ - 顺序：并发
+
+</Steps>

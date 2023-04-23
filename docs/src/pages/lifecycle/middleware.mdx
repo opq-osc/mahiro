@@ -22,3 +22,7 @@ mahiro.registerGroupMiddleware((data) => {
 ## `registerFriendMiddleware`
 
 注册私人消息中间件。
+
+## `registerNativeMiddleware`
+
+注册原始消息中间件，这在 [`onNativeEvent`](./api#onnativeevent) 之前调用，详见 [API 调用顺序](../lifecycle#api-调用顺序) 。
