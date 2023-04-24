@@ -214,7 +214,7 @@ export interface IResponseDataWithSearchUser {
   /**
    * avatar url
    */
-  Head: string
+  Head: AvatarUrl
   Signature: ''
   /**
    * 完整的还没试过

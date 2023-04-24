@@ -195,7 +195,11 @@ import { Callout } from 'nextra-theme-docs'
 根据用户 `Uid` 查个人信息。
 
 ```ts
-  const user = await mahiro.searchUser({ qq, Uid })
+import { EAvatarSize } from 'mahiro'
+
+const user = await mahiro.searchUser({ qq, Uid })
+// 头像需指定尺寸后使用
+const avatarUrl = `${user.Head}${EAvatarSize.s_640}`
 ```
 
 > 别名：`getUserInfo`
