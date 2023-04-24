@@ -934,6 +934,11 @@ export class Mahiro {
     }
   }
 
+  // alias for `searchUser`
+  async getUserInfo(opts: ISearchUserOpts) {
+    return this.searchUser(opts)
+  }
+
   async getGroupList(opts: IGetGroupListOpts) {
     const { qq } = opts
     const account = this.getAccount(qq)
