@@ -3,6 +3,7 @@ import {
   EMsgTypeWithGroupManager,
   IMsg,
   IMsgBody,
+  IMsgHead,
 } from '../received/interface'
 import {
   EUploadCommandId,
@@ -258,7 +259,7 @@ export interface IGroupEventJoin {
 
 export interface IGroupEventInvite {
   event: EMsgTypeWithGroupManager.invite
-  
+
   // ? FIXME: 目前好像就是收不到这些信息
   // tips: IEventWithInvite['Tips']
   // getUserInfo: IGetUserInfo
@@ -520,3 +521,5 @@ export const OPQ_APIS = {
 export interface IAsyncContextInfo extends Pick<IAsyncContext, 'from' | 'qq'> {
   [key: string]: any
 }
+
+export type IMatcherOpts = Pick<IMsgHead, 'FromType' | 'MsgType' | 'C2cCmd'>

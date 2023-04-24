@@ -67,10 +67,7 @@ import {
 import qs from 'qs'
 import { parse } from 'url'
 import {
-  EC2cCmd,
-  EFromType,
   EMsgEvent,
-  EMsgType,
   EMsgTypeWithGroupManager,
   IEventDataWithGroupManager,
   IEventWithExit,
@@ -96,6 +93,7 @@ import { Utils } from './utils'
 import { getMahiroConfigs } from '../utils/mahiroConfigs'
 import { Session } from './session'
 import bodyParser from 'body-parser'
+import { Matcher } from './matcher'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -159,6 +157,9 @@ export class Mahiro {
 
   // session
   session!: Session
+
+  // matcher
+  matcher = new Matcher()
 
   constructor(opts: IMahiroOpts) {
     this.printLogo()
@@ -559,7 +560,9 @@ export class Mahiro {
         const Uid = (EventData?.Event as IEventWithJoin)?.Uid
         const AdminUid = (EventData?.Event as IEventWithJoin)?.AdminUid
         if (!Uid || !AdminUid) {
-          this.logger.warn(`Join group event ${EventName} not found Uid or AdminUid, skip`)
+          this.logger.warn(
+            `Join group event ${EventName} not found Uid or AdminUid, skip`,
+          )
           return
         }
         data = {
@@ -602,7 +605,9 @@ export class Mahiro {
         const targetUid = eventData?.ReqUid
         const adminUid = eventData?.ActorUid
         if (!targetUid || !adminUid) {
-          this.logger.warn(`Group system event ${EventName} not found ReqUid or ActorUid, skip`)
+          this.logger.warn(
+            `Group system event ${EventName} not found ReqUid or ActorUid, skip`,
+          )
           return
         }
         data = {
@@ -639,10 +644,7 @@ export class Mahiro {
 
     const { ignoreMyself } = this.advancedOptions
     // onGroupMessage
-    const isGroupMsg =
-      MsgHead?.FromType === EFromType.group &&
-      MsgHead?.MsgType === EMsgType.group &&
-      MsgHead?.C2cCmd === EC2cCmd.group
+    const isGroupMsg = this.matcher.matchGroupMessage(MsgHead)
     if (isGroupMsg) {
       let data = {
         groupId: MsgHead?.GroupInfo?.GroupCode!,
@@ -743,10 +745,7 @@ export class Mahiro {
     }
 
     // onFriendMessage
-    const isFriendMsg =
-      MsgHead?.FromType === EFromType.friends &&
-      MsgHead?.MsgType === EMsgType.friends &&
-      MsgHead?.C2cCmd === EC2cCmd.firends
+    const isFriendMsg = this.matcher.matchFriendMessage(MsgHead)
     if (isFriendMsg) {
       let data = {
         userId: MsgHead?.SenderUin,

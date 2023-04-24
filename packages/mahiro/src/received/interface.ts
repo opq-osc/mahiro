@@ -465,6 +465,7 @@ export enum EC2cCmd {
   online = 8,
   /**
    * 收到好友私聊了
+   * @note typo 了，但不改了，防止已经被外部使用了 😅
    */
   firends = 11,
   /**
