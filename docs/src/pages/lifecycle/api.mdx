@@ -1,3 +1,5 @@
+import { Callout } from 'nextra-theme-docs'
+
 # 常用 API
 
 ## 初始化实例
@@ -151,6 +153,16 @@
 
 过期时间由 `MAHIRO_SESSION_TTL` 环境变量指定（单位 `ms`），默认 `10000`（`10s`）。
 
+## 常用信息
+
+### `getGroupList`
+
+获取群组列表
+
+```ts
+  const list = await mahiro.getGroupList({ qq })
+```
+
 ## 高级 API
 
 ### `onNativeEvent`
@@ -169,3 +181,19 @@
 |:-|:-|
 |群鉴权|不支持，因为 Native 事件在所有消息处理之前|
 |忽略自身|不支持，所有的事件（包括自己和任何人）都会收到|
+
+### `onGroupEvent`
+
+监听群组人员变动事件。
+
+<Callout type="warning">
+  现在回传信息还不够全面，请酌情使用。
+</Callout>
+
+### `searchUser`
+
+根据用户 `Uid` 查个人信息。
+
+```ts
+  const user = await mahiro.searchUser({ qq, Uid })
+```
