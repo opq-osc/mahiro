@@ -2,6 +2,7 @@ export enum ESendCmd {
   send = 'MessageSvc.PbSendMsg',
   upload = 'PicUp.DataUp',
   search = 'QueryUinByUid',
+  get_group_list = 'GetGroupLists'
 }
 
 export interface ISearchUserRequest {
@@ -11,6 +12,16 @@ export interface ISearchUserRequest {
 export interface ISearchUser {
   CgiCmd: ESendCmd.search
   CgiRequest: ISearchUserRequest
+}
+
+export interface IGetUserListRequest {
+  Uin: number
+  LastBuffer: string
+}
+
+export interface IGetUserList {
+  CgiCmd: ESendCmd.get_group_list
+  CgiRequest: IGetUserListRequest | {}
 }
 
 export interface IUploadFile {
@@ -150,17 +161,70 @@ export interface IResponseDataWithImage {
   FileSize: number
 }
 
+export type AvatarUrl = `http://q.qlogo.cn/g?b=qq&k=${string}&kti=${string}&s=`
+
+export enum EAvatarSize {
+  s_40 = 1, // 2, 40
+  s_100 = 3, // 100
+  s_140 = 4,
+  s_640 = 5,
+}
+
+export interface IGroupList {
+  /**
+   * timestamp (s)
+   */
+  CreateTime: number
+  /**
+   * group member max
+   */
+  GroupCnt: number
+  /**
+   * group id
+   */
+  GroupCode: number
+  GroupName: string
+  /**
+   * current group member count
+   */
+  MemberCnt: number
+}
+
+
+export interface IResponseDataWithGroupList {
+  GroupLists: IGroupList[]
+}
+
 /**
  * 根据 Uid 差 Uin 信息响应
  */
 export interface IResponseDataWithSearchUser {
+  /**
+   * account id
+   */
   Uin: number
+  /**
+   * string id
+   */
   Uid: string
+  /**
+   * account nickname
+   */
   Nick: string
+  /**
+   * avatar url
+   */
   Head: string
-  Signature: string
-  Sex: number
+  Signature: ''
+  /**
+   * 完整的还没试过
+   */
+  Sex: number | 255 | 2
   Level: number
+  /**
+   * account note name, only is friend
+   */
+  Mark: string | ''
 }
 
 export type IResponseDataUnion =
@@ -168,6 +232,7 @@ export type IResponseDataUnion =
   | IResponseDataWithVoice
   | IResponseDataWithImage
   | IResponseDataWithSearchUser
+  | IResponseDataWithGroupList
 
 export interface ISendMsgResponse<
   T extends IResponseDataUnion = IResponseData,

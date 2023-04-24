@@ -376,6 +376,10 @@ export interface ISearchUserOpts {
   Uid: string
 }
 
+export interface IGetGroupListOpts {
+  qq: number
+}
+
 const getDefaultNodeServerPort = () => {
   const fallback = 8098
   const env = process.env.MAHIRO_NODE_URL
