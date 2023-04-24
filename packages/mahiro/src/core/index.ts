@@ -36,6 +36,15 @@ import {
   IPythonHealthResponse,
   IOnNativeEvent,
   IMahiroNativeMiddleware,
+  IOnGroupEvent,
+  IGroupEvent,
+  OPQ_APIS,
+  ISearchUserOpts,
+  IGroupEventExit,
+  IAsyncContextInfo,
+  IGroupEventJoin,
+  IGroupEventInvite,
+  IGroupEventAdminChange,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -50,8 +59,10 @@ import {
   EToType,
   IUploadFile,
   EUploadCommandId,
-  ISendImage,
   ECgiBaseRes,
+  ISearchUser,
+  IResponseDataWithSearchUser,
+  IResponseDataWithImage,
 } from '../send/interface'
 import qs from 'qs'
 import { parse } from 'url'
@@ -60,7 +71,12 @@ import {
   EFromType,
   EMsgEvent,
   EMsgType,
+  EMsgTypeWithGroupManager,
+  IEventDataWithGroupManager,
+  IEventWithExit,
+  IEventWithJoin,
   IMsg,
+  MSG_EVENT_GROUP_MANAGER,
   VALID_MSG_EVENT,
 } from '../received/interface'
 import chalk from 'mahiro/compiled/chalk'
@@ -107,6 +123,7 @@ export class Mahiro {
     onGroupMessage: {},
     onFreindMessage: {},
     onNativeEvent: {},
+    onGroupEvent: {},
   }
 
   // middlewares
@@ -481,26 +498,10 @@ export class Mahiro {
     )
 
     // handle native phase
-    const withContextForNativeEvent = (opts: {
-      name: string
-      cb: (...args: any[]) => any
-    }) => {
-      const { name, cb } = opts
-      const timestamp = Date.now()
-      const contextId = asyncHookUtils.hash({
-        time: timestamp,
-        name,
-        qq: CurrentQQ,
-        from: EAsyncContextFrom.native,
-      })
-      return new Promise<void>((resolve, _) => {
-        this.logger.debug(`Run context (hasNativeEvent): ${contextId}`)
-        this.asyncLocalStorage.run(contextId, async () => {
-          await cb()
-          resolve()
-        })
-      })
-    }
+    const withContextForNativeEvent = this.createAsyncContext({
+      qq: CurrentQQ,
+      from: EAsyncContextFrom.native,
+    })
     // call native middlewares
     const nativeMiddlewares = this.middlewares.native
     if (nativeMiddlewares.length) {
@@ -528,6 +529,113 @@ export class Mahiro {
         },
       })
     })
+
+    // onGroupEvent
+    const isGroupEvent = MSG_EVENT_GROUP_MANAGER.includes(EventName)
+    if (isGroupEvent) {
+      // async context
+      const withContext = this.createAsyncContext({
+        from: EAsyncContextFrom.group_event,
+        qq: CurrentQQ,
+      })
+      // exit group
+      let data: IGroupEvent | null = null
+      // member can recived event
+      if (EventName === EMsgEvent.ON_EVENT_GROUP_EXIT) {
+        const Uid = (EventData?.Event as IEventWithExit)?.Uid
+        if (!Uid) {
+          this.logger.warn(`Exit group event ${EventName} not found Uid, skip`)
+          return
+        }
+        data = {
+          event: EMsgTypeWithGroupManager.exit,
+          getUserInfo: this.createUserGetter({
+            Uid,
+            qq: CurrentQQ,
+          }),
+        } as IGroupEventExit
+      }
+      if (EventName === EMsgEvent.ON_EVENT_GROUP_JOIN) {
+        const Uid = (EventData?.Event as IEventWithJoin)?.Uid
+        const AdminUid = (EventData?.Event as IEventWithJoin)?.AdminUid
+        if (!Uid || !AdminUid) {
+          this.logger.warn(`Join group event ${EventName} not found Uid or AdminUid, skip`)
+          return
+        }
+        data = {
+          event: EMsgTypeWithGroupManager.join,
+          getUserInfo: this.createUserGetter({
+            Uid,
+            qq: CurrentQQ,
+          }),
+          getAdminInfo: this.createUserGetter({
+            Uid: AdminUid,
+            qq: CurrentQQ,
+          }),
+        } as IGroupEventJoin
+      }
+      if (EventName === EMsgEvent.ON_EVENT_GROUP_INVITE) {
+        // const Invitee = (EventData?.Event as IEventWithInvite)?.Invitee
+        // const Invitor = (EventData?.Event as IEventWithInvite)?.Invitor
+        // const Tips = (EventData?.Event as IEventWithInvite)?.Tips
+        // ? FIXME: 目前好像就是收不到 EventData?.Event 里的任何内容
+        // if (!Invitee || !Invitor || !Tips) {
+        //   this.logger.warn(`Invite group event ${EventName} not found Invitee or Invitor or Tips, skip`)
+        //   return
+        // }
+        data = {
+          event: EMsgTypeWithGroupManager.invite,
+          // tips: Tips,
+          // getUserInfo: this.createUserGetter({
+          //   Uid: Invitee,
+          //   qq: CurrentQQ,
+          // }),
+          // getAdminInfo: this.createUserGetter({
+          //   Uid: Invitor,
+          //   qq: CurrentQQ,
+          // }),
+        } as IGroupEventInvite
+      }
+      // manager can recived event
+      if (EventName === EMsgEvent.ON_EVENT_GROUP_SYSTEM_MSG_NOTIFY) {
+        const eventData = EventData as any as IEventDataWithGroupManager
+        const targetUid = eventData?.ReqUid
+        const adminUid = eventData?.ActorUid
+        if (!targetUid || !adminUid) {
+          this.logger.warn(`Group system event ${EventName} not found ReqUid or ActorUid, skip`)
+          return
+        }
+        data = {
+          event: eventData.MsgType,
+          targetNickName: eventData?.ReqUidNick,
+          getTargetInfo: this.createUserGetter({
+            Uid: targetUid,
+            qq: CurrentQQ,
+          }),
+          adminNickName: eventData?.ActorUidNick,
+          getAdminInfo: this.createUserGetter({
+            Uid: adminUid,
+            qq: CurrentQQ,
+          }),
+          groupId: eventData?.GroupCode,
+          groupName: eventData?.GroupName,
+        } as IGroupEventAdminChange
+      }
+      if (data) {
+        // call callbacks
+        Object.entries(this.callback.onGroupEvent).forEach(([name, plugin]) => {
+          withContext({
+            name,
+            cb: () => {
+              plugin.call(null, data!, json)
+            },
+          })
+        })
+      } else {
+        throw new Error(`Never`)
+      }
+      return
+    }
 
     const { ignoreMyself } = this.advancedOptions
     // onGroupMessage
@@ -559,26 +667,10 @@ export class Mahiro {
         `${data?.userNickname}(${data?.userId})`,
       )
       // async context
-      const withContext = (opts: {
-        name: string
-        cb: (...args: any[]) => any
-      }) => {
-        const { name, cb } = opts
-        const timestamp = Date.now()
-        const contextId = asyncHookUtils.hash({
-          time: timestamp,
-          name,
-          qq: CurrentQQ,
-          from: EAsyncContextFrom.group,
-        })
-        return new Promise<void>((resolve, _) => {
-          this.logger.debug(`Run context (isGroupMsg): ${contextId}`)
-          this.asyncLocalStorage.run(contextId, async () => {
-            await cb()
-            resolve()
-          })
-        })
-      }
+      const withContext = this.createAsyncContext({
+        from: EAsyncContextFrom.group,
+        qq: CurrentQQ,
+      })
       // call middlewares
       const middlewares = this.middlewares.group
       if (middlewares.length) {
@@ -673,26 +765,10 @@ export class Mahiro {
         `${data?.userName}(${data?.userId})`,
       )
       // async context
-      const withContext = (opts: {
-        name: string
-        cb: (...args: any[]) => any
-      }) => {
-        const { name, cb } = opts
-        const timestamp = Date.now()
-        const contextId = asyncHookUtils.hash({
-          time: timestamp,
-          name,
-          qq: CurrentQQ,
-          from: EAsyncContextFrom.friend,
-        })
-        return new Promise<void>((resolve, _) => {
-          this.logger.debug(`Run context (isFriendMsg): ${contextId}`)
-          this.asyncLocalStorage.run(contextId, async () => {
-            await cb()
-            resolve()
-          })
-        })
-      }
+      const withContext = this.createAsyncContext({
+        qq: CurrentQQ,
+        from: EAsyncContextFrom.friend,
+      })
       // call middlewares
       const middlewares = this.middlewares.friend
       if (middlewares.length) {
@@ -782,7 +858,7 @@ export class Mahiro {
       qq,
     } satisfies ISendParams
     const stringifyParams = qs.stringify(params)
-    const sendMsgUrl = `${account.url}/v1/LuaApiCaller?${stringifyParams}`
+    const sendMsgUrl = `${account.url}${OPQ_APIS.common}?${stringifyParams}`
     const data: ISendMsg = {
       CgiCmd: ESendCmd.send,
       CgiRequest,
@@ -817,6 +893,42 @@ export class Mahiro {
       }
     } catch (e) {
       this.logger.error(`Send api error, account(${qq}) : `, e)
+    }
+  }
+
+  private createUserGetter(opts: ISearchUserOpts) {
+    return () => {
+      return this.searchUser(opts)
+    }
+  }
+
+  async searchUser(opts: ISearchUserOpts) {
+    const { qq, Uid } = opts
+    const account = this.getAccount(qq)
+    if (!account.wsConnected) {
+      this.logger.error(`WS not connected, search user failed, account(${qq})`)
+      return
+    }
+    const params = {
+      funcname: EFuncName.MagicCgiCmd,
+      timeout: 10,
+      qq,
+    } satisfies ISendParams
+    const stringifyParams = qs.stringify(params)
+    const searchUrl = `${account.url}${OPQ_APIS.common}?${stringifyParams}`
+    const data: ISearchUser = {
+      CgiCmd: ESendCmd.search,
+      CgiRequest: {
+        Uid,
+      },
+    }
+    try {
+      const res = await account.request.post(searchUrl, data)
+      if (res?.data) {
+        return res.data as ISendMsgResponse<IResponseDataWithSearchUser>
+      }
+    } catch (e) {
+      this.logger.error(`Search user api error, account(${qq}) : `, e)
     }
   }
 
@@ -897,7 +1009,7 @@ export class Mahiro {
       return
     }
     this.logger.debug('[Upload File] Will use qq: ', qq)
-    const uploadUrl = `${account.url}/v1/upload?qq=${qq}`
+    const uploadUrl = `${account.url}${OPQ_APIS.upload}?qq=${qq}`
     if (!hasFilePath && !hasFileUrl && !hasBase64) {
       this.logger.error(
         `[Upload File] Must provide file path or file url or base64, account(${qq})`,
@@ -936,6 +1048,29 @@ export class Mahiro {
     } catch (e) {
       this.logger.error(`Upload file error, account(${qq}): `, e)
     }
+  }
+
+  private createAsyncContext(info: IAsyncContextInfo) {
+    const withContext = (opts: {
+      name: string
+      cb: (...args: any[]) => any
+    }) => {
+      const { name, cb } = opts
+      const timestamp = Date.now()
+      const contextId = asyncHookUtils.hash({
+        time: timestamp,
+        name,
+        ...info,
+      })
+      return new Promise<void>((resolve, _) => {
+        this.logger.debug(`Run context (${name}): ${contextId}`)
+        this.asyncLocalStorage.run(contextId, async () => {
+          await cb()
+          resolve()
+        })
+      })
+    }
+    return withContext
   }
 
   private pushMsgToStack(opts: { account: IAccont; data: ISendMsg }) {
@@ -1029,6 +1164,22 @@ export class Mahiro {
     return unlistener
   }
 
+  async onGroupEvent(name: string, callback: IOnGroupEvent) {
+    this.logger.info(`Register ${chalk.green('onGroupEvent')}: `, name)
+    const has = this.callback.onGroupEvent[name] as any as Partial<
+      ICallbacks['onGroupEvent']
+    >
+    if (has) {
+      throw new Error(`onGroupEvent ${name} has been registered`)
+    } else {
+      this.callback.onGroupEvent[name] = callback
+    }
+    const unlistener: CancelListener = () => {
+      delete this.callback.onGroupEvent[name]
+    }
+    return unlistener
+  }
+
   async sendGroupMessage(data: IApiSendGroupMessage) {
     this.logger.info(
       `Send ${chalk.green('group')} message: ${data.groupId}, ${
@@ -1051,12 +1202,12 @@ export class Mahiro {
       specifiedQQ: qq,
     })
     if (fastImage?.length) {
-      const res = await this.uploadFile({
+      const res = (await this.uploadFile({
         file: fastImage,
         commandId: EUploadCommandId.groupImage,
         qq: useQQ,
-      })
-      const fileInfo = res?.ResponseData as ISendImage
+      })) as ISendMsgResponse<IResponseDataWithImage> | undefined
+      const fileInfo = res?.ResponseData
       if (!fileInfo?.FileMd5?.length) {
         this.logger.error('[FastImage] Upload file failed, not get fileMd5')
         return
@@ -1093,12 +1244,12 @@ export class Mahiro {
     })
     // upload fast image
     if (fastImage?.length) {
-      const res = await this.uploadFile({
+      const res = (await this.uploadFile({
         file: fastImage,
         commandId: EUploadCommandId.friendImage,
         qq: useQQ,
-      })
-      const fileInfo = res?.ResponseData as ISendImage
+      })) as ISendMsgResponse<IResponseDataWithImage> | undefined
+      const fileInfo = res?.ResponseData
       if (!fileInfo?.FileMd5?.length) {
         this.logger.error('[FastImage] Upload file failed, not get fileMd5')
         return

@@ -1,6 +1,16 @@
 export enum ESendCmd {
   send = 'MessageSvc.PbSendMsg',
   upload = 'PicUp.DataUp',
+  search = 'QueryUinByUid',
+}
+
+export interface ISearchUserRequest {
+  Uid: string
+}
+
+export interface ISearchUser {
+  CgiCmd: ESendCmd.search
+  CgiRequest: ISearchUserRequest
 }
 
 export interface IUploadFile {
@@ -118,9 +128,7 @@ export interface ICgiBaseResponse {
 /**
  * 消息发送的响应
  */
-export interface IResponseData
-  extends Partial<IResponseDataWithVoice>,
-    Partial<IResponseDataWithImage> {
+export interface IResponseData {
   MsgTime: number
 }
 
@@ -142,9 +150,30 @@ export interface IResponseDataWithImage {
   FileSize: number
 }
 
-export interface ISendMsgResponse {
+/**
+ * 根据 Uid 差 Uin 信息响应
+ */
+export interface IResponseDataWithSearchUser {
+  Uin: number
+  Uid: string
+  Nick: string
+  Head: string
+  Signature: string
+  Sex: number
+  Level: number
+}
+
+export type IResponseDataUnion =
+  | IResponseData
+  | IResponseDataWithVoice
+  | IResponseDataWithImage
+  | IResponseDataWithSearchUser
+
+export interface ISendMsgResponse<
+  T extends IResponseDataUnion = IResponseData,
+> {
   CgiBaseResponse: ICgiBaseResponse
-  ResponseData: IResponseData
+  ResponseData: T
   Data: null
 }
 

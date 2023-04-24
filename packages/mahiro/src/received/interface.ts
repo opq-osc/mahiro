@@ -57,19 +57,27 @@ export enum EMsgEvent {
    */
   ON_EVENT_GROUP_SYSTEM_MSG_NOTIFY = 'ON_EVENT_GROUP_SYSTEM_MSG_NOTIFY',
 }
-export const VALID_MSG_EVENT: EMsgEvent[] = [
-  EMsgEvent.ON_EVENT_FRIEND_NEW_MSG,
-  EMsgEvent.ON_EVENT_GROUP_NEW_MSG,
+
+/**
+ * group manager events
+ */
+export const MSG_EVENT_GROUP_MANAGER: EMsgEvent[] = [
   EMsgEvent.ON_EVENT_GROUP_JOIN,
   EMsgEvent.ON_EVENT_GROUP_EXIT,
   EMsgEvent.ON_EVENT_GROUP_INVITE,
-  EMsgEvent.ON_EVENT_LOGIN_SUCCESS,
-  EMsgEvent.ON_EVENT_NETWORK_CHANGE,
   EMsgEvent.ON_EVENT_GROUP_SYSTEM_MSG_NOTIFY,
 ]
 
-export interface ICurrentPacket {
-  EventData: IEventData
+export const VALID_MSG_EVENT: EMsgEvent[] = [
+  EMsgEvent.ON_EVENT_FRIEND_NEW_MSG,
+  EMsgEvent.ON_EVENT_GROUP_NEW_MSG,
+  EMsgEvent.ON_EVENT_LOGIN_SUCCESS,
+  EMsgEvent.ON_EVENT_NETWORK_CHANGE,
+  ...MSG_EVENT_GROUP_MANAGER,
+]
+
+export interface ICurrentPacket<T extends IEventDataUnion = IEventData> {
+  EventData: T
   EventName: EMsgEvent
 }
 
@@ -98,7 +106,7 @@ export interface IEventWithExit {
   Uid: string
 }
 
-export type IEvent = IEventWithJoin | IEventWithExit | IEventWithInvite
+export type IEventUnion = IEventWithJoin | IEventWithExit | IEventWithInvite
 
 /**
  * 邀请入群事件
@@ -139,28 +147,49 @@ export interface IEventDataWithLogin {
 
 export enum EMsgTypeWithGroupManager {
   /**
-   * 申请进群
+   * ? 申请进群
+   * @fixme remove this
    */
-  apply = 1,
+  // apply = 1,
+  /**
+   * 申请进群
+   * @admin
+   */
+  request = 6,
   /**
    * 被邀请进群
+   * @member
    */
   invite = 2,
   /**
    * 退出群聊
+   * @member
+   * @admin
    */
   exit = 13,
   /**
    * 取消管理员
+   * @admin
    */
   cancel_admin = 15,
   /**
    * 设置管理员
+   * @admin
    */
   set_admin = 3,
+  /**
+   * 加入群聊
+   * @member
+   * @admin
+   */
+  join = 33
 }
 
 export enum EStatusWithGroupManager {
+  /**
+   * 无需处理，如：设置管理员
+   */
+  over = 0,
   /**
    * 未处理
    */
@@ -183,7 +212,13 @@ export enum EStatusWithGroupManager {
  * 仅限于群组系统消息事件
  */
 export interface IEventDataWithGroupManager {
+  /**
+   * 操作人 Uid / 当前收通知的管理员 Uid (自己)
+   */
   ActorUid: string
+  /**
+   * 操作人昵称 / 当前收通知的管理员昵称(自己)
+   */
   ActorUidNick: string
   /**
    * 群号
@@ -193,7 +228,13 @@ export interface IEventDataWithGroupManager {
    * 群名
    */
   GroupName: string
+  /**
+   * 邀请人 Uid
+   */
   InvitorUid: string
+  /**
+   * 邀请人昵称
+   */
   InvitorUidNick: string
   /**
    * 进群附加消息
@@ -201,16 +242,23 @@ export interface IEventDataWithGroupManager {
   MsgAdditional: string
   MsgSeq: number
   MsgType: EMsgTypeWithGroupManager
+  /**
+   * 被操作人 Uid
+   */
   ReqUid: string
+  /**
+   * 被操作人昵称
+   */
   ReqUidNick: string
   Status: EStatusWithGroupManager
 }
 
-// Why not use union type?
-// Because every need use `as` too cumbersome
-export interface IEventData
-  extends Partial<IEventDataWithLogin>,
-    Partial<IEventDataWithGroupManager> {
+export type IEventDataUnion =
+  | IEventData
+  | IEventDataWithLogin
+  | IEventDataWithGroupManager
+
+export interface IEventData<T extends IEventUnion = any> {
   /**
    * 消息头
    */
@@ -220,9 +268,9 @@ export interface IEventData
    */
   MsgBody?: IMsgBody
   /**
-   * ? 还不清楚干啥的
+   * 其他信息
    */
-  Event?: IEvent
+  Event?: T
 }
 
 export enum ESubMsgType {
@@ -334,42 +382,49 @@ export enum EFromType {
   private = 3,
 }
 
+/**
+ * @experimental 都不是很确定搭配，慎用
+ */
 export enum EMsgType {
-  // small_word_msg = 141,
-  // qq_sports = 528
+  /**
+   * 有人进群了
+   */
+  group_join = 33,
+  /**
+   * 有人退群了
+   */
+  group_exit = 34,
   /**
    * 收到消息
    */
   group = 82,
   /**
-   * 1. 发出去消息的回应
-   * 2. 有人撤回消息
-   * 3. 自己被邀请入群
-   */
-  msg_sent = 732,
-  /**
    * 收到好友私聊消息
    */
   friends = 166,
+  /**
+   * 自己的群名片被改了
+   * ? 有人进群了
+   */
+  group_change = 528,
+  /**
+   * 1. 发出去消息的回应
+   * 2. 有人撤回消息
+   * 3. 自己被邀请入群
+   * 4. 设置了不允许任何人加群
+   */
+  msg_sent = 732,
+
+  // --- unknown ---
+
+  // small_word_msg = 141,
+  // qq_sports = 528
 
   // 被拉群了
   // old 1. fromType 2 + msgType 33 + c2c 0
   // old 2. from 2 + msg 87 + c2c 0
-  /**
-   * 有人进群了
-   */
-  group_join = 33,
-
-  /**
-   * 有人退群了
-   */
-  group_exit = 34,
 
   // old 1. 群解散了 528 + 34
-  /**
-   * 自己的群名片被改了
-   */
-  group_change = 528,
 }
 
 export interface IGroupInfo {
@@ -391,6 +446,9 @@ export interface IGroupInfo {
   GroupName: string
 }
 
+/**
+ * @experimental 都不是很确定搭配，慎用
+ */
 export enum EC2cCmd {
   /**
    * 收到群消息
@@ -401,23 +459,8 @@ export enum EC2cCmd {
    */
   msg_sent = 1,
   /**
-   * 群消息被某人撤回了
-   */
-  msg_cancel = 17,
-  /**
-   * 上下线
-   */
-  online_offline = 349,
-  /**
-   * 自己被拉群了
-   */
-  group_join = 20,
-  /**
-   * 群解散了
-   */
-  group_dismiss = 212,
-  /**
    * 上线了
+   * 有人进群了 MsgType 528 + c2c 8
    */
   online = 8,
   /**
@@ -425,11 +468,32 @@ export enum EC2cCmd {
    */
   firends = 11,
   /**
+   * 设置了不允许任何人加群
+   */
+  group_cannot_join = 16,
+  /**
+   * 群消息被某人撤回了
+   */
+  msg_cancel = 17,
+  /**
+   * 自己被拉群了
+   * 邀请人进群了 MsgType 732 + c2c 20
+   */
+  group_join = 20,
+  /**
    * 自己的群名片被改了
    */
   group_card_changed = 39,
-
+  /**
+   * 上下线
+   */
+  online_offline = 349,
+  /**
+   * 群解散了
+   */
+  group_dismiss = 212,
   // 16 ?
+  // 68 ? 有人进群了
 }
 
 export interface IMsgHead {

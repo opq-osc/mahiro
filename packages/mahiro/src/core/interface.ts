@@ -1,9 +1,15 @@
 import { join } from 'path'
-import { IMsg, IMsgBody } from '../received/interface'
+import {
+  EMsgTypeWithGroupManager,
+  IMsg,
+  IMsgBody,
+} from '../received/interface'
 import {
   EUploadCommandId,
   ICgiRequest,
+  IResponseDataWithSearchUser,
   ISendMsg,
+  ISendMsgResponse,
   ISendParams,
 } from '../send/interface'
 import { z } from 'zod'
@@ -219,10 +225,74 @@ export interface ICallbacks {
   /**
    * native event (origin ws message)
    */
-  onNativeEvent: Record<string, any>
+  onNativeEvent: Record<string, IOnNativeEvent>
+  onGroupEvent: Record<string, IOnGroupEvent>
 }
 
 export type IOnNativeEvent = (event: IMsg) => CallbackReturn<void>
+
+export interface IGroupEventBase {
+  /**
+   * from bot qq
+   */
+  qq: number
+}
+
+export type IGetUserInfo = () => Promise<
+  ISendMsgResponse<IResponseDataWithSearchUser>
+>
+
+export interface IGroupEventExit {
+  event: EMsgTypeWithGroupManager.exit
+  getUserInfo: IGetUserInfo
+}
+
+export interface IGroupEventJoin {
+  event: EMsgTypeWithGroupManager.join
+  getUserInfo: IGetUserInfo
+  /**
+   * 获取触发事件的管理员个人信息
+   */
+  getAdminInfo: IGetUserInfo
+}
+
+export interface IGroupEventInvite {
+  event: EMsgTypeWithGroupManager.invite
+  
+  // ? FIXME: 目前好像就是收不到这些信息
+  // tips: IEventWithInvite['Tips']
+  // getUserInfo: IGetUserInfo
+  // getAdminInfo: IGetUserInfo
+}
+
+/**
+ * admin only
+ */
+export interface IGroupEventAdminChange {
+  event:
+    | EMsgTypeWithGroupManager.cancel_admin
+    | EMsgTypeWithGroupManager.set_admin
+  /**
+   * get more detailed info
+   */
+  getTargetInfo: IGetUserInfo
+  targetNickName: string
+  getAdminInfo: IGetUserInfo
+  adminNickName: string
+  /**
+   * group info
+   */
+  groupName: string
+  groupId: number
+}
+
+export type IGroupEvent =
+  | IGroupEventExit
+  | IGroupEventJoin
+  | IGroupEventInvite
+  | IGroupEventAdminChange
+
+export type IOnGroupEvent = IOnAbstractMessage<IGroupEvent, void>
 
 export type IApiMsg = Pick<ICgiRequest, 'Content' | 'AtUinLists' | 'Images'>
 
@@ -294,6 +364,17 @@ export interface ISendApiOpts {
   qq: number
 }
 
+export interface ISearchUserOpts {
+  /**
+   * bot qq
+   */
+  qq: number
+  /**
+   * user string id
+   */
+  Uid: string
+}
+
 const getDefaultNodeServerPort = () => {
   const fallback = 8098
   const env = process.env.MAHIRO_NODE_URL
@@ -327,6 +408,7 @@ export const SERVER_ROUTES = {
 
 export enum EAsyncContextFrom {
   group = 'group',
+  group_event = 'group_event',
   friend = 'friend',
   native = 'native',
 }
@@ -428,4 +510,13 @@ export const getMahiroSessionTTL = () => {
     return parseInt(env, 10)
   }
   return 10 * 1e3
+}
+
+export const OPQ_APIS = {
+  upload: '/v1/upload',
+  common: '/v1/LuaApiCaller',
+} as const
+
+export interface IAsyncContextInfo extends Pick<IAsyncContext, 'from' | 'qq'> {
+  [key: string]: any
 }
