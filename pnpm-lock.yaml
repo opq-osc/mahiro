@@ -127,6 +127,9 @@ importers:
       figlet:
         specifier: 1.5.2
         version: registry.npmjs.org/figlet@1.5.2
+      iconv-lite:
+        specifier: 0.6.3
+        version: registry.npmjs.org/iconv-lite@0.6.3
       is-base64:
         specifier: 1.1.0
         version: registry.npmjs.org/is-base64@1.1.0
@@ -10190,7 +10193,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       safer-buffer: registry.npmjs.org/safer-buffer@2.1.2
-    optional: true
 
   registry.npmjs.org/icss-replace-symbols@1.1.0:
     resolution: {integrity: sha512-chIaY3Vh2mh2Q3RGXttaDIzeiPvaVXJ+C4DAh/w3c37SKZ/U6PGMmuicR2EQQp9bKG8zLMCl7I+PtIoOOPp8Gg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/icss-replace-symbols/-/icss-replace-symbols-1.1.0.tgz}

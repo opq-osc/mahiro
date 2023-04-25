@@ -1,3 +1,7 @@
+// global effects
+import { injectPolyfill } from './polyfill'
+injectPolyfill()
+
 // types
 export * from './core/interface'
 export * from './received/interface'

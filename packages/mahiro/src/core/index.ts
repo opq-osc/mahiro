@@ -97,6 +97,7 @@ import { getMahiroConfigs } from '../utils/mahiroConfigs'
 import { Session } from './session'
 import bodyParser from 'body-parser'
 import { Matcher } from './matcher'
+import { Avatar } from './avatar'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -163,6 +164,9 @@ export class Mahiro {
 
   // matcher
   matcher = new Matcher()
+
+  // avatar
+  avatar = new Avatar()
 
   constructor(opts: IMahiroOpts) {
     this.printLogo()
