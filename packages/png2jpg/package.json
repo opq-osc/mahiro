@@ -15,7 +15,7 @@
     "mahiro": "workspace:*"
   },
   "peerDependencies": {
-    "mahiro": "latest"
+    "mahiro": "workspace:*"
   },
   "dependencies": {
     "@napi-rs/image": "1.6.1",
