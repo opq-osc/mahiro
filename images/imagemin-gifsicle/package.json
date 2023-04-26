@@ -1,0 +1,17 @@
+{
+  "name": "@xn-sakina/imagemin-gifsicle",
+  "version": "7.0.0",
+  "description": "Imagemin plugin for Gifsicle",
+  "license": "MIT",
+  "engines": {
+    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+  },
+  "files": [
+    "index.js"
+  ],
+  "dependencies": {
+    "@xn-sakina/gifsicle": "workspace:*",
+    "is-gif": "^4.0.1",
+    "exec-buffer": "^3.0.0"
+  }
+}

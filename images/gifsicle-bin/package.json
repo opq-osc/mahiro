@@ -1,0 +1,26 @@
+{
+  "name": "@xn-sakina/gifsicle",
+  "version": "7.0.1",
+  "description": "gifsicle wrapper that makes it seamlessly available as a local dependency",
+  "license": "MIT",
+  "engines": {
+    "node": "^14.13.1 || >=16.0.0"
+  },
+  "scripts": {
+    "postinstall": "node lib/install.js"
+  },
+  "bin": {
+    "gifsicle": "cli.js"
+  },
+  "files": [
+    "index.js",
+    "cli.js",
+    "lib",
+    "vendor/source"
+  ],
+  "dependencies": {
+    "bin-build": "^3.0.0",
+    "bin-wrapper": "^4.0.0",
+    "execa": "^5.0.0"
+  }
+}
