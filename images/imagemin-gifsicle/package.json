@@ -11,7 +11,7 @@
   ],
   "dependencies": {
     "@xn-sakina/gifsicle": "workspace:*",
-    "is-gif": "^4.0.1",
+    "is-gif": "^3.0.0",
     "exec-buffer": "^3.0.0"
   }
 }

@@ -1,20 +1,32 @@
-import { existsSync } from 'fs'
+import { existsSync, unlinkSync } from 'fs'
 import { readFile, stat, writeFile } from 'fs/promises'
 import { IMahiroUse, ESendCmd, IUploadFile } from 'mahiro'
 import { fileSync } from 'tmp-promise'
 import { Transformer, compressJpeg } from '@napi-rs/image'
+import { compressGIF } from './compressGIF'
 
 export interface IMahiroPng2JpgOptions {
   /**
    * auto transform png to jpg image size limit
    * @default 200 (unit: KB)
+   * @description set `false` to disable
+   * @oldname limit 1.0.0
    */
-  limit?: number
+  pngLimit?: number | false
   /**
    * auto compress jpg size limit
    * @default 200 (unit: KB)
+   * @description set `false` to disable
+   * @oldname autoCompressLimit 1.0.0
    */
-  autoCompressLimit?: number
+  jpgLimit?: number | false
+  /**
+   * auto compress gif size limit
+   * @default 200 (unit: KB)
+   * @description set `false` to disable
+   * @version 2.0.0
+   */
+  gifLimit?: number | false
   /**
    * clear cache tmp file time
    * @default 10000 (unit: ms)
@@ -22,32 +34,52 @@ export interface IMahiroPng2JpgOptions {
   cacheClearTime?: number
 }
 
-export const DEFAULT_LIMIT = 200
-export const DEFAULT_COMPRESS_LIMIT = 200
-export const DEFAULT_CACHE_CLEAR_TIME = 10 * 1e3
+export const DEFAULT_CONFIGS: Required<IMahiroPng2JpgOptions> = {
+  pngLimit: 200,
+  jpgLimit: 200,
+  gifLimit: 200,
+  cacheClearTime: 10 * 1e3,
+}
 const PNG_REG = /\.png$/i
 const JPG_REG = /\.jpe?g$/i
+const GIF_REG = /\.gif$/i
 
-// 😇
 export const MahiroPng2Jpg = (opts: IMahiroPng2JpgOptions = {}) => {
-  const {
-    limit = DEFAULT_LIMIT,
-    autoCompressLimit = DEFAULT_COMPRESS_LIMIT,
-    cacheClearTime = DEFAULT_CACHE_CLEAR_TIME,
+  let {
+    pngLimit,
+    jpgLimit,
+    gifLimit,
+    cacheClearTime = DEFAULT_CONFIGS.cacheClearTime,
   } = opts
-  const isNumber = typeof limit === 'number'
-  if (!isNumber) {
-    throw new Error('limit must be a number')
+
+  const enablePng = pngLimit !== false
+  if (enablePng) {
+    pngLimit ||= DEFAULT_CONFIGS.pngLimit
   }
-  if (limit < 0) {
-    throw new Error('limit must be greater than 0')
+  const enableJpg = jpgLimit !== false
+  if (enableJpg) {
+    jpgLimit ||= DEFAULT_CONFIGS.jpgLimit
   }
+  const enableGif = gifLimit !== false
+  if (enableGif) {
+    gifLimit ||= DEFAULT_CONFIGS.gifLimit
+  }
+
   const use: IMahiroUse = (mahiro) => {
     const logger = mahiro.logger.withTag('png2jpg') as typeof mahiro.logger
 
     logger.info(
-      `😇 You are using png2jpg plugin, limit: ${limit}kb, autoCompressLimit: ${autoCompressLimit}kb, cacheClearTime: ${cacheClearTime}ms`,
+      `enable png2jpg, pngLimit: ${
+        enablePng ? pngLimit : 'disabled'
+      }, jpgLimit: ${enableJpg ? jpgLimit : 'disabled'}, gifLimit: ${
+        enableGif ? gifLimit : 'disabled'
+      }`,
     )
+    const isAllDisabled = !enablePng && !enableJpg && !enableGif
+    if (isAllDisabled) {
+      logger.warn('all disabled, skip png2jpg')
+      return
+    }
 
     const transformImage = async (p: string): Promise<string> => {
       if (!existsSync(p)) {
@@ -55,10 +87,10 @@ export const MahiroPng2Jpg = (opts: IMahiroPng2JpgOptions = {}) => {
       }
       // auto compress big jpg file
       const isJpg = JPG_REG.test(p)
-      if (isJpg) {
+      if (enablePng && isJpg) {
         const size = (await stat(p)).size
         const kbSize = size / 1024
-        if (kbSize <= autoCompressLimit) {
+        if (kbSize <= (jpgLimit as number)) {
           return p
         }
         try {
@@ -77,64 +109,105 @@ export const MahiroPng2Jpg = (opts: IMahiroPng2JpgOptions = {}) => {
       }
       // auto transform png to jpg
       const isPng = PNG_REG.test(p)
-      if (!isPng) {
-        return p
-      }
-      try {
-        // check size, if > limit, transform png to jpg
-        const size = (await stat(p)).size
-        const kbSize = size / 1024
-        logger.debug(`png image size: ${kbSize}kb`)
-        if (kbSize <= limit) {
-          return p
-        }
+      if (enablePng && isPng) {
+        try {
+          // check size, if > limit, transform png to jpg
+          const size = (await stat(p)).size
+          const kbSize = size / 1024
+          logger.debug(`png image size: ${kbSize}kb`)
+          if (kbSize <= (pngLimit as number)) {
+            return p
+          }
 
-        const png = await readFile(p)
-        logger.debug('transform png to jpg', p)
-        const output = await new Transformer(png).jpeg()
-        const tmpFile = fileSync({ postfix: '.jpg' })
-        await writeFile(tmpFile.name, output)
-        logger.success(
-          `png image is greater than limit (${kbSize}kb) , transform to jpg`,
-          p,
-        )
-
-        // check jpg size, if > compress size, compress again
-        const jpgSize = (await stat(tmpFile.name)).size
-        const jpgKbSize = jpgSize / 1024
-        if (jpgKbSize > autoCompressLimit) {
-          logger.debug('still greater than compress limit, compress again', p)
-          const jpg = await readFile(tmpFile.name)
-          const output = await compressJpeg(jpg, { quality: 80 })
-          // write
+          const png = await readFile(p)
+          logger.debug('transform png to jpg', p)
+          const output = await new Transformer(png).jpeg()
+          const tmpFile = fileSync({ postfix: '.jpg' })
           await writeFile(tmpFile.name, output)
           logger.success(
-            `png to jpg image is greater than compress limit (${jpgKbSize}kb) , compress again`,
+            `png image is greater than limit (${kbSize}kb) , transform to jpg`,
             p,
           )
+
+          if (enableJpg) {
+            // check jpg size, if > compress size, compress again
+            const jpgSize = (await stat(tmpFile.name)).size
+            const jpgKbSize = jpgSize / 1024
+            if (jpgKbSize > (jpgLimit as number)) {
+              logger.debug(
+                'still greater than compress limit, compress again',
+                p,
+              )
+              const jpg = await readFile(tmpFile.name)
+              const output = await compressJpeg(jpg, { quality: 80 })
+              // write
+              await writeFile(tmpFile.name, output)
+              logger.success(
+                `png to jpg image is greater than compress limit (${jpgKbSize}kb) , compress again`,
+                p,
+              )
+            }
+          }
+          // 10s auto delete
+          setTimeout(() => {
+            logger.debug('auto delete tmp file', tmpFile.name)
+            tmpFile.removeCallback()
+          }, cacheClearTime)
+          return tmpFile.name
+        } catch (e) {
+          logger.error('transform png to jpg failed', e)
+          return p
         }
-
-        // 10s auto delete
-        setTimeout(() => {
-          logger.debug('auto delete tmp file', tmpFile.name)
-          tmpFile.removeCallback()
-        }, cacheClearTime)
-
-        return tmpFile.name
-      } catch (e) {
-        logger.error('transform png to jpg failed', e)
-        return p
       }
+      // auto compress git
+      const isGif = GIF_REG.test(p)
+      if (enableGif && isGif) {
+        const size = (await stat(p)).size
+        const kbSize = size / 1024
+        if (kbSize <= (gifLimit as number)) {
+          return p
+        }
+        try {
+          const newFile = await compressGIF(p)
+          if (newFile?.length && existsSync(newFile)) {
+            logger.success(
+              `gif image is greater than compress limit (${kbSize}kb) , compress`,
+              p,
+            )
+
+            // clear cache file
+            setTimeout(() => {
+              logger.debug('auto delete tmp file', newFile)
+              if (existsSync(newFile)) {
+                unlinkSync(newFile)
+              }
+            }, cacheClearTime)
+
+            return newFile
+          }
+          throw new Error('compress gif failed')
+        } catch (e) {
+          logger.error('compress gif failed', e)
+          return p
+        }
+      }
+      logger.debug('not png or jpg or gif, skip:', p)
+      return p
     }
     const getMime = async (str: string) => {
       try {
         const isBase64 = mahiro.utils.isBase64(str)
         if (isBase64) {
-          const res = await mahiro.utils.fileType.fileTypeFromBuffer(Buffer.from(str, 'base64'))
+          logger.debug(`isBase64: ${isBase64}, str: ${str.slice(0, 30)}`)
+          const res = await mahiro.utils.fileType.fileTypeFromBuffer(
+            Buffer.from(str, 'base64'),
+          )
+          logger.debug('get mime from base64', res?.mime)
           if (res?.mime) {
             return {
-              isPng: res.mime === 'image/png',
-              isJpg: res.mime === 'image/jpeg',
+              isPng: enablePng && res.mime === 'image/png',
+              isJpg: enableJpg && res.mime === 'image/jpeg',
+              isGif: enableGif && res.mime === 'image/gif',
             }
           }
         }
@@ -182,12 +255,12 @@ export const MahiroPng2Jpg = (opts: IMahiroPng2JpgOptions = {}) => {
           const detected = await getMime(base64)
           const isPng = detected?.isPng
           const isJpg = detected?.isJpg
+          const isGif = detected?.isGif
+          const originFileSize = (base64.length / 4) * 3
+          const kbSize = originFileSize / 1024
           if (isPng) {
-            // if base64 is big, we will compress it
-            const originFileSize = (base64.length / 4) * 3
-            const kbSize = originFileSize / 1024
             logger.debug(`Will send png base64 image, size: ${kbSize}kb`)
-            if (kbSize <= limit) {
+            if (kbSize <= (pngLimit as number)) {
               return config
             }
             const tmpFile = fileSync({ postfix: '.png' })
@@ -210,9 +283,7 @@ export const MahiroPng2Jpg = (opts: IMahiroPng2JpgOptions = {}) => {
           }
           if (isJpg) {
             // if base64 is big, we will compress it
-            const originFileSize = (base64.length / 4) * 3
-            const kbSize = originFileSize / 1024
-            if (kbSize <= autoCompressLimit) {
+            if (kbSize <= (jpgLimit as number)) {
               return config
             }
             const tmpFile = fileSync({ postfix: '.jpg' })
@@ -223,6 +294,28 @@ export const MahiroPng2Jpg = (opts: IMahiroPng2JpgOptions = {}) => {
             params.CgiRequest.Base64Buf = newBase64
             logger.success(
               `jpg base64 image is greater than compress limit (${kbSize}kb) , compress`,
+            )
+
+            // time out auto delete
+            setTimeout(() => {
+              logger.debug('auto delete tmp file', tmpFile.name)
+              tmpFile.removeCallback()
+            }, cacheClearTime)
+
+            return config
+          }
+          if (isGif) {
+            if (kbSize <= (gifLimit as number)) {
+              return config
+            }
+            const tmpFile = fileSync({ postfix: '.gif' })
+            await writeFile(tmpFile.name, base64, 'base64')
+            const newFilePath = await transformImage(tmpFile.name)
+            logger.debug(`New file path: ${newFilePath}`)
+            const newBase64 = await readFile(newFilePath, 'base64')
+            params.CgiRequest.Base64Buf = newBase64
+            logger.success(
+              `gif base64 image is greater than compress limit (${kbSize}kb) , compress`,
             )
 
             // time out auto delete

@@ -1,6 +1,6 @@
 {
   "name": "@xn-sakina/mahiro-png2jpg",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "files": [
     "dist"
   ],
@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@napi-rs/image": "1.6.1",
-    "tmp-promise": "3.0.3"
+    "tmp-promise": "3.0.3",
+    "@xn-sakina/imagemin-gifsicle": "workspace:*",
+    "imagemin": "7.0.1"
   }
 }
