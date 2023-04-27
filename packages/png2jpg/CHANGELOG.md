@@ -1,5 +1,11 @@
 # @xn-sakina/mahiro-png2jpg
 
+## 9.0.1
+
+### Patch Changes
+
+- mahiro@9.0.1
+
 ## 9.0.0
 
 ### Patch Changes
