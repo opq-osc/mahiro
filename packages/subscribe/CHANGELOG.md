@@ -1,5 +1,18 @@
 # @xn-sakina/mahiro-subscribe
 
+## 9.0.0
+
+### Patch Changes
+
+- Updated dependencies
+  - mahiro@9.0.0
+
+## 8.0.1
+
+### Patch Changes
+
+- mahiro@8.0.1
+
 ## 8.0.0
 
 ### Patch Changes

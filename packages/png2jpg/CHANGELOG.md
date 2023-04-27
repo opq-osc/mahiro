@@ -1,5 +1,18 @@
 # @xn-sakina/mahiro-png2jpg
 
+## 9.0.0
+
+### Patch Changes
+
+- Updated dependencies
+  - mahiro@9.0.0
+
+## 3.0.1
+
+### Patch Changes
+
+- mahiro@8.0.1
+
 ## 3.0.0
 
 ### Patch Changes

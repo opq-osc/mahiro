@@ -1,5 +1,13 @@
 # mahiro
 
+## 9.0.0
+
+### Minor Changes
+
+- Fixed version publish
+
+## 8.0.1
+
 ## 8.0.0
 
 ### Major Changes
