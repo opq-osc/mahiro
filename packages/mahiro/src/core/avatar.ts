@@ -7,11 +7,6 @@ import iconv from 'iconv-lite'
 export class Avatar {
   avatarWays: IAvatarWay[] = [
     {
-      getUrl: (account, size) => {
-        return `https://qlogo4.store.qq.com/qzone/${account}/${account}/${size}`
-      },
-    },
-    {
       // https://cloud.tencent.com/developer/article/1987577
       getUrl: (account, size) => {
         return `http://q1.qlogo.cn/g?b=qq&nk=${account}&s=${size}`
@@ -36,6 +31,12 @@ export class Avatar {
     {
       getUrl: (account, size) => {
         return `https://q2.qlogo.cn/headimg_dl?dst_uin=${account}&spec=${size}`
+      },
+    },
+    // qzone 渠道，可能会拉到旧的独立头像
+    {
+      getUrl: (account, size) => {
+        return `https://qlogo4.store.qq.com/qzone/${account}/${account}/${size}`
       },
     },
   ]
@@ -107,7 +108,10 @@ export class Avatar {
     return
   }
 
-  async getUserAvatarUrl(account: number, size: EQzoneAvatarSize) {
+  async getUserAvatarUrl(
+    account: number,
+    size: EQzoneAvatarSize = EQzoneAvatarSize.s_640,
+  ) {
     const urls = this.avatarWays.map((way) => way.getUrl(account, size))
     const res = await this.getRequestSuccessUrl(urls)
     if (!res) {
@@ -129,7 +133,7 @@ export class Avatar {
         // `https://users.qzone.qq.com/fcg-bin/cgi_get_portrait.fcg?uins=${account}`,
         {
           responseType: 'arraybuffer',
-        }
+        },
       )
       const decodedRes = iconv.decode(res.data, 'gbk')
       const matchObject = JSON.parse(
