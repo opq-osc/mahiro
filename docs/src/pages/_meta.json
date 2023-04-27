@@ -6,5 +6,6 @@
   "faq": "常见问题",
   "lifecycle": "消息管理",
   "panel": "管理面板",
-  "python": "Python"
+  "python": "Python",
+  "plugins": "官方插件"
 }

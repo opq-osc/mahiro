@@ -1,0 +1,35 @@
+# Image Compress
+
+图片压缩插件将自动处理 `jpg` / `png` / `gif` 的发送行为，并在一定门槛下自动压缩，保证出图体积安全。
+
+### 安装
+
+```bash
+  pnpm i @xn-sakina/mahiro-png2jpg
+```
+
+### 使用
+
+```ts
+import { MahiroPng2Jpg } from '@xn-sakina/mahiro-png2jpg'
+
+mahiro.use(MahiroPng2Jpg())
+```
+
+默认情况下，即开即用，将自动压缩所有大于 `200 KB` 的图片发送行为。
+
+配置项详见 TS 类型声明。
+
+### 常见问题
+
+如安装失败，请先安装 GIF 预处理库：
+
+```bash
+  # linux
+  apt-get install libtool automake autoconf nasm
+
+  # macos
+  brew install libtool automake autoconf nasm
+```
+
+
