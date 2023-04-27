@@ -534,7 +534,7 @@ export type IMatcherOpts = Pick<IMsgHead, 'FromType' | 'MsgType' | 'C2cCmd'>
 export enum EQzoneAvatarSize {
   s_100 = 100,
   s_200 = 200,
-  s_640 = 640
+  s_640 = 640,
 }
 
 export interface IAvatarWay {
@@ -544,4 +544,13 @@ export interface IAvatarWay {
 export interface IQzoneInfo {
   avatar: `http://qlogo4.store.qq.com/qzone/${string}/${string}/100`
   nickname: string
+}
+
+export const getUserNamePatchTTL = () => {
+  const env = process.env.MAHIRO_USERNAME_PATCH_TTL
+  if (env?.length) {
+    return parseInt(env, 10)
+  }
+  // default: 10min
+  return 10 * 60 * 1e3
 }

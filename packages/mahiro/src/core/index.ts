@@ -98,6 +98,7 @@ import { Session } from './session'
 import bodyParser from 'body-parser'
 import { Matcher } from './matcher'
 import { Avatar } from './avatar'
+import { Patcher } from './patch'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -168,6 +169,9 @@ export class Mahiro {
   // avatar
   avatar = new Avatar()
 
+  // patcher
+  patcher!: Patcher
+
   constructor(opts: IMahiroOpts) {
     this.printLogo()
     this.opts = opts
@@ -178,6 +182,7 @@ export class Mahiro {
     await this.checkOptsAndConnect()
     await this.connectDatabase()
     this.initSession()
+    this.initPatcher()
     await this.startNodeServer()
     this.registerOptionsInterceptors()
     this.registerAdminManager()
@@ -186,9 +191,15 @@ export class Mahiro {
   }
 
   private initSession() {
+    this.logger.debug(`[Session] Init session`)
     this.session = new Session({
       mahiro: this,
     })
+  }
+
+  private initPatcher() {
+    this.logger.debug(`[Patcher] Init patcher`)
+    this.patcher = new Patcher({ mahiro: this })
   }
 
   static async start(opts: IMahiroOpts) {
@@ -764,6 +775,12 @@ export class Mahiro {
       const isBot = this.isRegisteredAccount(data.userId)
       if (ignoreMyself && isBot) {
         return
+      }
+      // ? patch user name, because opq current cannot get friend user name
+      if (!data.userName?.length) {
+        this.logger.debug(`Patch user name for ${data.userId}`)
+        data.userName =
+          (await this.patcher.getUserNameFromCache(data.userId)) || ''
       }
       // trigger callback
       this.logger.info(

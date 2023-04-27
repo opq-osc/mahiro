@@ -60,6 +60,7 @@ export class Database {
   // redis kv
   // only available when config the `advancedOptions.redisKV`
   private _redisKV: Keyv | undefined
+  isRedisKVAvailable = false
   get redisKV() {
     if (!this._redisKV) {
       throw new Error(
@@ -97,6 +98,7 @@ export class Database {
       store: new KeyvRedis(url),
       namespace: DEFAULT_REDIS_KV_NAMESPACE,
     })
+    this.isRedisKVAvailable = true
     this.logger.success(`Connected Redis KV`)
   }
 
