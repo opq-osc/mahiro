@@ -1,5 +1,11 @@
 # mahiro
 
+## 8.0.0
+
+### Major Changes
+
+- See [changelog](https://mahiro.opqbot.com/changelog)
+
 ## 7.2.0
 
 ### Minor Changes

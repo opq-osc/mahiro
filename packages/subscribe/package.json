@@ -1,6 +1,6 @@
 {
   "name": "@xn-sakina/mahiro-subscribe",
-  "version": "7.0.0",
+  "version": "8.0.0",
   "files": [
     "dist"
   ],
@@ -12,10 +12,10 @@
     "tsc:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "mahiro": "workspace:*"
+    "mahiro": "link:../mahiro"
   },
   "peerDependencies": {
-    "mahiro": "workspace:*"
+    "mahiro": "*"
   },
   "dependencies": {
     "nanoid": "3.3.6",

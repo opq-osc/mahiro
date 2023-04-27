@@ -1,6 +1,6 @@
 {
   "name": "@xn-sakina/mahiro-png2jpg",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "files": [
     "dist"
   ],
@@ -12,10 +12,10 @@
     "tsc:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "mahiro": "workspace:*"
+    "mahiro": "link:../mahiro"
   },
   "peerDependencies": {
-    "mahiro": "workspace:*"
+    "mahiro": "*"
   },
   "dependencies": {
     "@napi-rs/image": "1.6.1",
