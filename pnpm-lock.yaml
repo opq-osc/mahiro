@@ -10,6 +10,9 @@ importers:
       '@types/node':
         specifier: ^18.15.11
         version: registry.npmjs.org/@types/node@18.15.11
+      '@xn-sakina/dora':
+        specifier: ^1.0.0
+        version: registry.npmjs.org/@xn-sakina/dora@1.0.0
       '@xn-sakina/mental':
         specifier: ^4.0.2
         version: registry.npmjs.org/@xn-sakina/mental@4.0.2
@@ -106,6 +109,31 @@ importers:
       is-gif:
         specifier: ^3.0.0
         version: registry.npmjs.org/is-gif@3.0.0
+
+  packages/create-mahiro:
+    dependencies:
+      commander:
+        specifier: 10.0.1
+        version: registry.npmjs.org/commander@10.0.1
+      mustache:
+        specifier: 4.2.0
+        version: registry.npmjs.org/mustache@4.2.0
+    devDependencies:
+      '@clack/prompts':
+        specifier: 0.6.3
+        version: registry.npmjs.org/@clack/prompts@0.6.3
+      '@types/mustache':
+        specifier: ^4.2.2
+        version: registry.npmjs.org/@types/mustache@4.2.2
+      chalk:
+        specifier: ^5.2.0
+        version: registry.npmjs.org/chalk@5.2.0
+      create-mahiro:
+        specifier: link:./
+        version: 'link:'
+      mahiro:
+        specifier: workspace:*
+        version: link:../mahiro
 
   packages/mahiro:
     dependencies:
@@ -218,9 +246,6 @@ importers:
       '@types/ws':
         specifier: ^8.5.4
         version: registry.npmjs.org/@types/ws@8.5.4
-      '@xn-sakina/dora':
-        specifier: ^1.0.0
-        version: registry.npmjs.org/@xn-sakina/dora@1.0.0
       chalk:
         specifier: ^5.2.0
         version: registry.npmjs.org/chalk@5.2.0
@@ -2262,6 +2287,27 @@ packages:
       human-id: registry.npmjs.org/human-id@1.0.2
       prettier: registry.npmjs.org/prettier@2.8.7
     dev: true
+
+  registry.npmjs.org/@clack/core@0.3.2:
+    resolution: {integrity: sha512-FZnsNynwGDIDktx6PEZK1EuCkFpY4ldEX6VYvfl0dqeoLPb9Jpw1xoUXaVcGR8ExmYNm1w2vdGdJkEUYD/2pqg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@clack/core/-/core-0.3.2.tgz}
+    name: '@clack/core'
+    version: 0.3.2
+    dependencies:
+      picocolors: registry.npmjs.org/picocolors@1.0.0
+      sisteransi: registry.npmjs.org/sisteransi@1.0.5
+    dev: true
+
+  registry.npmjs.org/@clack/prompts@0.6.3:
+    resolution: {integrity: sha512-AM+kFmAHawpUQv2q9+mcB6jLKxXGjgu/r2EQjEwujgpCdzrST6BJqYw00GRn56/L/Izw5U7ImoLmy00X/r80Pw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@clack/prompts/-/prompts-0.6.3.tgz}
+    name: '@clack/prompts'
+    version: 0.6.3
+    dependencies:
+      '@clack/core': registry.npmjs.org/@clack/core@0.3.2
+      picocolors: registry.npmjs.org/picocolors@1.0.0
+      sisteransi: registry.npmjs.org/sisteransi@1.0.5
+    dev: true
+    bundledDependencies:
+      - is-unicode-supported
 
   registry.npmjs.org/@cspotcode/source-map-support@0.8.1:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz}
@@ -5242,6 +5288,12 @@ packages:
     version: 0.7.31
     dev: true
 
+  registry.npmjs.org/@types/mustache@4.2.2:
+    resolution: {integrity: sha512-MUSpfpW0yZbTgjekDbH0shMYBUD+X/uJJJMm9LXN1d5yjl5lCY1vN/eWKD6D1tOtjA6206K0zcIPnUaFMurdNA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@types/mustache/-/mustache-4.2.2.tgz}
+    name: '@types/mustache'
+    version: 4.2.2
+    dev: true
+
   registry.npmjs.org/@types/node-cron@3.0.7:
     resolution: {integrity: sha512-9PuLtBboc/+JJ7FshmJWv769gDonTpItN0Ol5TMwclpSQNjVyB2SRxSKBcTtbSysSL5R7Oea06kTTFNciCoYwA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@types/node-cron/-/node-cron-3.0.7.tgz}
     name: '@types/node-cron'
@@ -5629,7 +5681,7 @@ packages:
     hasBin: true
     dependencies:
       chalk: registry.npmjs.org/chalk@4.1.2
-      commander: registry.npmjs.org/commander@10.0.0
+      commander: registry.npmjs.org/commander@10.0.1
       fs-extra: registry.npmjs.org/fs-extra@11.1.1
       sharp: registry.npmjs.org/sharp@0.31.3
       to-ico: registry.npmjs.org/to-ico@1.1.5
@@ -5669,7 +5721,7 @@ packages:
       '@vercel/ncc': registry.npmjs.org/@vercel/ncc@0.36.1
       c12: registry.npmjs.org/c12@1.2.0
       chalk: registry.npmjs.org/chalk@4.1.2
-      commander: registry.npmjs.org/commander@10.0.0
+      commander: registry.npmjs.org/commander@10.0.1
       find-up: registry.npmjs.org/find-up@5.0.0
       resolve: registry.npmjs.org/resolve@1.22.1
       taskr: registry.npmjs.org/taskr@1.1.0
@@ -7272,12 +7324,11 @@ packages:
     version: 2.0.3
     dev: true
 
-  registry.npmjs.org/commander@10.0.0:
-    resolution: {integrity: sha512-zS5PnTI22FIRM6ylNW8G4Ap0IEOyk62fhLSD0+uHRT9McRCLGpkVNvao4bjimpK/GShynyQkFFxHhwMcETmduA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/commander/-/commander-10.0.0.tgz}
+  registry.npmjs.org/commander@10.0.1:
+    resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/commander/-/commander-10.0.1.tgz}
     name: commander
-    version: 10.0.0
+    version: 10.0.1
     engines: {node: '>=14'}
-    dev: true
 
   registry.npmjs.org/commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/commander/-/commander-2.20.3.tgz}
@@ -13425,7 +13476,6 @@ packages:
     name: mustache
     version: 4.2.0
     hasBin: true
-    dev: true
 
   registry.npmjs.org/mute-stream@0.0.8:
     resolution: {integrity: sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/mute-stream/-/mute-stream-0.0.8.tgz}

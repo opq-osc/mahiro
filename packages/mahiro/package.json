@@ -64,7 +64,6 @@
     "@types/qs": "^6.9.7",
     "@types/serve-static": "^1.15.1",
     "@types/ws": "^8.5.4",
-    "@xn-sakina/dora": "^1.0.0",
     "chalk": "^5.2.0",
     "file-type": "^18.2.1",
     "mahiro": "workspace:*"

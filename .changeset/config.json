@@ -4,7 +4,7 @@
   "commit": false,
   "access": "public",
   "linked": [],
-  "fixed": [],
+  "fixed": [["create-mahiro", "mahiro"]],
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": ["@xn-sakina/mahiro-docs", "simple", "@xn-sakina/mahiro-plugins"],

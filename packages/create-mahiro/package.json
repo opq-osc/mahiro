@@ -1,0 +1,30 @@
+{
+  "name": "create-mahiro",
+  "version": "7.2.0",
+  "files": [
+    "dist",
+    "templates",
+    "bin",
+    "compiled"
+  ],
+  "bin": {
+    "create-mahiro": "bin/create-mahiro.js"
+  },
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "rimraf dist && tsc --declarationMap false",
+    "tsc:check": "tsc --noEmit",
+    "build:deps": "dora build"
+  },
+  "dependencies": {
+    "commander": "10.0.1",
+    "mustache": "4.2.0"
+  },
+  "devDependencies": {
+    "@clack/prompts": "0.6.3",
+    "@types/mustache": "^4.2.2",
+    "chalk": "^5.2.0",
+    "create-mahiro": "link:./",
+    "mahiro": "workspace:*"
+  }
+}
