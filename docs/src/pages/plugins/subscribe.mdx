@@ -16,6 +16,8 @@ import { MahiroSubscribe } from '@xn-sakina/mahiro-subscribe'
 mahiro.use(MahiroSubscribe())
 ```
 
+此插件依赖于 redis 存储，请确保开启 [`advancedOptions.redisKV`](../lifecycle/kv#dbrediskv-redis) 。
+
 默认情况下，将 Web 管理面板中的 Token 以 `.use Token` 形式发送，群组将获得对应有效期。
 
 配置项详见 TS 类型声明。

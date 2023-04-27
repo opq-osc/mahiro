@@ -1,53 +1,61 @@
 # 更新日志
 
+### 9.0.1
+
+- 新增 [官方插件](./plugins) 文档说明
+
+- 新增 Mahiro 脚手架，可快速创建 Mahiro 项目，详见 [快速开始](./quick-start)
+
+- 新增 [API](./lifecycle/api) : `onNativeEvent` / `onGroupEvent` / `getGroupList` / `searchUser` / `avatar.getUserQzoneInfo` / `avatar.getUserAvatarUrl`
+
+- 自动补全 Friends 消息丢失的 `userName` 字段
+
 ### 7.2.0
 
- - 修复 base64 发图问题
+- 修复 base64 发图问题
 
 ### 7.1.0
 
- - 实验性支持发送不带有 `data:` 前缀的图片 base64 字符串
+- 实验性支持发送不带有 `data:` 前缀的图片 base64 字符串
 
- - 优化部分 Web 界面样式
+- 优化部分 Web 界面样式
 
 ### 7.0.0
 
- - 支持 [session](./lifecycle/api#连续对话) 连续对话（ 仅限 mahiro 本体 ）
+- 支持 [session](./lifecycle/api#连续对话) 连续对话（ 仅限 mahiro 本体 ）
 
 ### 6.0.0
 
- - Required Bridge: `v1.5.0`
+- Required Bridge: `v1.5.0`
 
- - Python Bridge 可以通过 `raw` 字段获得原生 OPQ 消息内容
+- Python Bridge 可以通过 `raw` 字段获得原生 OPQ 消息内容
 
 ### 5.0.1
 
- - 改善了一些手机端面板适配样式
+- 改善了一些手机端面板适配样式
 
 ### 5.0.0
 
- - 优化了与 Python Bridge 的链接，支持任一方的重启后重加载
+- 优化了与 Python Bridge 的链接，支持任一方的重启后重加载
 
- - 优化了 账号管理 扫码登录
+- 优化了 账号管理 扫码登录
 
 ### 3.0.1
 
- - 在 Python Bridge 响应非 `200` 时不抛出错误
+- 在 Python Bridge 响应非 `200` 时不抛出错误
 
 ### 3.0.0
 
- - 默认打开 `MAHIRO_AUTH_TOKEN` 权限校验，保护面板安全
+- 默认打开 `MAHIRO_AUTH_TOKEN` 权限校验，保护面板安全
 
- - 支持多账号
+- 支持多账号
 
 ### 2.0.0
 
- - 新增 `sqlite` 国内源加速说明
+- 新增 `sqlite` 国内源加速说明
 
- - 修复 `@vscode/sqlite3` 在 pnpm 下 `tar` 隐形依赖的问题
+- 修复 `@vscode/sqlite3` 在 pnpm 下 `tar` 隐形依赖的问题
 
 ### 1.0.1
 
- - 第一次发布版本
-
-
+- 第一次发布版本
