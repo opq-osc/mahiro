@@ -1,0 +1,15 @@
+# 常见问题
+
+### Mahiro 安装缓慢 / 无法安装成功
+
+Mahiro 第一次安装时，会自动下载与 `sqlite` 相关的依赖，请预设好 npm 加速下载源：
+
+```bash
+  npm config set registry https://registry.npmmirror.com/
+
+  # sqlite 安装国内网络必备
+  echo "better_sqlite3_binary_host=https://registry.npmmirror.com/-/binary/better-sqlite3" >> ~/.npmrc
+  echo "better_sqlite3_binary_host_mirror=https://registry.npmmirror.com/-/binary/better-sqlite3" >> ~/.npmrc
+  echo "node_sqlite3_binary_host=https://registry.npmmirror.com/-/binary/sqlite3" >> ~/.npmrc
+  echo "node_sqlite3_binary_host_mirror=https://registry.npmmirror.com/-/binary/sqlite3" >> ~/.npmrc
+```

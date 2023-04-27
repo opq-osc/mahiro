@@ -12,94 +12,60 @@ Mahiro 本体需要运行在 Nodejs 上，在安装依赖时进行编译，还�
 
 - Python **_v3.8+_**
 
-### 加速源
-
-若从零开始，请预设好 npm 加速源：
-
-```bash
-  npm config set registry https://registry.npmmirror.com/
-  npm i -g pnpm
-
-  # sqlite 安装国内网络必备
-  echo "better_sqlite3_binary_host=https://registry.npmmirror.com/-/binary/better-sqlite3" >> ~/.npmrc
-  echo "better_sqlite3_binary_host_mirror=https://registry.npmmirror.com/-/binary/better-sqlite3" >> ~/.npmrc
-  echo "node_sqlite3_binary_host=https://registry.npmmirror.com/-/binary/sqlite3" >> ~/.npmrc
-  echo "node_sqlite3_binary_host_mirror=https://registry.npmmirror.com/-/binary/sqlite3" >> ~/.npmrc
-```
-
-## 启动
+## 快速上手
 
 ### 创建项目
 
 我们将创建一个最简 Mahiro 项目：
 
 ```bash
-  # 创建文件夹
-  mkdir my-mahiro
-  cd ./my-mahiro
+  # 加速源
+  npm config set registry https://registry.npmmirror.com/
+  npm i -g pnpm
 
-  # 初始化项目
-  pnpm init
+  # 在当前目录下创建一个最简项目模板
+  pnpm create mahiro
 ```
 
-安装依赖：
+选择并创建一个 `Simple` 项目，安装依赖： 
 
 ```bash
-  pnpm add -D mahiro
+  cd my-mahiro
+  pnpm i
 ```
 
-注：在第一次安装时，`sqlite` 编译需一定时间，请耐心等待，如无法安装成功，请确保你配置了 [加速源](#加速源) 相关配置。
+注：在第一次安装时，`sqlite` 编译需一定时间，请耐心等待，如无法安装成功，请确保你配置了 [加速源](./faq##mahiro-安装缓慢--无法安装成功) 相关配置。
 
-创建并编写 `index.ts` ：
+### 修改配置
 
-```ts filename="index.ts"
-import { Mahiro } from 'mahiro'
-
-const run = async () => {
-  const mahiro = await Mahiro.start({
-    host: '127.0.0.1', // 默认 localhost
-    port: 8086, // 默认 8086
-    qq: 12345678,
-  })
-
-  mahiro.onGroupMessage('Hello world Group', async (data) => {
-    if (data?.msg?.Content === 'Hello') {
-      mahiro.sendGroupMessage({
-        groupId: data.groupId,
-        msg: {
-          Content: 'Mahiro',
-        },
-      })
-    }
-  })
-
-  mahiro.onFriendMessage('Hello world Friend', (data) => {
-    if (data?.msg?.Content === 'Hello') {
-      mahiro.sendFriendMessage({
-        userId: data.userId,
-        msg: {
-          Content: 'Mahiro',
-        },
-      })
-    }
-  })
-}
-
-run()
-```
-
-最终目录结构如下：
+初始化得到的目录结构如下：
 
 ```bash filename="目录结构"
  - my-mahiro
    - package.json
    - index.ts
+   - .account.json
+   - .npmrc
 ```
 
-启动程序：
+为了安全，我们不将账号信息写入代码（ `index.ts` ）中，而是单独置于 `.account.json` 文件内：
+
+```json filename=".account.json"
+{
+  "account": 123456789,
+  "host": "localhost",
+  "port": 8086
+}
+```
+
+将 `account` 修改为你的账号即可。
+
+### 启动程序
+
+启动 Mahiro ：
 
 ```bash
-  pnpm mahiro ./index.ts
+  pnpm start
 ```
 
 ```bash filename="终端输出"
@@ -127,9 +93,9 @@ run()
 
 ### 配置群组
 
-在 Mahiro 中，**一切均为白名单设计**，这是为了防止消息收发有非预期的情况，保证安全。
+在 Mahiro 中，出于安全考量，**一切均为白名单设计**。
 
-故群组功能必须配置后才可使用，打开控制台打印的 Mahiro 面板地址：`http://localhost:8098` （注意放通防火墙与安全组，运行在服务器上时，请替换为服务器公网 IP）。
+故必须配置群组后才可使用相关功能，打开控制台打印的 Mahiro 面板地址：`http://localhost:8098` （注意放通防火墙与安全组，运行在服务器上时，请替换为服务器公网 IP）。
 
 在首页输入当前主账号，获得面板访问权限。
 
@@ -142,7 +108,7 @@ run()
 至此，我们已经完成了最简的收发消息项目，你可以在对应群组发送 `Hello` 查看触发情况。
 
 <Callout type="info" emoji="ℹ️">
-  注：Friend 消息无限制设计，均为放通状态。
+  注：仅群组必须配置后才可使用，Friend 消息功能无权限限制。
 </Callout>
 
 ## 学到更多

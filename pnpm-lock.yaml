@@ -286,7 +286,7 @@ importers:
         version: registry.npmjs.org/tmp-promise@3.0.3
     devDependencies:
       mahiro:
-        specifier: workspace:*
+        specifier: link:../mahiro
         version: link:../mahiro
 
   packages/subscribe:
@@ -299,7 +299,7 @@ importers:
         version: registry.npmjs.org/pretty-ms@7.0.1
     devDependencies:
       mahiro:
-        specifier: workspace:*
+        specifier: link:../mahiro
         version: link:../mahiro
 
   packages/web:

@@ -4,11 +4,15 @@
   "commit": false,
   "access": "public",
   "linked": [],
-  "fixed": [["create-mahiro", "mahiro"]],
+  "fixed": [
+    [
+      "create-mahiro",
+      "mahiro",
+      "@xn-sakina/mahiro-png2jpg",
+      "@xn-sakina/mahiro-subscribe"
+    ]
+  ],
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@xn-sakina/mahiro-docs", "simple", "@xn-sakina/mahiro-plugins"],
-  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
-    "updateInternalDependents": "always"
-  }
+  "ignore": ["@xn-sakina/mahiro-docs", "simple", "@xn-sakina/mahiro-plugins"]
 }
