@@ -1,5 +1,11 @@
 # mahiro
 
+## 9.0.2
+
+### Patch Changes
+
+- Fix base64 too long
+
 ## 9.0.1
 
 ## 9.0.0
