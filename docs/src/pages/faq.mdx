@@ -13,3 +13,13 @@ Mahiro 第一次安装时，会自动下载与 `sqlite` 相关的依赖，请预
   echo "node_sqlite3_binary_host=https://registry.npmmirror.com/-/binary/sqlite3" >> ~/.npmrc
   echo "node_sqlite3_binary_host_mirror=https://registry.npmmirror.com/-/binary/sqlite3" >> ~/.npmrc
 ```
+
+### 插件运行报错后进程退出
+
+Mahiro 不会自动捕获插件运行过程中的报错，如果你认为插件运行可能是不安全的，请自行 `try catch` 捕获。
+
+因为每一次错误操作数据库，错误发送消息是危险的，这是 Mahiro 出于安全性第一的考量。
+
+### Base64 过长导致发送图片失败
+
+若 `base64` 字符串过长，会导致图片发送失败，请先写为文件后，使用文件绝对路径发送。
