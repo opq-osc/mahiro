@@ -35,5 +35,8 @@ jobs:
         with:
           context: ./docker
           push: true
-          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/386
+          # fixme: python-nodejs currently not support arm64 arch
+          # todo:  we need compile python and nodejs manually
+          # linux/arm64,linux/arm/v7,linux/386
+          platforms: linux/amd64
           tags: yingci/mahiro:latest,${{ format('yingci/mahiro:v{0}', inputs.version) }}
