@@ -34,12 +34,16 @@ export const detectFileType = async (url: string): Promise<IDetectFileType> => {
     }
   } catch {}
   // check base64 url
-  const isBase64Url = isBase64(url)
-  if (isBase64Url) {
-    logger.debug('is like base64 url')
-    return {
-      base64: url,
+  try {
+    const isBase64Url = isBase64(url)
+    if (isBase64Url) {
+      logger.debug('is like base64 url')
+      return {
+        base64: url,
+      }
     }
+  } catch {
+    logger.error(`Too long base64 string causes parsing failure, please write file and use file path send message`)
   }
   return {}
 }
