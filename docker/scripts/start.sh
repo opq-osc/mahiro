@@ -1,6 +1,8 @@
 
 set -e
 
+cd ../mahiro
+
 current_dir=$(pwd)
 mahiro_db_path=$current_dir/mahiro.db
 mahiro_start_file=$current_dir/index.ts
@@ -20,4 +22,4 @@ docker run -d \
   --name mahiro \
   -v $mahiro_db_path:/app/server/mahiro.db \
   -v $mahiro_start_file:/app/server/index.ts \
-  yingci/mahiro:latest
+  mahiro:v1
