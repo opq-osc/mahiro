@@ -7,5 +7,6 @@
   "lifecycle": "消息管理",
   "panel": "管理面板",
   "python": "Python",
-  "plugins": "官方插件"
+  "plugins": "官方插件",
+  "advanced": "高级内容"
 }

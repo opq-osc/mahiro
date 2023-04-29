@@ -1,0 +1,52 @@
+import { Callout } from 'nextra-theme-docs'
+
+# Docker
+
+<Callout type="warning" emoji="⚠️">
+  我们不推荐使用 Docker 运行 Mahiro ，因为这不便于插件扩展，推荐在本地安装 Nodejs 后运行，Nodejs 的安装十分容易。
+</Callout>
+
+### docker-compose
+
+请在对 Mahiro 有充分了解下使用 Docker 。
+
+示例如下：
+
+```yaml
+version: '3'
+services:
+  redis-mahiro:
+    image: redis:latest
+    container_name: redis-mahiro
+    ports:
+      - 6379:6379
+    volumes:
+      # redis 快照位置
+      - /path/to/redis/data:/data
+    command: redis-server --save 60 1 --loglevel warning
+    restart: always
+  node-mahiro:
+    image: yingci/mahiro:latest
+    container_name: node-mahiro
+    depends_on:
+      - redis-mahiro
+    ports:
+      - 8086:8086
+      - 8098:8098
+      - 8099:8099
+    links:
+      - redis-mahiro
+    volumes:
+      # mahiro 数据库
+      - /path/to/mahiro.db:/app/server/mahiro.db
+      # mahiro 主启动文件
+      - /path/to/index.ts:/app/server/index.ts
+```
+
+### 限制
+
+目前 Docker 打开方式存在较多限制：
+
+1. 由于本地不存在 Nodejs 环境，不能使用任何 Mahiro 的 Nodejs 插件。
+
+2. 目前仅支持 `linux amd64` 系统。
