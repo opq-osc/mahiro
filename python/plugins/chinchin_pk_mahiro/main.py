@@ -25,9 +25,10 @@ async def chinchin_pk(mahiro: GroupMessageMahiro):
         return
 
     if is_at_msg:
+        target = ats[0].Uin
+        content = content.replace(ats[0].Nick, '').replace('@', '').strip()
         if not match_func(keywords=keywords, text=content):
             return
-        target = ats[0].Uin
         message_processor(
             message=content,
             qq=from_user,
