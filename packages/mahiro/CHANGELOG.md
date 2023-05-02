@@ -1,5 +1,11 @@
 # mahiro
 
+## 10.0.0
+
+### Minor Changes
+
+- Improve base64 detect
+
 ## 9.0.2
 
 ### Patch Changes

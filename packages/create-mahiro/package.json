@@ -1,6 +1,6 @@
 {
   "name": "create-mahiro",
-  "version": "9.0.2",
+  "version": "10.0.0",
   "files": [
     "dist",
     "templates",
