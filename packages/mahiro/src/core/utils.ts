@@ -11,12 +11,12 @@ import cron from 'node-cron'
 import cronstrue from 'cronstrue'
 import knex from 'knex'
 import * as fileType from 'mahiro/compiled/file-type'
-import isBase64 from 'is-base64'
 
 // keyv
 import Keyv from '@keyvhq/core'
 import KeyvSQLite from '@keyvhq/sqlite'
 import KeyvRedis from '@keyvhq/redis'
+import { isBase64 } from '../utils/base64'
 
 export class Utils {
   dayjs = dayjs

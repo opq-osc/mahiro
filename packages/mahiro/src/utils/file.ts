@@ -1,7 +1,7 @@
 import { consola } from 'consola'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { readFile } from 'fs/promises'
-import isBase64 from 'is-base64'
+import { isBase64 } from './base64'
 
 const logger = consola.withTag('file-utils') as typeof consola
 
@@ -43,7 +43,9 @@ export const detectFileType = async (url: string): Promise<IDetectFileType> => {
       }
     }
   } catch {
-    logger.error(`Too long base64 string causes parsing failure, please write file and use file path send message`)
+    logger.error(
+      `Too long base64 string causes parsing failure, please write file and use file path send message`,
+    )
   }
   return {}
 }
