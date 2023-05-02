@@ -28,7 +28,7 @@
     "@types/node": "^18.15.11",
     "@xn-sakina/dora": "^1.0.0",
     "@xn-sakina/mental": "^4.0.2",
-    "@xn-sakina/vary": "^1.0.2",
+    "@xn-sakina/vary": "^1.1.1",
     "prettier": "^2.8.7",
     "rimraf": "^4.4.1",
     "rome": "^12.0.0",

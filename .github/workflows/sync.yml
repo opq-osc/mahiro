@@ -1,9 +1,8 @@
-
-name: Sync cnpm
+name: Sync packages
 
 on:
   push:
-    tags:        
+    tags:
       - '*'
   workflow_dispatch:
 
@@ -11,12 +10,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-permissions:
-  pages: write
-  id-token: write
-
 jobs:
-  build:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -26,12 +21,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
-          registry-url: 'https://registry.npmjs.org/'
-      
+          registry-url: 'https://registry.npmjs.com/'
+
       - name: Sync dependencies
         run: |
-          npm i -g cnpm
-          cnpm sync mahiro @xn-sakina/mahiro-css 
-          cnpm sync @xn-sakina/mahiro-subscribe @xn-sakina/mahiro-web 
-          cnpm sync @xn-sakina/mahiro-png2jpg @xn-sakina/gifsicle @xn-sakina/imagemin-gifsicle
-          cnpm sync create-mahiro
+          npm i -g cnpm @xn-sakina/vary
+          vary sync
