@@ -2,6 +2,8 @@
 
 ### Mahiro 安装缓慢 / 无法安装成功
 
+#### 使用加速源
+
 Mahiro 第一次安装时，会自动下载与 `sqlite` 相关的依赖，请预设好 npm 加速下载源：
 
 ```bash
@@ -13,6 +15,10 @@ Mahiro 第一次安装时，会自动下载与 `sqlite` 相关的依赖，请预
   echo "node_sqlite3_binary_host=https://registry.npmmirror.com/-/binary/sqlite3" >> ~/.npmrc
   echo "node_sqlite3_binary_host_mirror=https://registry.npmmirror.com/-/binary/sqlite3" >> ~/.npmrc
 ```
+
+#### 确保内存大小
+
+编译 sqlite 需内存大于 `1G` ，若你在树莓派等小内存设备上运行，可先添加内存，确保能通过编译，编译结果会缓存，之后使用就不需要高内存了。 
 
 ### 插件运行报错后进程退出
 
