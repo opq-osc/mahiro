@@ -231,3 +231,38 @@ const avatarUrl = `${user.Head}${EAvatarSize.s_640}`
 ```
 
 > 别名：`getUserInfo`
+
+## 危险 API
+
+<Callout type="error" emoji="️❌">
+  这些 API 涉及到极高的封禁风险，在使用前，请做好 **放弃账号的准备** 和相关备份。
+</Callout>
+
+### `rail.replyGroupMessage`
+
+回复某一条群组消息。
+
+```ts
+mahiro.onGroupMessage('reply', async (data) => {
+  if (data.msg?.Content === 'ping') {
+    mahiro.rail.replyGroupMessage({
+      to: data.replyTo,
+      msg: {
+        Content: 'pong'
+      }
+    })
+  }
+})
+```
+
+### `rail.sendGroupJsonMessage`
+
+```ts
+  mahiro.rail.sendGroupJsonMessage({ groupId, json })
+```
+
+### `rail.sendGroupXMLMessage`
+
+```ts
+  mahiro.rail.sendGroupXMLMessage({ groupId, xml })
+```
