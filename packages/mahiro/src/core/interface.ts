@@ -362,6 +362,27 @@ export interface IApiSendFriendMessage {
   fastImage?: string
 }
 
+export interface IApiSendGroupJsonMessage {
+  groupId: number
+  qq?: number
+  /**
+   * json string or object
+   * @example "{\"key\": \"value\"}"
+   * @example JSON.stringify({key: "value"})
+   * @example {key: "value"}
+   */
+  json: string | Record<string, any>
+}
+
+export interface IApiSendGroupXmlMessage {
+  groupId: number
+  qq?: number
+  /**
+   * XML内容 需转义
+   */
+  xml: string
+}
+
 export interface ISendApiOpts {
   CgiRequest: ICgiRequest
   qq: number

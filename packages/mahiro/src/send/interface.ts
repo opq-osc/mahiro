@@ -1,4 +1,4 @@
-import { IMsgHead } from '../received/interface'
+import { ESubMsgType, IMsgHead } from '../received/interface'
 
 export enum ESendCmd {
   send = 'MessageSvc.PbSendMsg',
@@ -108,8 +108,15 @@ export interface ICgiRequest {
 
   /**
    * only for reply group message
+   * @scope Reply group message
    */
   ReplyTo?: Omit<IReplyTo, 'FromUin'>
+
+  /**
+   * only for send json message
+   * @scope Send json message
+   */
+  SubMsgType?: ESubMsgType
 }
 
 export enum IAt {
