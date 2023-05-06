@@ -113,8 +113,8 @@ export interface ICgiRequest {
   ReplyTo?: Omit<IReplyTo, 'FromUin'>
 
   /**
-   * only for send json message
-   * @scope Send json message
+   * only for send json/xml message
+   * @scope Send json/xml message
    */
   SubMsgType?: ESubMsgType
 }
