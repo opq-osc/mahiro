@@ -1,5 +1,11 @@
 # mahiro
 
+## 11.0.0
+
+### Minor Changes
+
+- Add dangerous api
+
 ## 10.0.0
 
 ### Minor Changes
