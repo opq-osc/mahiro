@@ -8,6 +8,7 @@ import {
 import {
   EUploadCommandId,
   ICgiRequest,
+  IReplyTo,
   IResponseDataWithSearchUser,
   ISendMsg,
   ISendMsgResponse,
@@ -179,6 +180,7 @@ export interface IGroupMessage extends IMahiroMsgBase {
   groupName: string
   userId: number
   userNickname: string
+  replyTo: IReplyTo
   /**
    * 高级配置，一般用于内部
    */
@@ -553,4 +555,26 @@ export const getUserNamePatchTTL = () => {
   }
   // default: 10min
   return 10 * 60 * 1e3
+}
+
+export interface IRailOpts {
+  mahiro: Mahiro
+}
+
+export const replyToSchema = z.object({
+  MsgSeq: z.number(),
+  MsgType: z.number(),
+  MsgUid: z.number(),
+  FromUin: z.number(),
+})
+
+export interface IReplyGroupMessageOpts {
+  to: IReplyTo
+  qq?: number
+  msg?: Partial<IApiMsg>
+  /**
+   * 便捷字段，会被转换为 msg.Images
+   * 必须传图片本地绝对路径或 url
+   */
+  fastImage?: string
 }

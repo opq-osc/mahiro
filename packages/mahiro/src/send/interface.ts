@@ -1,8 +1,10 @@
+import { IMsgHead } from '../received/interface'
+
 export enum ESendCmd {
   send = 'MessageSvc.PbSendMsg',
   upload = 'PicUp.DataUp',
   search = 'QueryUinByUid',
-  get_group_list = 'GetGroupLists'
+  get_group_list = 'GetGroupLists',
 }
 
 export interface ISearchUserRequest {
@@ -77,6 +79,10 @@ export enum EToType {
   friends = 1,
 }
 
+export type IReplyTo = Required<
+  Pick<IMsgHead, 'MsgSeq' | 'MsgType' | 'MsgUid' | 'FromUin'>
+>
+
 export interface ICgiRequest {
   /**
    * 发送消息对象 好友/私聊/群组Uid
@@ -99,6 +105,11 @@ export interface ICgiRequest {
    */
   Images?: ISendImage[]
   // todo: support voice
+
+  /**
+   * only for reply group message
+   */
+  ReplyTo?: Omit<IReplyTo, 'FromUin'>
 }
 
 export enum IAt {
@@ -189,7 +200,6 @@ export interface IGroupList {
    */
   MemberCnt: number
 }
-
 
 export interface IResponseDataWithGroupList {
   GroupLists: IGroupList[]

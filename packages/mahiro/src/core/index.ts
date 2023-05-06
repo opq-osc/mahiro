@@ -99,6 +99,7 @@ import bodyParser from 'body-parser'
 import { Matcher } from './matcher'
 import { Avatar } from './avatar'
 import { Patcher } from './patch'
+import { Rail } from './rail'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -172,6 +173,9 @@ export class Mahiro {
   // patcher
   patcher!: Patcher
 
+  // rail
+  rail!: Rail
+
   constructor(opts: IMahiroOpts) {
     this.printLogo()
     this.opts = opts
@@ -183,6 +187,7 @@ export class Mahiro {
     await this.connectDatabase()
     this.initSession()
     this.initPatcher()
+    this.initRail()
     await this.startNodeServer()
     this.registerOptionsInterceptors()
     this.registerAdminManager()
@@ -200,6 +205,11 @@ export class Mahiro {
   private initPatcher() {
     this.logger.debug(`[Patcher] Init patcher`)
     this.patcher = new Patcher({ mahiro: this })
+  }
+
+  private initRail() {
+    this.logger.debug(`[Rail] Init rail`)
+    this.rail = new Rail({ mahiro: this })
   }
 
   static async start(opts: IMahiroOpts) {
@@ -664,13 +674,20 @@ export class Mahiro {
     // onGroupMessage
     const isGroupMsg = this.matcher.matchGroupMessage(MsgHead)
     if (isGroupMsg) {
+      const groupId = MsgHead?.GroupInfo?.GroupCode!
       let data = {
-        groupId: MsgHead?.GroupInfo?.GroupCode!,
+        groupId,
         groupName: MsgHead?.GroupInfo?.GroupName!,
         userId: MsgHead?.SenderUin,
         userNickname: MsgHead?.SenderNick || '',
         msg: MsgBody!,
         qq: CurrentQQ,
+        replyTo: {
+          FromUin: groupId,
+          MsgSeq: MsgHead?.MsgSeq,
+          MsgType: MsgHead?.MsgType,
+          MsgUid: MsgHead?.MsgUid,
+        },
         configs: {
           availablePlugins: [],
         },
@@ -851,7 +868,7 @@ export class Mahiro {
     return this.sideAccounts.find((account) => account.qq === qq)!
   }
 
-  private getUseQQ(opts: { specifiedQQ?: number }) {
+  getUseQQ(opts: { specifiedQQ?: number }) {
     const { specifiedQQ } = opts
     let useQQ = specifiedQQ
     if (!useQQ) {
@@ -868,7 +885,7 @@ export class Mahiro {
     return useQQ
   }
 
-  private async sendApi(opts: ISendApiOpts) {
+  async sendApi(opts: ISendApiOpts) {
     const { CgiRequest, qq } = opts
     const account = this.getAccount(qq)
     if (!account.wsConnected) {
@@ -990,7 +1007,7 @@ export class Mahiro {
     }
   }
 
-  private async uploadFile(opts: IMahiroUploadFileOpts) {
+  async uploadFile(opts: IMahiroUploadFileOpts) {
     const { file, commandId, qq } = opts
     const account = this.getAccount(qq)
     if (!account.wsConnected) {
