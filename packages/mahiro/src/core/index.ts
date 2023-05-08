@@ -404,7 +404,8 @@ export class Mahiro {
   }
 
   private async createConnect(account: IAccont) {
-    return new Promise<void>((resolve, _reject) => {
+    let resolve: () => void
+    const connect = () => {
       const { ws } = account
       if (account.wsRetrying || account.wsConnected) {
         this.logger.debug(
@@ -429,7 +430,7 @@ export class Mahiro {
         account.wsRetrying = true
         setTimeout(() => {
           account.wsRetrying = false
-          this.createConnect(account)
+          connect()
         }, time)
       }
 
@@ -468,6 +469,10 @@ export class Mahiro {
         this.logger.debug('MAHIRO_IGNORE_CONNECT :: Ignore connect')
         resolve()
       }
+    }
+    return new Promise<void>((_resolve, _reject) => {
+      resolve = _resolve
+      connect()
     })
   }
 
