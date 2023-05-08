@@ -1,5 +1,11 @@
 # mahiro
 
+## 12.0.0
+
+### Minor Changes
+
+- Add action apis
+
 ## 11.0.0
 
 ### Minor Changes
