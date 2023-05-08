@@ -100,6 +100,7 @@ import { Matcher } from './matcher'
 import { Avatar } from './avatar'
 import { Patcher } from './patch'
 import { Rail } from './rail'
+import { saveCrashLog } from '../utils/crash'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -671,6 +672,16 @@ export class Mahiro {
     }
 
     const { ignoreMyself } = this.advancedOptions
+
+    // ensure keys
+    const hasKeys = this.matcher.ensureConditionKeysExist(MsgHead)
+    if (!hasKeys) {
+      // expect keys not found
+      this.logger.warn(`Expect keys not found, skip`)
+      saveCrashLog(json)
+      return
+    }
+
     // onGroupMessage
     const isGroupMsg = this.matcher.matchGroupMessage(MsgHead)
     if (isGroupMsg) {

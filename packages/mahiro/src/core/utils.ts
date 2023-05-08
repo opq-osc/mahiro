@@ -17,8 +17,10 @@ import Keyv from '@keyvhq/core'
 import KeyvSQLite from '@keyvhq/sqlite'
 import KeyvRedis from '@keyvhq/redis'
 import { isBase64 } from '../utils/base64'
+import { saveCrashLog } from '../utils/crash'
 
 export class Utils {
+  // deps
   dayjs = dayjs
   lodash = lodash
   chalk = chalk
@@ -35,5 +37,8 @@ export class Utils {
   KeyvSQLite = KeyvSQLite
   KeyvRedis = KeyvRedis
   fileType = fileType
+
+  // utils
   isBase64 = isBase64
+  saveCrashLog = saveCrashLog
 }

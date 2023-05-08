@@ -1,8 +1,19 @@
+import { isNil } from 'lodash'
 import { EC2cCmd, EFromType, EMsgType } from '../received/interface'
 import { IMatcherOpts } from './interface'
+import { consola } from 'consola'
 
 export class Matcher {
+  logger = consola.withTag('matcher') as typeof consola
+
   constructor() {}
+
+  ensureConditionKeysExist(opts: IMatcherOpts) {
+    if (isNil(opts?.FromType) || isNil(opts?.MsgType) || isNil(opts?.C2cCmd)) {
+      return false
+    }
+    return true
+  }
 
   matchGroupMessage(opts: IMatcherOpts) {
     const { FromType, MsgType, C2cCmd } = opts
