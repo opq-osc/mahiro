@@ -625,3 +625,22 @@ export interface IDropGroupMessageOpts {
    */
   qq?: number
 }
+
+export interface ISendGroupMessageReturn extends ISendMsgResponse {
+  drop: () => Promise<void>
+}
+
+export interface IMessageSnapshotGetterOpts {
+  FromUin: number
+  MsgSeq?: number
+  MsgTime?: number
+}
+
+export const getMessageSnapshotTTL = () => {
+  const env = process.env.MAHIRO_MESSAGE_SNAPSHOT_TTL
+  if (env?.length) {
+    return parseInt(env, 10)
+  }
+  // default: 2min
+  return 2 * 60 * 1e3
+}

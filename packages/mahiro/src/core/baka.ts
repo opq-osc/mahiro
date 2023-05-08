@@ -2,9 +2,11 @@ import { consola } from 'consola'
 import {
   IBakaOpts,
   IDropGroupMessageOpts,
+  IMessageSnapshotGetterOpts,
   ISendApiOpts,
   OPQ_APIS,
   dropSchema,
+  getMessageSnapshotTTL,
 } from './interface'
 import type { Mahiro } from '.'
 import {
@@ -17,11 +19,17 @@ import {
   ISendParams,
 } from '../send/interface'
 import qs from 'qs'
+import { IMsg } from '../received/interface'
+import { isNil } from 'lodash'
 
 export class Baka {
   logger = consola.withTag('baka') as typeof consola
 
   mahiro!: Mahiro
+
+  // snapshot
+  snapshotKey = 'mahiro:baka:snapshot:group'
+  snapshotTTL = getMessageSnapshotTTL()
 
   constructor(opts: IBakaOpts) {
     this.mahiro = opts.mahiro
@@ -90,5 +98,37 @@ export class Baka {
       qq: useQQ,
     })
     return res
+  }
+
+  async setMessageSnapshot(json: IMsg) {
+    if (!this.mahiro.db.isRedisKVAvailable) {
+      return
+    }
+    const MsgHead = json?.CurrentPacket?.EventData?.MsgHead
+    if (isNil(MsgHead?.FromUin) || isNil(MsgHead?.MsgSeq) || isNil(MsgHead?.MsgTime)) {
+      this.logger.debug(`Message snapshot failed, because missing some fields, MsgHead: ${JSON.stringify(MsgHead)}`)
+      return
+    }
+    const key = `${this.snapshotKey}:${MsgHead.FromUin}:${MsgHead.MsgSeq}:${MsgHead.MsgTime}`
+    const value = JSON.stringify(json)
+    await this.mahiro.db.redisKV.set(key, value, this.snapshotTTL)
+    this.logger.debug(`Message snapshot success, key: ${key}`)
+  }
+
+  async getMessageSnapshotByHead(opts: IMessageSnapshotGetterOpts) {
+    const { FromUin, MsgSeq, MsgTime } = opts
+    if (isNil(FromUin) || isNil(MsgSeq) || isNil(MsgTime)) {
+      this.logger.warn(`Get message snapshot failed, because missing some fields, opts: ${JSON.stringify(opts)}`)
+      return
+    }
+    const key = `${this.snapshotKey}:${FromUin}:${MsgSeq}:${MsgTime}`
+    const value = await this.mahiro.db.redisKV.get(key)
+    if (isNil(value)) {
+      this.logger.warn(`Get message snapshot failed, key: ${key}, expired or not exists`)
+      return
+    }
+    const json = JSON.parse(value)
+    this.logger.debug(`Get message snapshot success, key: ${key}`)
+    return json as IMsg
   }
 }

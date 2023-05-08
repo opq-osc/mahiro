@@ -46,6 +46,7 @@ import {
   IGroupEventInvite,
   IGroupEventAdminChange,
   IGetGroupListOpts,
+  ISendGroupMessageReturn,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -725,6 +726,10 @@ export class Mahiro {
       } as IGroupMessage
       // ignore myself and all side qq
       const isBot = this.isRegisteredAccount(data.userId)
+      // save all bot raw message snapshot to redis for drop message
+      if (isBot) {
+        await this.baka.setMessageSnapshot(json)
+      }
       if (ignoreMyself && isBot) {
         return
       }
@@ -1331,7 +1336,35 @@ export class Mahiro {
       },
       qq: useQQ,
     })
-    return res
+    const drop = async () => {
+      // ensure redis connected
+      if (!this.db.isRedisKVAvailable) {
+        throw new Error(
+          `Drop self message depends on redis, but redis is not available`,
+        )
+      }
+      const json = await this.baka.getMessageSnapshotByHead({
+        FromUin: groupId,
+        MsgSeq: res?.ResponseData?.MsgSeq,
+        MsgTime: res?.ResponseData?.MsgTime,
+      })
+      if (json) {
+        const MsgHead = json?.CurrentPacket?.EventData?.MsgHead
+        await this.baka.dropGroupMessage({
+          to: {
+            FromUin: groupId,
+            MsgSeq: MsgHead?.MsgSeq,
+            MsgRandom: MsgHead?.MsgRandom,
+          },
+        })
+      } else {
+        this.logger.warn(`Drop self message failed, not found message snapshot`)
+      }
+    }
+    return {
+      ...res,
+      drop,
+    } as ISendGroupMessageReturn
   }
 
   async sendFriendMessage(data: IApiSendFriendMessage) {

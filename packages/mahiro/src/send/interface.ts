@@ -175,6 +175,11 @@ export interface ICgiBaseResponse {
  */
 export interface IResponseData {
   MsgTime: number
+
+  /**
+   * send group message response only
+   */
+  MsgSeq?: number
 }
 
 /**
