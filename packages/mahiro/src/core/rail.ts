@@ -46,12 +46,6 @@ export class Rail {
       this.logger.error(`Reply Message 'to' object validate failed`, e)
       return
     }
-    this.logger.info(
-      `Send reply message, use account ${qq}, msg content: ${msg?.Content?.slice(
-        0,
-        10,
-      )}...`,
-    )
     // ensure msg content is string
     if (isNil(msg?.Content)) {
       msg.Content = ''
@@ -59,6 +53,12 @@ export class Rail {
     const useQQ = this.mahiro.getUseQQ({
       specifiedQQ: qq,
     })
+    this.logger.info(
+      `Send reply message, use account ${useQQ}, msg content: ${msg?.Content?.slice(
+        0,
+        10,
+      )}...`,
+    )
     if (fastImage?.length) {
       const res = (await this.mahiro.uploadFile({
         file: fastImage,
@@ -99,15 +99,15 @@ export class Rail {
     }
     const jsonStr = isString(json) ? json : JSON.stringify(json)
     this.logger.debug(`Json message string: ${jsonStr.slice(0, 100)}`)
+    const useQQ = this.mahiro.getUseQQ({
+      specifiedQQ: qq,
+    })
     this.logger.info(
-      `Send group json message to: ${groupId}, use account ${qq}, json content: ${jsonStr.slice(
+      `Send group json message to: ${groupId}, use account ${useQQ}, json content: ${jsonStr.slice(
         0,
         10,
       )}...`,
     )
-    const useQQ = this.mahiro.getUseQQ({
-      specifiedQQ: qq,
-    })
     const res = await this.mahiro.sendApi({
       CgiRequest: {
         ToUin: groupId,

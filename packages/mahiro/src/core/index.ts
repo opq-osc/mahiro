@@ -720,6 +720,14 @@ export class Mahiro {
           MsgSeq: MsgHead?.MsgSeq,
           MsgRandom: MsgHead?.MsgRandom,
         },
+        banTo: {
+          Uin: MsgHead?.SenderUin,
+          Uid: MsgHead?.SenderUid
+        },
+        kickTo: {
+          Uin: MsgHead?.SenderUin,
+          Uid: MsgHead?.SenderUid
+        },
         configs: {
           availablePlugins: [],
         },

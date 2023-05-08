@@ -1,19 +1,26 @@
 import { consola } from 'consola'
 import {
   IBakaOpts,
+  IBanGroupMemberOpts,
   IDropGroupMessageOpts,
+  IKickGroupMemberOpts,
   IMessageSnapshotGetterOpts,
   ISendApiOpts,
   OPQ_APIS,
+  banGroupMemberSchema,
   dropSchema,
   getMessageSnapshotTTL,
+  kickGroupMemberSchema,
 } from './interface'
 import type { Mahiro } from '.'
 import {
   EFuncName,
   ESendCmd,
+  ESsoGroupOp,
   ICgiRequestUnion,
+  ICgiRequestWithBanGroupMember,
   ICgiRequestWithDropMessage,
+  ICgiRequestWithKickGroupMember,
   ISendMsg,
   ISendMsgResponse,
   ISendParams,
@@ -78,12 +85,12 @@ export class Baka {
       this.logger.error(`Validate to failed, error:`, e)
       return
     }
-    this.logger.info(
-      `Drop group message, use account ${qq}, groupId: ${to.FromUin}`,
-    )
     const useQQ = this.mahiro.getUseQQ({
       specifiedQQ: qq,
     })
+    this.logger.info(
+      `Drop group message, use account ${useQQ}, groupId: ${to.FromUin}`,
+    )
     const { FromUin, MsgSeq, MsgRandom } = to
     const res = await this.sendBakaApi<
       ICgiRequestWithDropMessage,
@@ -105,8 +112,16 @@ export class Baka {
       return
     }
     const MsgHead = json?.CurrentPacket?.EventData?.MsgHead
-    if (isNil(MsgHead?.FromUin) || isNil(MsgHead?.MsgSeq) || isNil(MsgHead?.MsgTime)) {
-      this.logger.debug(`Message snapshot failed, because missing some fields, MsgHead: ${JSON.stringify(MsgHead)}`)
+    if (
+      isNil(MsgHead?.FromUin) ||
+      isNil(MsgHead?.MsgSeq) ||
+      isNil(MsgHead?.MsgTime)
+    ) {
+      this.logger.debug(
+        `Message snapshot failed, because missing some fields, MsgHead: ${JSON.stringify(
+          MsgHead,
+        )}`,
+      )
       return
     }
     const key = `${this.snapshotKey}:${MsgHead.FromUin}:${MsgHead.MsgSeq}:${MsgHead.MsgTime}`
@@ -118,17 +133,100 @@ export class Baka {
   async getMessageSnapshotByHead(opts: IMessageSnapshotGetterOpts) {
     const { FromUin, MsgSeq, MsgTime } = opts
     if (isNil(FromUin) || isNil(MsgSeq) || isNil(MsgTime)) {
-      this.logger.warn(`Get message snapshot failed, because missing some fields, opts: ${JSON.stringify(opts)}`)
+      this.logger.warn(
+        `Get message snapshot failed, because missing some fields, opts: ${JSON.stringify(
+          opts,
+        )}`,
+      )
       return
     }
     const key = `${this.snapshotKey}:${FromUin}:${MsgSeq}:${MsgTime}`
     const value = await this.mahiro.db.redisKV.get(key)
     if (isNil(value)) {
-      this.logger.warn(`Get message snapshot failed, key: ${key}, expired or not exists`)
+      this.logger.warn(
+        `Get message snapshot failed, key: ${key}, expired or not exists`,
+      )
       return
     }
     const json = JSON.parse(value)
     this.logger.debug(`Get message snapshot success, key: ${key}`)
     return json as IMsg
+  }
+
+  async banGroupMember(opts: IBanGroupMemberOpts) {
+    const { to, qq, BanTime } = opts
+    // validate
+    this.logger.debug(
+      `Ban group member, to: ${JSON.stringify(to)}, ban time: ${BanTime}`,
+    )
+    // 30 days
+    const maxTime = 24 * 3600
+    const isBanTimeAvailable =
+      (!isNil(BanTime) && BanTime >= 60 && BanTime <= maxTime) || BanTime === 0
+    if (!isBanTimeAvailable) {
+      this.logger.error(
+        `Ban time invalid, ban time: ${BanTime}, ban time must between 60 and ${maxTime}, or 0 (unlock)`,
+      )
+      return
+    }
+    try {
+      banGroupMemberSchema.parse(to)
+    } catch (e) {
+      this.logger.error(`Validate to failed, error:`, e)
+      return
+    }
+    const useQQ = this.mahiro.getUseQQ({
+      specifiedQQ: qq,
+    })
+    this.logger.info(
+      `Ban group member ${to.Uin}, message uid: ${to.Uid}, use account ${useQQ}`,
+    )
+    const { Uin, Uid } = to
+    const res = await this.sendBakaApi<
+      ICgiRequestWithBanGroupMember,
+      ESendCmd.sso_group_op
+    >({
+      CgiRequest: {
+        Uin,
+        Uid,
+        OpCode: ESsoGroupOp.ban_group_member,
+        BanTime,
+      },
+      CgiCmd: ESendCmd.sso_group_op,
+      qq: useQQ,
+    })
+    return res
+  }
+
+  async kickGroupMember(opts: IKickGroupMemberOpts) {
+    const { to, qq } = opts
+    this.logger.debug(`Kick group member, to: ${JSON.stringify(to)}`)
+    // validate
+    try {
+      kickGroupMemberSchema.parse(to)
+    } catch (e) {
+      this.logger.error(`Validate to failed, error:`, e)
+      return
+    }
+    const useQQ = this.mahiro.getUseQQ({
+      specifiedQQ: qq,
+    })
+    this.logger.info(
+      `Kick group member ${to.Uin}, message uid: ${to.Uid}, use account ${useQQ}`,
+    )
+    const { Uin, Uid } = to
+    const res = await this.sendBakaApi<
+      ICgiRequestWithKickGroupMember,
+      ESendCmd.sso_group_op
+    >({
+      CgiRequest: {
+        Uin,
+        Uid,
+        OpCode: ESsoGroupOp.kick_group_member,
+      },
+      CgiCmd: ESendCmd.sso_group_op,
+      qq: useQQ,
+    })
+    return res
   }
 }

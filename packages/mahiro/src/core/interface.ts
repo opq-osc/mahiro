@@ -8,9 +8,11 @@ import {
 import {
   ESendCmd,
   EUploadCommandId,
+  IBanMemberTo,
   ICgiRequest,
   ICgiRequestUnion,
   IDropTo,
+  IKickMemberTo,
   IReplyTo,
   IResponseDataWithSearchUser,
   ISendMsg,
@@ -185,6 +187,8 @@ export interface IGroupMessage extends IMahiroMsgBase {
   userNickname: string
   replyTo: IReplyTo
   dropTo: IDropTo
+  banTo: IBanMemberTo
+  kickTo: IKickMemberTo
   /**
    * 高级配置，一般用于内部
    */
@@ -643,4 +647,28 @@ export const getMessageSnapshotTTL = () => {
   }
   // default: 2min
   return 2 * 60 * 1e3
+}
+
+export const banGroupMemberSchema = z.object({
+  Uin: z.number(),
+  Uid: z.string(),
+})
+
+export interface IBanGroupMemberOpts {
+  to: IBanMemberTo
+  qq?: number
+  /**
+   * ban seconds, (60s ~ 30days, 86400s)
+   */
+  BanTime: number
+}
+
+export const kickGroupMemberSchema = z.object({
+  Uin: z.number(),
+  Uid: z.string(),
+})
+
+export interface IKickGroupMemberOpts {
+  to: IKickMemberTo
+  qq?: number
 }

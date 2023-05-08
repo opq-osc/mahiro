@@ -6,6 +6,7 @@ export enum ESendCmd {
   search = 'QueryUinByUid',
   get_group_list = 'GetGroupLists',
   drop_group_message = 'GroupRevokeMsg',
+  sso_group_op = 'SsoGroup.Op'
 }
 
 export interface ISearchUserRequest {
@@ -83,6 +84,21 @@ export enum EToType {
   friends = 1,
 }
 
+export enum ESsoGroupOp {
+  ban_group_member = 4691,
+  kick_group_member = 2208
+}
+
+export interface IBanMemberTo {
+  Uin: number
+  Uid: string
+}
+
+export interface IKickMemberTo {
+  Uin: number
+  Uid: string
+}
+
 export type IDropTo = Required<
   Pick<IMsgHead, 'MsgSeq' | 'MsgRandom' | 'FromUin'>
 >
@@ -97,7 +113,24 @@ export interface ICgiRequestWithDropMessage {
   MsgRandom: number
 }
 
-export type ICgiRequestUnion = ICgiRequestWithDropMessage | ICgiRequest
+export interface ICgiRequestWithBanGroupMember {
+  OpCode: ESsoGroupOp.ban_group_member
+  Uin: number
+  Uid: string
+  BanTime: number
+}
+
+export interface ICgiRequestWithKickGroupMember {
+  OpCode: ESsoGroupOp.kick_group_member
+  Uin: number
+  Uid: string
+}
+
+export type ICgiRequestUnion =
+  | ICgiRequest
+  | ICgiRequestWithDropMessage
+  | ICgiRequestWithBanGroupMember
+  | ICgiRequestWithKickGroupMember
 
 export interface ICgiRequest {
   /**

@@ -515,6 +515,10 @@ export interface IMsgHead {
    */
   SenderUin: number
   /**
+   * 触发消息对象 Uid
+   */
+  SenderUid: string
+  /**
    * 触发消息对象 群昵称 群组有值 私聊好友为空
    */
   SenderNick: string | ''
