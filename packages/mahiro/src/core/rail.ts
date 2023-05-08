@@ -26,7 +26,8 @@ export class Rail {
   }
 
   /**
-   * @deprecated ⛔️ Currently OPQ not implement this API
+   * @deprecated 😭 Very dangerous, use it carefully
+   * @description Currently cannot display the reply details (user name and message content)
    */
   async replyGroupMessage(data: IReplyGroupMessageOpts) {
     const {

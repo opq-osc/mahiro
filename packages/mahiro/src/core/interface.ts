@@ -584,7 +584,7 @@ export interface IRailOpts {
 
 export const replyToSchema = z.object({
   MsgSeq: z.number(),
-  MsgType: z.number(),
+  MsgTime: z.number(),
   MsgUid: z.number(),
   FromUin: z.number(),
 })

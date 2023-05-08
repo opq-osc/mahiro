@@ -701,7 +701,7 @@ export class Mahiro {
         replyTo: {
           FromUin: groupId,
           MsgSeq: MsgHead?.MsgSeq,
-          MsgType: MsgHead?.MsgType,
+          MsgTime: MsgHead?.MsgTime,
           MsgUid: MsgHead?.MsgUid,
         },
         configs: {

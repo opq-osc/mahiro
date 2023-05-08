@@ -80,7 +80,7 @@ export enum EToType {
 }
 
 export type IReplyTo = Required<
-  Pick<IMsgHead, 'MsgSeq' | 'MsgType' | 'MsgUid' | 'FromUin'>
+  Pick<IMsgHead, 'MsgSeq' | 'MsgTime' | 'MsgUid' | 'FromUin'>
 >
 
 export interface ICgiRequest {
