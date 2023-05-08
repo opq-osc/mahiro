@@ -101,6 +101,7 @@ import { Avatar } from './avatar'
 import { Patcher } from './patch'
 import { Rail } from './rail'
 import { saveCrashLog } from '../utils/crash'
+import { Baka } from './baka'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -177,6 +178,9 @@ export class Mahiro {
   // rail
   rail!: Rail
 
+  // baka
+  baka!: Baka
+
   constructor(opts: IMahiroOpts) {
     this.printLogo()
     this.opts = opts
@@ -189,6 +193,7 @@ export class Mahiro {
     this.initSession()
     this.initPatcher()
     this.initRail()
+    this.initBaka()
     await this.startNodeServer()
     this.registerOptionsInterceptors()
     this.registerAdminManager()
@@ -211,6 +216,11 @@ export class Mahiro {
   private initRail() {
     this.logger.debug(`[Rail] Init rail`)
     this.rail = new Rail({ mahiro: this })
+  }
+
+  private initBaka() {
+    this.logger.debug(`[Baka] Init baka`)
+    this.baka = new Baka({ mahiro: this })
   }
 
   static async start(opts: IMahiroOpts) {
@@ -704,6 +714,11 @@ export class Mahiro {
           MsgTime: MsgHead?.MsgTime,
           MsgUid: MsgHead?.MsgUid,
         },
+        dropTo: {
+          FromUin: groupId,
+          MsgSeq: MsgHead?.MsgSeq,
+          MsgRandom: MsgHead?.MsgRandom,
+        },
         configs: {
           availablePlugins: [],
         },
@@ -877,7 +892,7 @@ export class Mahiro {
     return asyncHookUtils.parse(this.asyncLocalStorage.getStore())
   }
 
-  private getAccount(qq: number) {
+  getAccount(qq: number) {
     if (qq === this.mainAccount.qq) {
       return this.mainAccount
     }
@@ -902,7 +917,7 @@ export class Mahiro {
   }
 
   async sendApi(opts: ISendApiOpts) {
-    const { CgiRequest, qq } = opts
+    const { CgiRequest, qq, CgiCmd = ESendCmd.send } = opts
     const account = this.getAccount(qq)
     if (!account.wsConnected) {
       this.logger.error(`WS not connected, send api failed, account(${qq})`)
@@ -916,7 +931,7 @@ export class Mahiro {
     const stringifyParams = qs.stringify(params)
     const sendMsgUrl = `${account.url}${OPQ_APIS.common}?${stringifyParams}`
     const data: ISendMsg = {
-      CgiCmd: ESendCmd.send,
+      CgiCmd,
       CgiRequest,
     }
     // run interceptor

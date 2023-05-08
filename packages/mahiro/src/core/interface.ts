@@ -6,8 +6,11 @@ import {
   IMsgHead,
 } from '../received/interface'
 import {
+  ESendCmd,
   EUploadCommandId,
   ICgiRequest,
+  ICgiRequestUnion,
+  IDropTo,
   IReplyTo,
   IResponseDataWithSearchUser,
   ISendMsg,
@@ -181,6 +184,7 @@ export interface IGroupMessage extends IMahiroMsgBase {
   userId: number
   userNickname: string
   replyTo: IReplyTo
+  dropTo: IDropTo
   /**
    * 高级配置，一般用于内部
    */
@@ -383,8 +387,12 @@ export interface IApiSendGroupXmlMessage {
   xml: string
 }
 
-export interface ISendApiOpts {
-  CgiRequest: ICgiRequest
+export interface ISendApiOpts<
+  T extends ICgiRequestUnion = ICgiRequest,
+  K extends ESendCmd = ESendCmd.send,
+> {
+  CgiCmd?: K
+  CgiRequest: T
   qq: number
 }
 
@@ -598,4 +606,22 @@ export interface IReplyGroupMessageOpts {
    * 必须传图片本地绝对路径或 url
    */
   fastImage?: string
+}
+
+export interface IBakaOpts {
+  mahiro: Mahiro
+}
+
+export const dropSchema = z.object({
+  MsgSeq: z.number(),
+  MsgRandom: z.number(),
+  FromUin: z.number(),
+})
+
+export interface IDropGroupMessageOpts {
+  to: IDropTo
+  /**
+   * bot qq
+   */
+  qq?: number
 }

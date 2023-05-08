@@ -5,6 +5,7 @@ export enum ESendCmd {
   upload = 'PicUp.DataUp',
   search = 'QueryUinByUid',
   get_group_list = 'GetGroupLists',
+  drop_group_message = 'GroupRevokeMsg',
 }
 
 export interface ISearchUserRequest {
@@ -68,9 +69,12 @@ export interface IUploadFileRequest {
   Base64Buf?: string
 }
 
-export interface ISendMsg {
-  CgiCmd: ESendCmd.send
-  CgiRequest: ICgiRequest
+export interface ISendMsg<
+  T extends ESendCmd = ESendCmd.send,
+  K extends ICgiRequestUnion = ICgiRequest,
+> {
+  CgiCmd: T
+  CgiRequest: K
 }
 
 export enum EToType {
@@ -79,9 +83,21 @@ export enum EToType {
   friends = 1,
 }
 
+export type IDropTo = Required<
+  Pick<IMsgHead, 'MsgSeq' | 'MsgRandom' | 'FromUin'>
+>
+
 export type IReplyTo = Required<
   Pick<IMsgHead, 'MsgSeq' | 'MsgTime' | 'MsgUid' | 'FromUin'>
 >
+
+export interface ICgiRequestWithDropMessage {
+  Uin: number
+  MsgSeq: number
+  MsgRandom: number
+}
+
+export type ICgiRequestUnion = ICgiRequestWithDropMessage | ICgiRequest
 
 export interface ICgiRequest {
   /**
