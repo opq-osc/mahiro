@@ -191,6 +191,72 @@ import { Callout } from 'nextra-theme-docs'
   不保证一定获取到，请兜底处理
 </Callout>
 
+## 操作 API
+
+### `baka.banGroupMember`
+
+禁言群组成员：
+
+```ts
+mahiro.onGroupMessage('ban', async (data) => {
+  if (data.msg?.Content === 'I need ban') {
+    mahiro.baka.banGroupMember({
+      to: data.banTo,
+      BanTime: 60 // 60s - 86400s (30 days), use 0 unlock
+    })
+  }
+})
+```
+
+### `baka.kickGroupMember`
+
+移除群组成员：
+
+```ts
+mahiro.onGroupMessage('kick', async (data) => {
+  if (data.msg?.Content === 'ping') {
+    mahiro.baka.kickGroupMember({
+      to: data.kickTo,
+    })
+  }
+})
+```
+
+### `baka.dropGroupMessage`
+
+撤回群组消息：
+
+```ts
+mahiro.onGroupMessage('drop', async (data) => {
+  if (data.msg?.Content === 'ErrorMessage') {
+    mahiro.baka.dropGroupMessage({
+      to: data.dropTo
+    })
+  }
+})
+```
+
+撤回自己消息：
+
+```ts
+mahiro.onGroupMessage('revoke', async (data) => {
+  if (data.msg?.Content === 'Hello') {
+    const op = await mahiro.sendGroupMessage()
+    
+    // 5s after revoke
+    setTimeout(() => {
+      op?.drop()
+    }, 5 * 1000)
+  }
+})
+```
+
+注：
+
+1. 撤回自己消息需开启 redis ，详见 [`advancedOptions.redisKV`](./kv#dbrediskv-redis) 。
+
+2. 撤回自己消息的有效期默认为 2 分钟，过期后不可撤回。
+
 ## 高级 API
 
 ### `onNativeEvent`
@@ -240,7 +306,7 @@ const avatarUrl = `${user.Head}${EAvatarSize.s_640}`
 
 ### `rail.replyGroupMessage`
 
-回复某一条群组消息。
+回复某一条群组消息：
 
 ```ts
 mahiro.onGroupMessage('reply', async (data) => {
