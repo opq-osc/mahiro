@@ -1,5 +1,11 @@
 # mahiro
 
+## 13.0.0
+
+### Minor Changes
+
+- Add manual kick and drop apis
+
 ## 12.0.0
 
 ### Minor Changes
