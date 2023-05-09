@@ -5,8 +5,9 @@ export enum ESendCmd {
   upload = 'PicUp.DataUp',
   search = 'QueryUinByUid',
   get_group_list = 'GetGroupLists',
+  get_group_member_list = 'GetGroupMemberLists',
   drop_group_message = 'GroupRevokeMsg',
-  sso_group_op = 'SsoGroup.Op'
+  sso_group_op = 'SsoGroup.Op',
 }
 
 export interface ISearchUserRequest {
@@ -76,7 +77,7 @@ export enum EToType {
 
 export enum ESsoGroupOp {
   ban_group_member = 4691,
-  kick_group_member = 2208
+  kick_group_member = 2208,
 }
 
 export interface IBanMemberTo {
@@ -120,12 +121,18 @@ export interface ICgiRequestWithGetGroupList {
   LastBuffer?: string
 }
 
+export interface ICgiRequestWithGetGroupMemberList {
+  Uin: number
+  LastBuffer?: string
+}
+
 export type ICgiRequestUnion =
   | ICgiRequest
   | ICgiRequestWithDropMessage
   | ICgiRequestWithBanGroupMember
   | ICgiRequestWithKickGroupMember
   | ICgiRequestWithGetGroupList
+  | ICgiRequestWithGetGroupMemberList
 
 export interface ICgiRequest {
   /**
@@ -237,6 +244,10 @@ export enum EAvatarSize {
   s_640 = 5,
 }
 
+export interface IGroupListMap {
+  [groupId: number]: IGroupList
+}
+
 export interface IGroupList {
   /**
    * timestamp (s)
@@ -259,6 +270,41 @@ export interface IGroupList {
 
 export interface IResponseDataWithGroupList {
   GroupLists: IGroupList[]
+  LastBuffer?: string
+}
+
+export interface IGroupMemberListMap {
+  [userId: number]: IGroupMemberList
+}
+
+export interface IGroupMemberList {
+  CreditLevel: number
+  /**
+   * timestamp (s)
+   */
+  JoinTime: number
+  /**
+   * timestamp (s)
+   */
+  LastSpeakTime: number
+  /**
+   * @enum 0 : hidden
+   */
+  Level: number
+  /**
+   * ? means
+   */
+  MemberFlag: number
+  /**
+   * user nickname
+   */
+  Nick: string
+  Uid: string
+  Uin: number
+}
+
+export interface IResponseDataWithGroupMemberList {
+  MemberLists: IGroupMemberList[]
   LastBuffer?: string
 }
 
@@ -300,6 +346,7 @@ export type IResponseDataUnion =
   | IResponseDataWithImage
   | IResponseDataWithSearchUser
   | IResponseDataWithGroupList
+  | IResponseDataWithGroupMemberList
 
 export interface ISendMsgResponse<
   T extends IResponseDataUnion = IResponseData,

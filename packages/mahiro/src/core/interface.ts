@@ -683,7 +683,18 @@ export interface IKickGroupMemberOpts {
 export interface IGroupListOpts {
   qq?: number
   /**
-   * not use cache
+   * not use cache when `true`
+   * @default false
+   */
+  force?: boolean
+}
+
+export interface IGetGroupMemberListOpts {
+  groupId: number
+  qq?: number
+  /**
+   * not use cache when `true`
+   * @default false
    */
   force?: boolean
 }
