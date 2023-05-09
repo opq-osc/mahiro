@@ -280,6 +280,38 @@ mahiro.onGroupMessage('revoke', async (data) => {
   撤回自己消息需开启 Redis ，详见 [KV 存储](./kv#dbrediskv-redis) 。<br /> 默认有效期默认为 2 分钟，过期后不可撤回。
 </Callout>
 
+### `baka.getGroupListMap`
+
+获取账号群组列表的映射。
+
+```ts
+  const map = await mahiro.baka.getGroupListMap()
+  const groupInfo = map?.[groupId]
+
+  // 🟡 skip cache: very dangerous
+  await mahiro.baka.getGroupListMap({ force: true })
+```
+
+<Callout type="info" emoji="ℹ️">
+  使用该功能需开启 Redis ，详见 [KV 存储](./kv#dbrediskv-redis) ；默认 `20` 分钟缓存，使用 `force` 刷新缓存或调整 `MAHIRO_GROUP_DATA_TTL`
+</Callout>
+
+### `baka.getGroupMemberListMap`
+
+获取某群组成员的映射。
+
+```ts
+  const map = await mahiro.baka.getGroupMemberListMap({ groupId })
+  const userInfo = map?.[userId]
+
+  // 🟡 skip cache: very dangerous
+  await mahiro.baka.getGroupMemberListMap({ groupId, force: true })
+```
+
+<Callout type="info" emoji="ℹ️">
+  使用该功能需开启 Redis ，详见 [KV 存储](./kv#dbrediskv-redis) ；默认 `20` 分钟缓存，使用 `force` 刷新缓存或调整 `MAHIRO_GROUP_DATA_TTL`
+</Callout>
+
 ## 高级 API
 
 ### `onNativeEvent`
@@ -320,6 +352,19 @@ const avatarUrl = `${user.Head}${EAvatarSize.s_640}`
 ```
 
 > 别名：`getUserInfo`
+
+### `baka.getUserInfoCache2LevelByUin`
+
+获取某账号的元信息。
+
+```ts
+  const user = await mahiro.baka.getUserInfoCache2LevelByUin(userId)
+  user?.SenderUid
+```
+
+<Callout type="info" emoji="ℹ️">
+  使用该功能需开启 Redis ，详见 [KV 存储](./kv#dbrediskv-redis) ；默认 `20` 分钟缓存，使用 `MAHIRO_GROUP_DATA_TTL` 调整
+</Callout>
 
 ## 危险 API
 

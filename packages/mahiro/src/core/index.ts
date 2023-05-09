@@ -1040,7 +1040,7 @@ export class Mahiro {
    * @deprecated use `mahiro.baka.getGroupList` instead
    */
   async getGroupList() {
-    throw new Error('Deprecated, use `mahiro.baka.getGroupList` instead, see')
+    throw new Error('Deprecated, use `mahiro.baka.getGroupListMap` instead')
   }
 
   async uploadFile(opts: IMahiroUploadFileOpts) {
