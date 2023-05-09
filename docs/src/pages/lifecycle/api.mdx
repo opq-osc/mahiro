@@ -155,13 +155,11 @@ import { Callout } from 'nextra-theme-docs'
 
 ## 常用信息
 
-### `getGroupList`
+### ~~`getGroupList`~~
 
-获取群组列表
+ - available version: `<= 12.0.0`
 
-```ts
-  const list = await mahiro.getGroupList({ qq })
-```
+~~获取群组列表~~ ，已废弃。
 
 ### `avatar.getUserAvatarUrl`
 
@@ -195,7 +193,7 @@ import { Callout } from 'nextra-theme-docs'
 
 ### `baka.banGroupMember`
 
-禁言群组成员：
+在消息响应中禁言群组成员：
 
 ```ts
 mahiro.onGroupMessage('ban', async (data) => {
@@ -207,6 +205,20 @@ mahiro.onGroupMessage('ban', async (data) => {
   }
 })
 ```
+
+手动禁言群组成员：
+
+```ts
+mahiro.baka.banGroupMember({
+  groupId,
+  userId,
+  BanTime: 0 // use `0` unlock
+})
+```
+
+<Callout type="info" emoji="ℹ️">
+  使用手动禁言需开启 Redis ，详见 [KV 存储](./kv#dbrediskv-redis)
+</Callout>
 
 ### `baka.kickGroupMember`
 
@@ -221,6 +233,19 @@ mahiro.onGroupMessage('kick', async (data) => {
   }
 })
 ```
+
+手动移除群组成员：
+
+```ts
+mahiro.baka.kickGroupMember({
+  groupId,
+  userId
+})
+```
+
+<Callout type="info" emoji="ℹ️">
+  使用手动移除需开启 Redis ，详见 [KV 存储](./kv#dbrediskv-redis)
+</Callout>
 
 ### `baka.dropGroupMessage`
 
@@ -251,11 +276,9 @@ mahiro.onGroupMessage('revoke', async (data) => {
 })
 ```
 
-注：
-
-1. 撤回自己消息需开启 redis ，详见 [`advancedOptions.redisKV`](./kv#dbrediskv-redis) 。
-
-2. 撤回自己消息的有效期默认为 2 分钟，过期后不可撤回。
+<Callout type="info" emoji="ℹ️">
+  撤回自己消息需开启 Redis ，详见 [KV 存储](./kv#dbrediskv-redis) 。<br /> 默认有效期默认为 2 分钟，过期后不可撤回。
+</Callout>
 
 ## 高级 API
 
