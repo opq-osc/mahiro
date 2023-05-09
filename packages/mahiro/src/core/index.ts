@@ -743,6 +743,10 @@ export class Mahiro {
           availablePlugins: [],
         },
       } as IGroupMessage
+      // set user info cache
+      if (process.env.MAHIRO_2_LEVEL_CACHE !== 'none') {
+        await this.baka.setUserInfoCache2Level(MsgHead)
+      }
       // ignore myself and all side qq
       const isBot = this.isRegisteredAccount(data.userId)
       // save all bot raw message snapshot to redis for drop message

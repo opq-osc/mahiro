@@ -37,7 +37,7 @@ import {
   ISendParams,
 } from '../send/interface'
 import qs from 'qs'
-import { IMsg } from '../received/interface'
+import { IMsg, IMsgHead } from '../received/interface'
 import { isNil, uniqBy } from 'lodash'
 import { sleep } from '../utils'
 
@@ -57,6 +57,10 @@ export class Baka {
   // group member list cache
   groupMemberListCacheKey = 'mahiro:baka:cache:group:member:list'
   groupMemberListCacheTTL = getGroupDataTTL()
+
+  // user 2 level cache
+  user2LevelCacheKey = 'mahiro:baka:cache:group:user:2level'
+  user2LevelCacheTTL = getGroupDataTTL()
 
   constructor(opts: IBakaOpts) {
     this.mahiro = opts.mahiro
@@ -201,22 +205,35 @@ export class Baka {
         return
       }
     } else if (!isNil(userId) && !isNil(groupId)) {
-      // we auto detect user uid
-      const groupMemberList = await this.getGroupMemberListMap({
-        groupId,
-        qq: useQQ,
-      })
-      const memberInfo = groupMemberList?.[userId]
-      if (!memberInfo?.Uid?.length) {
-        this.logger.error(
-          `Validate to failed, user not in group, userId: ${userId}, groupId: ${groupId}`,
+      // first get from 2 level cache
+      const userInfo = await this.getUserInfoCache2LevelByUin(userId)
+      if (userInfo?.SenderUid?.length) {
+        this.logger.debug(
+          `Get user info from 2 level cache success, userId: ${userId}`,
         )
-        return
-      }
-      // add to `to`
-      to = {
-        Uid: memberInfo.Uid,
-        Uin: groupId,
+        // add to `to`
+        to = {
+          Uid: userInfo.SenderUid,
+          Uin: groupId,
+        }
+      } else {
+        // we auto detect user uid from group member list
+        const groupMemberList = await this.getGroupMemberListMap({
+          groupId,
+          qq: useQQ,
+        })
+        const memberInfo = groupMemberList?.[userId]
+        if (!memberInfo?.Uid?.length) {
+          this.logger.error(
+            `Validate to failed, user not in group, userId: ${userId}, groupId: ${groupId}`,
+          )
+          return
+        }
+        // add to `to`
+        to = {
+          Uid: memberInfo.Uid,
+          Uin: groupId,
+        }
       }
     } else {
       // never
@@ -262,22 +279,35 @@ export class Baka {
         return
       }
     } else if (!isNil(userId) && !isNil(groupId)) {
-      // we auto detect user uid
-      const groupMemberList = await this.getGroupMemberListMap({
-        groupId,
-        qq: useQQ,
-      })
-      const memberInfo = groupMemberList?.[userId]
-      if (!memberInfo?.Uid?.length) {
-        this.logger.error(
-          `Validate to failed, user not in group, userId: ${userId}, groupId: ${groupId}`,
+      // first get from 2 level cache
+      const userInfo = await this.getUserInfoCache2LevelByUin(userId)
+      if (userInfo?.SenderUid?.length) {
+        this.logger.debug(
+          `Get user info from 2 level cache success, userId: ${userId}`,
         )
-        return
-      }
-      // add to `to`
-      to = {
-        Uid: memberInfo.Uid,
-        Uin: groupId,
+        // add to `to`
+        to = {
+          Uid: userInfo.SenderUid,
+          Uin: groupId,
+        }
+      } else {
+        // we auto detect user uid
+        const groupMemberList = await this.getGroupMemberListMap({
+          groupId,
+          qq: useQQ,
+        })
+        const memberInfo = groupMemberList?.[userId]
+        if (!memberInfo?.Uid?.length) {
+          this.logger.error(
+            `Validate to failed, user not in group, userId: ${userId}, groupId: ${groupId}`,
+          )
+          return
+        }
+        // add to `to`
+        to = {
+          Uid: memberInfo.Uid,
+          Uin: groupId,
+        }
       }
     } else {
       // never
@@ -488,5 +518,47 @@ export class Baka {
       `Get group member list success, length: ${uniqData.length}, cache to redis`,
     )
     return uniqDataMap
+  }
+
+  /**
+   * for 2 level user info cache
+   *
+   * we auto cache user info when user every send message
+   * when we need user info, this will be used as a `2 level` high priority
+   */
+  async setUserInfoCache2Level(head: IMsgHead) {
+    if (!this.mahiro.db.isRedisKVAvailable) {
+      // skip
+      return
+    }
+    if (isNil(head?.SenderUin)) {
+      this.logger.warn(`User info cache 2 level fail, head.SenderUin is empty`)
+      return
+    }
+    const key = `${this.user2LevelCacheKey}:${head.SenderUin}`
+    const hasKey = await this.mahiro.db.redisKV.has(key)
+    if (hasKey) {
+      this.logger.debug(`User info cache 2 level has key, ignore, key: ${key}`)
+      // not need cache
+      return
+    }
+    // cache
+    await this.mahiro.db.redisKV.set(key, head, this.user2LevelCacheTTL)
+    this.logger.debug(`User info cache 2 level success, key: ${key}`)
+  }
+
+  async getUserInfoCache2LevelByUin(uin: number) {
+    if (!this.mahiro.db.isRedisKVAvailable) {
+      // skip
+      return
+    }
+    const key = `${this.user2LevelCacheKey}:${uin}`
+    const value = await this.mahiro.db.redisKV.get(key)
+    if (!value) {
+      this.logger.debug(`Get user info cache 2 level fail, key: ${key}`)
+      return
+    }
+    this.logger.debug(`Get user info cache 2 level success, key: ${key}`)
+    return value as IMsgHead
   }
 }
