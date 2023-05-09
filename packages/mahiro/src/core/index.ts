@@ -45,7 +45,6 @@ import {
   IGroupEventJoin,
   IGroupEventInvite,
   IGroupEventAdminChange,
-  IGetGroupListOpts,
   ISendGroupMessageReturn,
 } from './interface'
 import { z } from 'zod'
@@ -65,8 +64,6 @@ import {
   ISearchUser,
   IResponseDataWithSearchUser,
   IResponseDataWithImage,
-  IGetUserList,
-  IResponseDataWithGroupList,
 } from '../send/interface'
 import qs from 'qs'
 import { parse } from 'url'
@@ -1035,34 +1032,11 @@ export class Mahiro {
     return this.searchUser(opts)
   }
 
-  async getGroupList(opts: IGetGroupListOpts) {
-    const { qq } = opts
-    const account = this.getAccount(qq)
-    if (!account.wsConnected) {
-      this.logger.error(
-        `WS not connected, get group list failed, account(${qq})`,
-      )
-      return
-    }
-    const params = {
-      funcname: EFuncName.MagicCgiCmd,
-      timeout: 10,
-      qq,
-    } satisfies ISendParams
-    const stringifyParams = qs.stringify(params)
-    const searchUrl = `${account.url}${OPQ_APIS.common}?${stringifyParams}`
-    const data: IGetUserList = {
-      CgiCmd: ESendCmd.get_group_list,
-      CgiRequest: {},
-    }
-    try {
-      const res = await account.request.post(searchUrl, data)
-      if (res?.data) {
-        return res.data as ISendMsgResponse<IResponseDataWithGroupList>
-      }
-    } catch (e) {
-      this.logger.error(`Get group list api error, account(${qq}) : `, e)
-    }
+  /**
+   * @deprecated use `mahiro.baka.getGroupList` instead
+   */
+  async getGroupList() {
+    throw new Error('Deprecated, use `mahiro.baka.getGroupList` instead, see')
   }
 
   async uploadFile(opts: IMahiroUploadFileOpts) {
