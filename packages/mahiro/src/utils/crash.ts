@@ -1,10 +1,17 @@
 import { consola } from 'consola'
-import { existsSync, mkdirSync, statSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
+  removeSync,
+} from 'fs-extra'
+import { join, relative } from 'path'
 
 const logger = consola.withTag('crash') as typeof consola
 
-export const saveCrashLog = (err: any) => {
+const getCrashLogDir = () => {
   const cwd = process.cwd()
   const nodeModules = join(cwd, 'node_modules')
   const saveDir =
@@ -15,6 +22,38 @@ export const saveCrashLog = (err: any) => {
   if (!existsSync(saveDir)) {
     mkdirSync(saveDir, { recursive: true })
   }
+  return saveDir
+}
+
+export const clearCrashLogs = () => {
+  const saveDir = getCrashLogDir()
+  if (existsSync(saveDir) && statSync(saveDir).isDirectory()) {
+    // remove dir
+    logger.info(`Clear crash logs in ${saveDir}`)
+    removeSync(saveDir)
+    logger.success(`Clear crash logs success`)
+  }
+}
+
+// when mahiro started, we auto detect logs
+export const printCrashLogTips = () => {
+  const saveDir = getCrashLogDir()
+  const cwd = process.cwd()
+  if (existsSync(saveDir) && statSync(saveDir).isDirectory()) {
+    const files = readdirSync(saveDir).filter((file) => file.endsWith('.log'))
+    if (files.length) {
+      logger.error(`You have ${files.length} crash logs:`)
+      files.forEach((file) => {
+        logger.warn(`- ${relative(cwd, join(saveDir, file))}`)
+      })
+      logger.warn(`Please report to https://github.com/opq-osc/mahiro/issues`)
+      logger.warn(`Use \`mahiro clean\` to clear crash logs`)
+    }
+  }
+}
+
+export const saveCrashLog = (err: any) => {
+  const saveDir = getCrashLogDir()
   const savePath = join(saveDir, `${Date.now()}.log`)
   let errorMsg: string | undefined
   try {

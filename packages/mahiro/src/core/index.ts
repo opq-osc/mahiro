@@ -101,7 +101,7 @@ import { Matcher } from './matcher'
 import { Avatar } from './avatar'
 import { Patcher } from './patch'
 import { Rail } from './rail'
-import { saveCrashLog } from '../utils/crash'
+import { printCrashLogTips, saveCrashLog } from '../utils/crash'
 import { Baka } from './baka'
 import os from 'os'
 
@@ -205,11 +205,15 @@ export class Mahiro {
   }
 
   private prepareSystemCheck() {
-    // 1. warning if < 1GB free memory
-    const freeMemory = os.freemem();
-    if (freeMemory < 1024 * 1024 * 1024) {
-      this.logger.warn(`[System] Free memory is less than 1GB, mahiro may crash`)
+    // 1. warning if < 1GB total memory
+    const totalmem = os.totalmem()
+    if (totalmem < 1024 * 1024 * 1024) {
+      this.logger.warn(
+        `[System] Total memory is less than 1GB, mahiro may crash`,
+      )
     }
+    // 2. check crash logs
+    printCrashLogTips()
   }
 
   private initSession() {
@@ -732,11 +736,11 @@ export class Mahiro {
         },
         banTo: {
           Uin: MsgHead?.SenderUin,
-          Uid: MsgHead?.SenderUid
+          Uid: MsgHead?.SenderUid,
         },
         kickTo: {
           Uin: MsgHead?.SenderUin,
-          Uid: MsgHead?.SenderUid
+          Uid: MsgHead?.SenderUid,
         },
         configs: {
           availablePlugins: [],

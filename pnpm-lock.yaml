@@ -182,6 +182,9 @@ importers:
       figlet:
         specifier: 1.5.2
         version: registry.npmjs.org/figlet@1.5.2
+      fs-extra:
+        specifier: 11.1.1
+        version: registry.npmjs.org/fs-extra@11.1.1
       iconv-lite:
         specifier: 0.6.3
         version: registry.npmjs.org/iconv-lite@0.6.3
@@ -228,6 +231,9 @@ importers:
       '@types/figlet':
         specifier: ^1.5.5
         version: registry.npmjs.org/@types/figlet@1.5.5
+      '@types/fs-extra':
+        specifier: ^11.0.1
+        version: registry.npmjs.org/@types/fs-extra@11.0.1
       '@types/is-base64':
         specifier: ^1.1.1
         version: registry.npmjs.org/@types/is-base64@1.1.1
@@ -9941,7 +9947,6 @@ packages:
       graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
       jsonfile: registry.npmjs.org/jsonfile@6.1.0
       universalify: registry.npmjs.org/universalify@2.0.0
-    dev: true
 
   registry.npmjs.org/fs-extra@7.0.1:
     resolution: {integrity: sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/fs-extra/-/fs-extra-7.0.1.tgz}
@@ -11980,7 +11985,6 @@ packages:
       universalify: registry.npmjs.org/universalify@2.0.0
     optionalDependencies:
       graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
-    dev: true
 
   registry.npmjs.org/jsprim@1.4.2:
     resolution: {integrity: sha512-P2bSOMAc/ciLz6DzgjVlGJP9+BrJWu5UDGK70C2iweC5QBIeFf0ZXRvGjEj2uYgrY2MkAAhsSWHDWlFtEroZWw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/jsprim/-/jsprim-1.4.2.tgz}
@@ -20145,7 +20149,6 @@ packages:
     name: universalify
     version: 2.0.0
     engines: {node: '>= 10.0.0'}
-    dev: true
 
   registry.npmjs.org/unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz}

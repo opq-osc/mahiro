@@ -11,6 +11,7 @@ import cron from 'node-cron'
 import cronstrue from 'cronstrue'
 import knex from 'knex'
 import * as fileType from 'mahiro/compiled/file-type'
+import fsExtra from 'fs-extra'
 
 // keyv
 import Keyv from '@keyvhq/core'
@@ -37,6 +38,7 @@ export class Utils {
   KeyvSQLite = KeyvSQLite
   KeyvRedis = KeyvRedis
   fileType = fileType
+  fsExtra = fsExtra
 
   // utils
   isBase64 = isBase64
