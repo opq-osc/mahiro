@@ -81,12 +81,24 @@ export enum ESsoGroupOp {
 }
 
 export interface IBanMemberTo {
+  /**
+   * groupId
+   */
   Uin: number
+  /**
+   * user uid
+   */
   Uid: string
 }
 
 export interface IKickMemberTo {
+  /**
+   * groupId
+   */
   Uin: number
+  /**
+   * user uid
+   */
   Uid: string
 }
 

@@ -662,7 +662,18 @@ export const banGroupMemberSchema = z.object({
 })
 
 export interface IBanGroupMemberOpts {
-  to: IBanMemberTo
+  /**
+   * quick ban with use `data.banTo`
+   */
+  to?: IBanMemberTo
+  /**
+   * manual ban, should use `groupId` and `userId`
+   */
+  groupId?: number
+  userId?: number
+  /**
+   * bot account
+   */
   qq?: number
   /**
    * ban seconds, (60s ~ 30days, 86400s)
@@ -676,7 +687,18 @@ export const kickGroupMemberSchema = z.object({
 })
 
 export interface IKickGroupMemberOpts {
-  to: IKickMemberTo
+  /**
+   * quick kick with use `data.kickTo`
+   */
+  to?: IKickMemberTo
+  /**
+   * manual ban, should use `groupId` and `userId`
+   */
+  groupId?: number
+  userId?: number
+  /**
+   * bot account
+   */
   qq?: number
 }
 

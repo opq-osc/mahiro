@@ -174,8 +174,7 @@ export class Baka {
   }
 
   async banGroupMember(opts: IBanGroupMemberOpts) {
-    const { to, qq, BanTime } = opts
-    // validate
+    let { to, qq, BanTime, userId, groupId } = opts
     this.logger.debug(
       `Ban group member, to: ${JSON.stringify(to)}, ban time: ${BanTime}`,
     )
@@ -189,15 +188,44 @@ export class Baka {
       )
       return
     }
-    try {
-      banGroupMemberSchema.parse(to)
-    } catch (e) {
-      this.logger.error(`Validate to failed, error:`, e)
-      return
-    }
     const useQQ = this.mahiro.getUseQQ({
       specifiedQQ: qq,
     })
+    // validate
+    // use `to`
+    if (!isNil(to)) {
+      try {
+        banGroupMemberSchema.parse(to)
+      } catch (e) {
+        this.logger.error(`Validate to failed, error:`, e)
+        return
+      }
+    } else if (!isNil(userId) && !isNil(groupId)) {
+      // we auto detect user uid
+      const groupMemberList = await this.getGroupMemberListMap({
+        groupId,
+        qq: useQQ,
+      })
+      const memberInfo = groupMemberList?.[userId]
+      if (!memberInfo?.Uid?.length) {
+        this.logger.error(
+          `Validate to failed, user not in group, userId: ${userId}, groupId: ${groupId}`,
+        )
+        return
+      }
+      // add to `to`
+      to = {
+        Uid: memberInfo.Uid,
+        Uin: groupId,
+      }
+    } else {
+      // never
+      this.logger.error(
+        `Validate to failed, You should use \`to\` or \`userId\` and \`groupId\``,
+      )
+      return
+    }
+    // ensure has `to`
     this.logger.info(
       `Ban group member ${to.Uin}, message uid: ${to.Uid}, use account ${useQQ}`,
     )
@@ -219,18 +247,45 @@ export class Baka {
   }
 
   async kickGroupMember(opts: IKickGroupMemberOpts) {
-    const { to, qq } = opts
+    let { to, qq, userId, groupId } = opts
     this.logger.debug(`Kick group member, to: ${JSON.stringify(to)}`)
-    // validate
-    try {
-      kickGroupMemberSchema.parse(to)
-    } catch (e) {
-      this.logger.error(`Validate to failed, error:`, e)
-      return
-    }
     const useQQ = this.mahiro.getUseQQ({
       specifiedQQ: qq,
     })
+    // validate
+    // use `to`
+    if (!isNil(to)) {
+      try {
+        kickGroupMemberSchema.parse(to)
+      } catch (e) {
+        this.logger.error(`Validate to failed, error:`, e)
+        return
+      }
+    } else if (!isNil(userId) && !isNil(groupId)) {
+      // we auto detect user uid
+      const groupMemberList = await this.getGroupMemberListMap({
+        groupId,
+        qq: useQQ,
+      })
+      const memberInfo = groupMemberList?.[userId]
+      if (!memberInfo?.Uid?.length) {
+        this.logger.error(
+          `Validate to failed, user not in group, userId: ${userId}, groupId: ${groupId}`,
+        )
+        return
+      }
+      // add to `to`
+      to = {
+        Uid: memberInfo.Uid,
+        Uin: groupId,
+      }
+    } else {
+      // never
+      this.logger.error(
+        `Validate to failed, You should use \`to\` or \`userId\` and \`groupId\``,
+      )
+      return
+    }
     this.logger.info(
       `Kick group member ${to.Uin}, message uid: ${to.Uid}, use account ${useQQ}`,
     )

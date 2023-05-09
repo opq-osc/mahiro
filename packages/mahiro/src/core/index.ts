@@ -732,11 +732,11 @@ export class Mahiro {
           MsgRandom: MsgHead?.MsgRandom,
         },
         banTo: {
-          Uin: MsgHead?.SenderUin,
+          Uin: groupId,
           Uid: MsgHead?.SenderUid,
         },
         kickTo: {
-          Uin: MsgHead?.SenderUin,
+          Uin: groupId,
           Uid: MsgHead?.SenderUid,
         },
         configs: {
