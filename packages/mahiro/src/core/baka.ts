@@ -3,12 +3,14 @@ import {
   IBakaOpts,
   IBanGroupMemberOpts,
   IDropGroupMessageOpts,
+  IGroupListOpts,
   IKickGroupMemberOpts,
   IMessageSnapshotGetterOpts,
   ISendApiOpts,
   OPQ_APIS,
   banGroupMemberSchema,
   dropSchema,
+  getGroupDataTTL,
   getMessageSnapshotTTL,
   kickGroupMemberSchema,
 } from './interface'
@@ -20,14 +22,18 @@ import {
   ICgiRequestUnion,
   ICgiRequestWithBanGroupMember,
   ICgiRequestWithDropMessage,
+  ICgiRequestWithGetGroupList,
   ICgiRequestWithKickGroupMember,
+  IGroupList,
+  IResponseDataWithGroupList,
   ISendMsg,
   ISendMsgResponse,
   ISendParams,
 } from '../send/interface'
 import qs from 'qs'
 import { IMsg } from '../received/interface'
-import { isNil } from 'lodash'
+import { isNil, uniqBy } from 'lodash'
+import { sleep } from '../utils'
 
 export class Baka {
   logger = consola.withTag('baka') as typeof consola
@@ -37,6 +43,10 @@ export class Baka {
   // snapshot
   snapshotKey = 'mahiro:baka:snapshot:group'
   snapshotTTL = getMessageSnapshotTTL()
+
+  // group list cache
+  groupListCacheKey = 'mahiro:baka:cache:group:list'
+  groupListCacheTTL = getGroupDataTTL()
 
   constructor(opts: IBakaOpts) {
     this.mahiro = opts.mahiro
@@ -229,4 +239,91 @@ export class Baka {
     })
     return res
   }
+
+  private async randomSleep() {
+    // random sleep 0.5s - 1.5s
+    const sleepTime = Math.floor(Math.random() * 1000) + 500
+    await sleep(sleepTime)
+    this.logger.info(`Poll multi page search, random sleep ${sleepTime}ms ...`)
+  }
+
+  async getGroupList(data: IGroupListOpts = {}) {
+    if (!this.mahiro.db.isRedisKVAvailable) {
+      throw new Error(`Use 'getGroupList' api must enable redis kv`)
+    }
+    const { qq, force } = data
+    this.logger.debug(`Get group list api`)
+    const useQQ = this.mahiro.getUseQQ({
+      specifiedQQ: qq,
+    })
+    this.logger.info(`Get group list, use account: ${useQQ}`)
+    const key = `${this.groupListCacheKey}:${useQQ}`
+    this.logger.debug(`Get group list, key: ${key}`)
+    if (force) {
+      this.logger.warn(
+        `Very dangerous, Get group list force mode, ignore cache`,
+      )
+    } else {
+      // get from cache
+      const cache = await this.mahiro.db.redisKV.get(key)
+      if (cache) {
+        this.logger.info(`Get group list from cache`)
+        return cache as IGroupList[]
+      }
+    }
+    // get from api
+    const allData: IGroupList[] = []
+    const pageSeach = async (page?: string) => {
+      this.logger.debug(
+        `Get group list, page: ${page?.length ? page : 'first page'}`,
+      )
+      const res = await this.sendBakaApi<
+        ICgiRequestWithGetGroupList,
+        ESendCmd.get_group_list
+      >({
+        CgiRequest: page?.length
+          ? {
+              LastBuffer: page,
+            }
+          : {},
+        CgiCmd: ESendCmd.get_group_list,
+        qq: useQQ,
+      })
+      const data = res?.ResponseData as IResponseDataWithGroupList | undefined
+      if (data?.GroupLists?.length) {
+        // push
+        data.GroupLists.forEach((group) => {
+          allData.push(group)
+        })
+        this.logger.debug(
+          `Push group list success, length: ${data.GroupLists.length}`,
+        )
+      }
+      // has next page
+      const hasNextPage = data?.LastBuffer?.length
+      if (hasNextPage) {
+        // random sleep
+        await this.randomSleep()
+        await pageSeach(data.LastBuffer)
+      } else {
+        this.logger.debug(
+          `Not has next page, group list search done, all data length: ${allData.length}`,
+        )
+      }
+    }
+    await pageSeach()
+    // uniq
+    const uniqData = uniqBy(
+      allData.filter((i) => !isNil(i?.GroupCode)),
+      (i) => i?.GroupCode,
+    )
+    // cache to redis
+    await this.mahiro.db.redisKV.set(key, uniqData, this.groupListCacheTTL)
+    this.logger.info(
+      `Get group list success, length: ${uniqData.length}, cache to redis`,
+    )
+    return uniqData
+  }
+
+  // async getGroupMemberList(opts: IGetGroupMemberListOpts) {}
 }

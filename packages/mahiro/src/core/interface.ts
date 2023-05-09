@@ -411,10 +411,6 @@ export interface ISearchUserOpts {
   Uid: string
 }
 
-export interface IGetGroupListOpts {
-  qq: number
-}
-
 const getDefaultNodeServerPort = () => {
   const fallback = 8098
   const env = process.env.MAHIRO_NODE_URL
@@ -649,6 +645,17 @@ export const getMessageSnapshotTTL = () => {
   return 2 * 60 * 1e3
 }
 
+// for group list cache
+// for group member list cache
+export const getGroupDataTTL = () => {
+  const env = process.env.MAHIRO_GROUP_DATA_TTL
+  if (env?.length) {
+    return parseInt(env, 10)
+  }
+  // default: 20 mins
+  return 20 * 60 * 1e3
+}
+
 export const banGroupMemberSchema = z.object({
   Uin: z.number(),
   Uid: z.string(),
@@ -671,4 +678,12 @@ export const kickGroupMemberSchema = z.object({
 export interface IKickGroupMemberOpts {
   to: IKickMemberTo
   qq?: number
+}
+
+export interface IGroupListOpts {
+  qq?: number
+  /**
+   * not use cache
+   */
+  force?: boolean
 }

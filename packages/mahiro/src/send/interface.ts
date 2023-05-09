@@ -18,16 +18,6 @@ export interface ISearchUser {
   CgiRequest: ISearchUserRequest
 }
 
-export interface IGetUserListRequest {
-  Uin: number
-  LastBuffer: string
-}
-
-export interface IGetUserList {
-  CgiCmd: ESendCmd.get_group_list
-  CgiRequest: IGetUserListRequest | {}
-}
-
 export interface IUploadFile {
   CgiCmd: ESendCmd.upload
   CgiRequest: IUploadFileRequest
@@ -126,11 +116,16 @@ export interface ICgiRequestWithKickGroupMember {
   Uid: string
 }
 
+export interface ICgiRequestWithGetGroupList {
+  LastBuffer?: string
+}
+
 export type ICgiRequestUnion =
   | ICgiRequest
   | ICgiRequestWithDropMessage
   | ICgiRequestWithBanGroupMember
   | ICgiRequestWithKickGroupMember
+  | ICgiRequestWithGetGroupList
 
 export interface ICgiRequest {
   /**
@@ -264,6 +259,7 @@ export interface IGroupList {
 
 export interface IResponseDataWithGroupList {
   GroupLists: IGroupList[]
+  LastBuffer?: string
 }
 
 /**
