@@ -103,6 +103,7 @@ import { Patcher } from './patch'
 import { Rail } from './rail'
 import { saveCrashLog } from '../utils/crash'
 import { Baka } from './baka'
+import os from 'os'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -184,6 +185,7 @@ export class Mahiro {
 
   constructor(opts: IMahiroOpts) {
     this.printLogo()
+    this.prepareSystemCheck()
     this.opts = opts
   }
 
@@ -200,6 +202,14 @@ export class Mahiro {
     this.registerAdminManager()
     this.logger.success('Mahiro started')
     this.initialled = true
+  }
+
+  private prepareSystemCheck() {
+    // 1. warning if < 1GB free memory
+    const freeMemory = os.freemem();
+    if (freeMemory < 1024 * 1024 * 1024) {
+      this.logger.warn(`[System] Free memory is less than 1GB, mahiro may crash`)
+    }
   }
 
   private initSession() {
