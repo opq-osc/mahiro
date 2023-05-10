@@ -71,6 +71,7 @@ import {
   EMsgEvent,
   EMsgTypeWithGroupManager,
   IEventDataWithGroupManager,
+  IEventDataWithLogin,
   IEventWithExit,
   IEventWithJoin,
   IMsg,
@@ -533,26 +534,24 @@ export class Mahiro {
     switch (EventName) {
       case EMsgEvent.ON_EVENT_LOGIN_SUCCESS:
         this.logger.success('Login success')
+        const eventWithLogin = EventData as any as
+          | IEventDataWithLogin
+          | undefined
+        this.logger.info(
+          `Login account: ${eventWithLogin?.Uin}, nickname: ${eventWithLogin?.Nick}`,
+        )
         break
       case EMsgEvent.ON_EVENT_NETWORK_CHANGE:
-        this.logger.success('Network change')
+        this.logger.warn('Network change')
+        const eventWithNetworkChange = EventData as any as
+          | IEventDataWithLogin
+          | undefined
+        this.logger.info(
+          `Network change, account: ${eventWithNetworkChange?.Uin}, nickname: ${eventWithNetworkChange?.Nick}, content: ${eventWithNetworkChange?.Content}`,
+        )
         break
       // todo: more event name tips
     }
-
-    const { MsgHead, MsgBody: _MsgBody } = EventData
-    // remove msg body null value
-    // because null can not match models in python
-    const MsgBody = removeNull(_MsgBody)
-
-    // debug log
-    this.logger.debug(
-      'Received message: ',
-      `FromType: ${MsgHead?.FromType}`,
-      `MsgType: ${MsgHead?.MsgType}`,
-      `C2cCmd: ${MsgHead?.C2cCmd}`,
-      `Content: ${MsgBody?.Content || ''}`,
-    )
 
     // handle native phase
     const withContextForNativeEvent = this.createAsyncContext({
@@ -586,6 +585,28 @@ export class Mahiro {
         },
       })
     })
+
+    // check msg complete
+    const isIncompleteMsg =
+      isNil(EventData?.MsgHead) || isNil(EventData?.MsgBody)
+    if (isIncompleteMsg) {
+      this.logger.debug('No MsgHead or MsgBody, will ignore it')
+      return
+    }
+
+    const { MsgHead, MsgBody: _MsgBody } = EventData
+    // remove msg body null value
+    // because null can not match models in python
+    const MsgBody = removeNull(_MsgBody)
+
+    // debug log
+    this.logger.debug(
+      'Received message: ',
+      `FromType: ${MsgHead?.FromType}`,
+      `MsgType: ${MsgHead?.MsgType}`,
+      `C2cCmd: ${MsgHead?.C2cCmd}`,
+      `Content: ${MsgBody?.Content || ''}`,
+    )
 
     // onGroupEvent
     const isGroupEvent = MSG_EVENT_GROUP_MANAGER.includes(EventName)
