@@ -107,6 +107,15 @@ export class Avatar {
     account: number,
     size: EAvatarSize = EAvatarSize.s_640,
   ) {
+    const isAllow = [
+      EAvatarSize.s_40,
+      EAvatarSize.s_100,
+      EAvatarSize.s_140,
+      EAvatarSize.s_640,
+    ].includes(size)
+    if (!isAllow) {
+      throw new Error(`Avatar size ${size} is not allow`)
+    }
     const urls = this.avatarWays.map((way) => way.getUrl(account, size))
     const res = await this.getRequestSuccessUrl(urls)
     if (!res) {
