@@ -565,7 +565,7 @@ export interface IAvatarWay {
 }
 
 export interface IQzoneInfo {
-  avatar: `http://qlogo4.store.qq.com/qzone/${string}/${string}/100`
+  avatar: string
   nickname: string
 }
 

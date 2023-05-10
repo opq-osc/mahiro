@@ -144,8 +144,9 @@ export class Avatar {
         decodedRes?.trim().match(/^portraitCallBack\((.*?)\)$/)?.[1] || '{}',
       )
       const list = matchObject?.[account]
-      const avatar = list?.[0] as IQzoneInfo['avatar'] | undefined
       const nickname = list?.at(-2) as string | undefined
+      // we dont use qzone api response avatar, because it is too old
+      const avatar = await this.getUserAvatarUrl(account)
       if (!avatar?.length || !nickname?.length) {
         throw new Error(`Get qzone info failed, account: ${account}`)
       }
