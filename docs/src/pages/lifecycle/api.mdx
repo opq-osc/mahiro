@@ -200,7 +200,7 @@ mahiro.onGroupMessage('ban', async (data) => {
   if (data.msg?.Content === 'I need ban') {
     mahiro.baka.banGroupMember({
       to: data.banTo,
-      BanTime: 60 // 60s - 86400s (30 days), use 0 unlock
+      BanTime: 60 // 60s - (30 * 24 * 3600)s (30 days), use 0 unlock
     })
   }
 })

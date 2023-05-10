@@ -183,7 +183,7 @@ export class Baka {
       `Ban group member, to: ${JSON.stringify(to)}, ban time: ${BanTime}`,
     )
     // 30 days
-    const maxTime = 24 * 3600
+    const maxTime = 30 * 24 * 3600
     const isBanTimeAvailable =
       (!isNil(BanTime) && BanTime >= 60 && BanTime <= maxTime) || BanTime === 0
     if (!isBanTimeAvailable) {
