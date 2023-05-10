@@ -1,5 +1,11 @@
 # mahiro
 
+## 14.0.0
+
+### Minor Changes
+
+- Fix some bugs
+
 ## 13.0.0
 
 ### Minor Changes
