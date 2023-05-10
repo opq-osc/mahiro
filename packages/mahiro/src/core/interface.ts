@@ -552,6 +552,7 @@ export const getMahiroSessionTTL = () => {
 export const OPQ_APIS = {
   upload: '/v1/upload',
   common: '/v1/LuaApiCaller',
+  cluster_info: '/v1/clusterinfo?isShow=1'
 } as const
 
 export interface IAsyncContextInfo extends Pick<IAsyncContext, 'from' | 'qq'> {
@@ -712,3 +713,5 @@ export interface IGetGroupMemberListOpts {
    */
   force?: boolean
 }
+
+export const __unstable__use_dynamic_account = !!process.env.MAHIRO_DYNAMIC_ACCOUNT?.length

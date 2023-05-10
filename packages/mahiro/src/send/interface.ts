@@ -352,6 +352,42 @@ export interface IResponseDataWithSearchUser {
   Mark: string | ''
 }
 
+export interface IResponseDataWithClusterInfo {
+  Alloc: string
+  ClientId: string
+  ClusterIP: string
+  CpuNum: number
+  FreesTimes: number
+  GCTime: string
+  GoArch: string
+  GoVersion: string
+  GoroutineNum: number
+  LastGCTime: string
+  MacInfo: string
+  MallocsTimes: number
+  NextGC: string
+  Platform: string
+  QQUsers: IClusterUserInfo[]
+  QQUsersCounts: number
+  ServerRuntime: string
+  Sys: string
+  TotalAlloc: string
+  Version: string
+}
+
+export interface IClusterUserInfo {
+  LevelInfo: string
+  MoneyCount: string
+  OnlieTime: string
+  QQ: string
+  ReceiveCount: number
+  SendCount: number
+  TotalMoney: string
+  TotalRecv: string
+  TotalSend: string
+}
+
+
 export type IResponseDataUnion =
   | IResponseData
   | IResponseDataWithVoice
@@ -359,6 +395,7 @@ export type IResponseDataUnion =
   | IResponseDataWithSearchUser
   | IResponseDataWithGroupList
   | IResponseDataWithGroupMemberList
+  | IResponseDataWithClusterInfo
 
 export interface ISendMsgResponse<
   T extends IResponseDataUnion = IResponseData,

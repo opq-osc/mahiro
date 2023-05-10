@@ -46,6 +46,7 @@ import {
   IGroupEventInvite,
   IGroupEventAdminChange,
   ISendGroupMessageReturn,
+  __unstable__use_dynamic_account,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -64,6 +65,7 @@ import {
   ISearchUser,
   IResponseDataWithSearchUser,
   IResponseDataWithImage,
+  IResponseDataWithClusterInfo,
 } from '../send/interface'
 import qs from 'qs'
 import { parse } from 'url'
@@ -88,7 +90,7 @@ import { AsyncLocalStorage } from 'async_hooks'
 import { existsSync } from 'fs'
 import { dirname, isAbsolute, join } from 'path'
 import serveStatic from 'serve-static'
-import { cloneDeep, isFunction, isNil, isString, trim } from 'lodash'
+import { cloneDeep, isFunction, isNil, isString, trim, uniqBy } from 'lodash'
 import { detectFileType, getFileBase64 } from '../utils/file'
 import { CronJob } from './cron'
 import { Utils } from './utils'
@@ -267,15 +269,58 @@ export class Mahiro {
     }
   }
 
-  private async checkOptsAndConnect() {
-    const opts = this.opts
-    // ensure qq number
-    const mainAccountEnv = process.env.MAHIRO_ACCOUNT_MAIN
-    if (!opts?.qq && !mainAccountEnv?.length) {
+  private async getClusterUsers(url: string) {
+    this.logger.info(`Get accounts from cluster info...`)
+    const res = await axios.get(url)
+    const data = res?.data as
+      | ISendMsgResponse<IResponseDataWithClusterInfo>
+      | undefined
+    const clusterAccounts = data?.ResponseData?.QQUsers
+    if (!clusterAccounts?.length) {
       throw new Error(
-        `You must provide a 'qq' number or set env 'MAHIRO_ACCOUNT_MAIN'`,
+        `Use dynamic accounts must login 1 account first, this account will be used as main account`,
       )
     }
+    const uniqAccounts = uniqBy(
+      clusterAccounts?.filter((i) => !isNil(i?.QQ)),
+      (i) => i?.QQ,
+    )
+    // first account is main account
+    const mainAccount = uniqAccounts[0]
+    this.logger.success(`We detected ${uniqAccounts.length} accounts`)
+    this.logger.success(`Main account: ${mainAccount.QQ}`)
+    const sideAccounts = uniqAccounts.slice(1)
+    if (sideAccounts?.length) {
+      this.logger.success(
+        `Side accounts: ${sideAccounts.map((i) => i.QQ).join(', ')}`,
+      )
+    }
+    return {
+      mainAccount,
+      sideAccounts: sideAccounts,
+    }
+  }
+
+  private addInternalSideAccount(account: number) {
+    // repeat check
+    const isRepeat = this.sideAccounts.some((i) => i.qq === account)
+    if (isRepeat) {
+      this.logger.error(`[Side(${account})] Account is already exists`)
+      return
+    }
+    this.sideAccounts.push({
+      ...this.mainAccount,
+      stack: new Map(),
+      wsIns: null!,
+      wsConnected: true,
+      wsRetrying: false,
+      qq: account,
+    })
+    this.logger.debug(`[Side(${account}]: reuse main account info`)
+  }
+
+  private async checkOptsAndConnect() {
+    const opts = this.opts
 
     const sideQQschema = z.union([
       z.number(),
@@ -292,7 +337,7 @@ export class Mahiro {
       ]),
     ])
     const sharedSchema = {
-      qq: z.number().default(Number(mainAccountEnv)),
+      qq: z.number().optional(),
       advancedOptions: z
         .object({
           ignoreMyself: z
@@ -342,6 +387,32 @@ export class Mahiro {
         `ws://${result.host}:${result.port}/ws`
     const { url: mainAccountUrl, isLocal: mainAccountIsLocal } =
       this.getInitUrl({ ws: mainAccountWs })
+
+    // dynamic account
+    if (!__unstable__use_dynamic_account) {
+      // ensure qq number
+      const mainAccountEnv = process.env.MAHIRO_ACCOUNT_MAIN
+      if (!result?.qq && !mainAccountEnv?.length) {
+        throw new Error(
+          `You must provide a 'qq' number or set env 'MAHIRO_ACCOUNT_MAIN'`,
+        )
+      }
+      result.qq = result.qq || Number(mainAccountEnv)
+    } else {
+      this.logger.warn(
+        chalk.red(
+          `Dynamic account feature is unstable, you should know what you are doing`,
+        ),
+      )
+      this.logger.info(`Use dynamic accounts, will auto detect accounts`)
+      const clusterUrl = `${mainAccountUrl}${OPQ_APIS.cluster_info}`
+      const clusterUsers = await this.getClusterUsers(clusterUrl)
+      result.qq = Number(clusterUsers.mainAccount.QQ)
+      result.advancedOptions.sideQQs = clusterUsers.sideAccounts.map((i) =>
+        Number(i.QQ),
+      )
+    }
+
     const mainAccountQQ = result.qq
     const mainRequest = this.createRequest({
       qq: mainAccountQQ,
@@ -375,16 +446,7 @@ export class Mahiro {
         throw new Error(`Side account ${sideQQ} is repeat! Please check it.`)
       }
       if (isInternalSide) {
-        // repeat check
-        sideAccounts.push({
-          ...this.mainAccount,
-          stack: new Map(),
-          wsIns: null!,
-          wsConnected: true,
-          wsRetrying: false,
-          qq: item,
-        })
-        this.logger.debug(`[Side(${item}]: reuse main account info`)
+        this.addInternalSideAccount(sideQQ)
       } else {
         // @ts-ignore
         const sideWs = item?.ws ? item.ws : `ws://${item.host}:${item.port}/ws`
@@ -509,7 +571,7 @@ export class Mahiro {
     let json = cloneDeep(_json)
     const { CurrentPacket, CurrentQQ } = json
     const isValidQQ = this.isRegisteredAccount(CurrentQQ)
-    if (!isValidQQ) {
+    if (!isValidQQ && !__unstable__use_dynamic_account) {
       this.logger.error(
         'CurrentQQ not match: ',
         CurrentQQ,
@@ -540,6 +602,29 @@ export class Mahiro {
         this.logger.info(
           `Login account: ${eventWithLogin?.Uin}, nickname: ${eventWithLogin?.Nick}`,
         )
+
+        // if use dynamic account, we add new account
+        if (__unstable__use_dynamic_account) {
+          const newAccountUin = eventWithLogin?.Uin
+          if (isNil(newAccountUin)) {
+            this.logger.debug(`New account uin is nil, ignore it`)
+            return
+          }
+          this.logger.warn(
+            chalk.red(
+              `You using dynamic account, this feature is unstable, you should know what you are doing`,
+            ),
+          )
+          this.logger.info(`New account detected, add it to side accounts`)
+          this.addInternalSideAccount(newAccountUin)
+          this.logger.success(`New account added, uin: ${newAccountUin}`)
+          this.logger.warn(
+            chalk.red(
+              `Dynamic account feature is unstable, please use it carefully`,
+            ),
+          )
+        }
+
         break
       case EMsgEvent.ON_EVENT_NETWORK_CHANGE:
         this.logger.warn('Network change')
