@@ -1,8 +1,9 @@
 import { sample } from 'lodash'
-import { IAvatarWay, EQzoneAvatarSize, IQzoneInfo } from './interface'
+import { IAvatarWay, IQzoneInfo } from './interface'
 import axios from 'axios'
 import { consola } from 'consola'
 import iconv from 'iconv-lite'
+import { EAvatarSize } from '../send/interface'
 
 export class Avatar {
   avatarWays: IAvatarWay[] = [
@@ -31,12 +32,6 @@ export class Avatar {
     {
       getUrl: (account, size) => {
         return `https://q2.qlogo.cn/headimg_dl?dst_uin=${account}&spec=${size}`
-      },
-    },
-    // qzone 渠道，可能会拉到旧的独立头像
-    {
-      getUrl: (account, size) => {
-        return `https://qlogo4.store.qq.com/qzone/${account}/${account}/${size}`
       },
     },
   ]
@@ -110,7 +105,7 @@ export class Avatar {
 
   async getUserAvatarUrl(
     account: number,
-    size: EQzoneAvatarSize = EQzoneAvatarSize.s_640,
+    size: EAvatarSize = EAvatarSize.s_640,
   ) {
     const urls = this.avatarWays.map((way) => way.getUrl(account, size))
     const res = await this.getRequestSuccessUrl(urls)

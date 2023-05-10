@@ -251,9 +251,9 @@ export type AvatarUrl = `http://q.qlogo.cn/g?b=qq&k=${string}&kti=${string}&s=`
 
 export enum EAvatarSize {
   s_40 = 1, // 2, 40
-  s_100 = 3, // 100
+  s_100 = 100, // 100
   s_140 = 4,
-  s_640 = 5,
+  s_640 = 640,
 }
 
 export interface IGroupListMap {

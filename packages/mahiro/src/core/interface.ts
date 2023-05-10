@@ -6,6 +6,7 @@ import {
   IMsgHead,
 } from '../received/interface'
 import {
+  EAvatarSize,
   ESendCmd,
   EUploadCommandId,
   IBanMemberTo,
@@ -559,17 +560,8 @@ export interface IAsyncContextInfo extends Pick<IAsyncContext, 'from' | 'qq'> {
 
 export type IMatcherOpts = Pick<IMsgHead, 'FromType' | 'MsgType' | 'C2cCmd'>
 
-/**
- * 与 EAvatarSize 的区别：空间接口允许的 size 范围不一样
- */
-export enum EQzoneAvatarSize {
-  s_100 = 100,
-  s_200 = 200,
-  s_640 = 640,
-}
-
 export interface IAvatarWay {
-  getUrl: (account: number, size: EQzoneAvatarSize) => string
+  getUrl: (account: number, size: EAvatarSize) => string
 }
 
 export interface IQzoneInfo {
