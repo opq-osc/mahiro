@@ -303,7 +303,9 @@ export class Mahiro {
 
   private addInternalSideAccount(account: number) {
     // repeat check
-    const isRepeat = this.sideAccounts.some((i) => i.qq === account)
+    const isRepeat =
+      this.mainAccount.qq === account ||
+      this.sideAccounts.some((i) => i.qq === account)
     if (isRepeat) {
       this.logger.error(`[Side(${account})] Account is already exists`)
       return
@@ -435,13 +437,13 @@ export class Mahiro {
     this.mainAccount = mainAccount
 
     // side accounts
-    const sideAccounts: IAccont[] = []
+    this.sideAccounts = []
     const sideQQs = result.advancedOptions.sideQQs || []
     for await (const item of sideQQs) {
       const isInternalSide = typeof item === 'number'
       const sideQQ = typeof item === 'number' ? item : item.qq
       const isRepeat =
-        item === mainAccountQQ || sideAccounts.some((v) => v.qq == item)
+        item === mainAccountQQ || this.sideAccounts.some((v) => v.qq == item)
       if (isRepeat) {
         throw new Error(`Side account ${sideQQ} is repeat! Please check it.`)
       }
@@ -471,10 +473,9 @@ export class Mahiro {
         }
         this.logger.debug(`[Side(${sideQQ})] ${JSON.stringify(sideAccount)}`)
         await this.createConnect(sideAccount)
-        sideAccounts.push(sideAccount)
+        this.sideAccounts.push(sideAccount)
       }
     }
-    this.sideAccounts = sideAccounts
 
     // advancedOptions
     this.advancedOptions =
