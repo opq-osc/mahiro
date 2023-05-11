@@ -1,5 +1,11 @@
 # mahiro
 
+## 14.0.1
+
+### Patch Changes
+
+- Fix side accounts init error
+
 ## 14.0.0
 
 ### Minor Changes

@@ -1,5 +1,12 @@
 # @xn-sakina/mahiro-png2jpg
 
+## 14.0.1
+
+### Patch Changes
+
+- Updated dependencies
+  - mahiro@14.0.1
+
 ## 14.0.0
 
 ### Patch Changes
