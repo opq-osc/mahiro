@@ -1,4 +1,4 @@
-import type { Mahiro } from "../core"
+import type { Mahiro } from '../core'
 
 export interface IDatabaseOpts {
   path: string
@@ -91,3 +91,14 @@ export interface IMahiroWebPanel {
 
 export const DEFAULT_REDIS_KV_NAMESPACE = 'mahiro-redis-kv'
 export const MAHIRO_TOKEN_HEADER = 'x-mahiro-token'
+
+const ATTACK_KEYWORDS = [
+  '.php',
+  '.json',
+  ...(process.env.MAHIRO_ATTACK_KEYWORDS?.length
+    ? process.env.MAHIRO_ATTACK_KEYWORDS.split(',')
+    : []),
+].filter(Boolean)
+export const isNetworkAttack = (path: string) => {
+  return ATTACK_KEYWORDS.some((keyword) => path.includes(keyword))
+}

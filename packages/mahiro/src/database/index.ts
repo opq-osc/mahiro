@@ -11,6 +11,7 @@ import {
   IMvcPlugin,
   MAHIRO_TOKEN_HEADER,
   getCacheTime,
+  isNetworkAttack,
 } from './interface'
 import knex from 'knex'
 import { consola } from 'consola'
@@ -29,6 +30,8 @@ import {
   PYTHON_SERVER_APIS,
   __UNSTABLE_PYTHON_SERVER_BASE,
 } from '../core/interface'
+import { saveCrashLog } from '../utils/crash'
+import axios from 'axios'
 
 export class Database {
   private path!: string
@@ -507,6 +510,45 @@ export class Database {
       res: express.Response,
       next: express.NextFunction,
     ) => {
+      // detect attack
+      const isAttack = isNetworkAttack(req.path)
+      if (isAttack) {
+        this.logger.error(`Network attack detected (request path: ${req.path})`)
+        const attackInfo: Record<string, any> = {
+          ip: req.ip,
+          ips: req.ips,
+          path: req.path,
+          query: req.query,
+          body: req.body,
+          headers: req.headers,
+          method: req.method,
+          url: req.url,
+          cookies: req.cookies,
+          protocol: req.protocol,
+          hostname: req.hostname,
+          subdomains: req.subdomains,
+        }
+        const needReport = process.env.MAHIRO_NETWORK_ATTACK_REPORT?.length
+        if (needReport) {
+          // report to url
+          const targetUrl = process.env.MAHIRO_NETWORK_ATTACK_REPORT!
+          this.logger.error(`Attack info: ${JSON.stringify(attackInfo)}`)
+          this.logger.error(`Attack info will be reported to ${targetUrl}`)
+          axios.post(targetUrl, attackInfo)
+        } else {
+          this.logger.error(`Mahiro force shutdown for safe`)
+          saveCrashLog(
+            `Network attack detected (request path: ${
+              req.path
+            }), attack info: \n${JSON.stringify(attackInfo, null, 2)}`,
+          )
+          // force shutdown
+          if (process.env.MAHIRO_NETWORK_ATTACK_FORCE_SHUTDOWN !== 'none') {
+            process.exit(1)
+          }
+        }
+      }
+
       const isStartWithApi = req.path.startsWith('/api')
       if (!isStartWithApi) {
         return next()

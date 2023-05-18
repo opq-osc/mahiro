@@ -7,6 +7,7 @@ import {
   writeFileSync,
   removeSync,
 } from 'fs-extra'
+import chalk from 'mahiro/compiled/chalk'
 import { join, relative } from 'path'
 
 const logger = consola.withTag('crash') as typeof consola
@@ -47,7 +48,13 @@ export const printCrashLogTips = () => {
         logger.warn(`- ${relative(cwd, join(saveDir, file))}`)
       })
       logger.warn(`Please report to https://github.com/opq-osc/mahiro/issues`)
-      logger.warn(`Use \`mahiro clean\` to clear crash logs`)
+      logger.warn(
+        `Use \`mahiro clean\` to clear crash logs, ${chalk.red(
+          'otherwise mahiro will cannot start',
+        )}`,
+      )
+      // force shutdown
+      process.exit(1)
     }
   }
 }
