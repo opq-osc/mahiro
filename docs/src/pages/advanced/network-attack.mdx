@@ -1,0 +1,24 @@
+# 网络安全
+
+默认情况下，Web 面板受到 `.php` / `.json` 的请求时，会断定为网络渗透攻击，Mahiro 将立即停机，在人工排查日志前无法重启。
+
+### 攻击识别关键词
+
+通过 `MAHIRO_ATTACK_KEYWORDS` 自定义哪些关键词可能是网络攻击：
+
+```bash
+  MAHIRO_ATTACK_KEYWORDS=bypass,.zip mahiro index.ts
+```
+
+默认内置了 `.php` / `.json` 两个高频关键词，因为面板并无使用任何含有该关键词的接口。
+
+### 攻击上报
+
+通过配置 `MAHIRO_NETWORK_ATTACK_REPORT` 上报服务地址，每次 Mahiro 面板受到攻击后，会将包含 IP 等请求的信息自动以 `POST` 方式上报至该地址：
+
+```bash
+  MAHIRO_NETWORK_ATTACK_REPORT=http://localhost:9999/report mahiro index.ts
+```
+
+当配置了 `MAHIRO_NETWORK_ATTACK_REPORT` 时，Mahiro 不会停机，请在接收侧自动封禁 IP 。
+
