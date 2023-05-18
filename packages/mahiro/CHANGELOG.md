@@ -1,5 +1,11 @@
 # mahiro
 
+## 14.0.2
+
+### Patch Changes
+
+- Add network security strategy
+
 ## 14.0.1
 
 ### Patch Changes
