@@ -26,10 +26,7 @@ import KeyvSQLite from '@keyvhq/sqlite'
 import KeyvRedis from '@keyvhq/redis'
 import { extract } from '@xn-sakina/mahiro-css'
 import express from 'express'
-import {
-  PYTHON_SERVER_APIS,
-  __UNSTABLE_PYTHON_SERVER_BASE,
-} from '../core/interface'
+import { PYTHON_SERVER_APIS } from '../core/interface'
 import { saveCrashLog } from '../utils/crash'
 import axios from 'axios'
 

@@ -30,7 +30,7 @@ import {
   IMahiroMiddleware,
   EMiddleware,
   IAccont,
-  __UNSTABLE_PYTHON_SERVER_BASE,
+  __unstable_python_server_base,
   PYTHON_SERVER_APIS,
   ISendToPythonData,
   IPythonHealthResponse,
@@ -47,6 +47,7 @@ import {
   IGroupEventAdminChange,
   ISendGroupMessageReturn,
   __unstable__use_dynamic_account,
+  getImageUploadRetry,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -104,6 +105,7 @@ import { Rail } from './rail'
 import { printCrashLogTips, saveCrashLog } from '../utils/crash'
 import { Baka } from './baka'
 import os from 'os'
+import { sleep } from '../utils'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -485,7 +487,7 @@ export class Mahiro {
     this.nodeServer = result.nodeServer as Required<INodeServerOpts>
     this.logger.debug('Node server options: ', this.nodeServer)
     // init python server url
-    this.pythonServerUrl = `${__UNSTABLE_PYTHON_SERVER_BASE}:${this.nodeServer.pythonPort}`
+    this.pythonServerUrl = `${__unstable_python_server_base}:${this.nodeServer.pythonPort}`
     this.logger.debug('Python server url: ', this.pythonServerUrl)
   }
 
@@ -1251,7 +1253,7 @@ export class Mahiro {
             }),
       },
     }
-    try {
+    const task = async () => {
       const res = await account.request.post(uploadUrl, data)
       const json = res?.data as ISendMsgResponse | undefined
       if (json) {
@@ -1263,8 +1265,24 @@ export class Mahiro {
         )
         return json as ISendMsgResponse
       }
+    }
+    const retryTime = getImageUploadRetry()
+    try {
+      const taskResult = await task()
+      return taskResult
     } catch (e) {
-      this.logger.error(`Upload file error, account(${qq}): `, e)
+      this.logger.error(`Upload file error (first), account(${qq}): `, e)
+      this.logger.info(`Retry upload file in ${retryTime}ms, account(${qq})`)
+      // we retry 1 time only
+      try {
+        // sleep 
+        await sleep(retryTime)
+        const taskResult = await task()
+        return taskResult
+      } catch (e2) {
+        this.logger.error(`Upload file error (retry), account(${qq}): `, e2)
+        this.logger.error(`Drop upload file task, account(${qq})`)
+      }
     }
   }
 

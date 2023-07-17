@@ -513,7 +513,7 @@ export enum EMiddleware {
   native = 'middleware-native',
 }
 
-export const __UNSTABLE_PYTHON_SERVER_BASE =
+export const __unstable_python_server_base =
   process.env.MAHIRO_UNSTABLE_PYTHON_SERVER_BASE || `http://0.0.0.0`
 
 export const PYTHON_SERVER_APIS = {
@@ -715,3 +715,11 @@ export interface IGetGroupMemberListOpts {
 }
 
 export const __unstable__use_dynamic_account = !!process.env.MAHIRO_DYNAMIC_ACCOUNT?.length
+
+export const getImageUploadRetry = () => {
+  const env = process.env.MAHIRO_IMAGE_UPLOAD_RETRY_TIME
+  if (env) {
+    return parseInt(env, 10)
+  }
+  return 500
+}
