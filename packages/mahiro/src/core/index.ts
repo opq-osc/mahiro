@@ -1838,6 +1838,17 @@ export class Mahiro {
         const errorCode = res?.CgiBaseResponse?.Ret
         const hasErrorCode = errorCode !== ECgiBaseRes.success
         const hasErrorMsg = res?.CgiBaseResponse?.ErrMsg?.length
+
+        // FIXME(2023-07-02): if upload response has data, it means success
+        // 2023-07-18: seems like this bug has been fixed
+        // const hasImageUploadData = (res?.ResponseData as any as IResponseDataWithImage)?.FileMd5?.length
+        // if (hasImageUploadData) {
+        //   this.logger.debug(
+        //     `FIXME: upload image has response data, but error code is ${errorCode}, will return response`,
+        //   )
+        //   return response
+        // }
+
         if (hasErrorCode && hasErrorMsg) {
           const url = response.request?.responseURL
           this.logger.error(
