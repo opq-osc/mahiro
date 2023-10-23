@@ -216,6 +216,16 @@ export interface ISendImage {
   FileId: number
   FileMd5: string
   FileSize: number
+  /**
+   * 图片宽度
+   * @version >= v6.9.21-17412
+   */
+  Width: number
+  /**
+   * 图片高度
+   * @version >= v6.9.21-17412
+   */
+  Height: number
 }
 
 export enum ECgiBaseRes {
