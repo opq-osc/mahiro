@@ -191,6 +191,7 @@ export interface IGroupMessage extends IMahiroMsgBase {
   dropTo: IDropTo
   banTo: IBanMemberTo
   kickTo: IKickMemberTo
+  exitTo: IExitTo
   /**
    * 高级配置，一般用于内部
    */
@@ -634,8 +635,14 @@ export interface IDropGroupMessageOpts {
   qq?: number
 }
 
-export interface IExitGroupOpts {
+export interface IExitGroupQuickOpts {
+  /**
+   * quick usage `data.exitTo`
+   */
   to?: IExitTo
+}
+
+export interface IExitGroupOpts extends IExitGroupQuickOpts {
   /**
    * manual exit, should use `groupId`
    */
@@ -681,11 +688,14 @@ export const banGroupMemberSchema = z.object({
   Uid: z.string(),
 })
 
-export interface IBanGroupMemberOpts {
+export interface IBanGroupMemberQuickOpts {
   /**
    * quick ban with use `data.banTo`
    */
   to?: IBanMemberTo
+}
+
+export interface IBanGroupMemberOpts extends IBanGroupMemberQuickOpts {
   /**
    * manual ban, should use `groupId` and `userId`
    */
@@ -706,11 +716,14 @@ export const kickGroupMemberSchema = z.object({
   Uid: z.string(),
 })
 
-export interface IKickGroupMemberOpts {
+export interface IKickGroupMemberQuickOpts {
   /**
    * quick kick with use `data.kickTo`
    */
   to?: IKickMemberTo
+}
+
+export interface IKickGroupMemberOpts extends IKickGroupMemberQuickOpts {
   /**
    * manual ban, should use `groupId` and `userId`
    */

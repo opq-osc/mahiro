@@ -883,6 +883,9 @@ export class Mahiro {
           Uin: groupId,
           Uid: MsgHead?.SenderUid,
         },
+        exitTo: {
+          FromUin: groupId,
+        },
         configs: {
           availablePlugins: [],
         },
