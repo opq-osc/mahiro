@@ -20,21 +20,23 @@
   },
   "engines": {
     "pnpm": "^8",
-    "node": "^18"
+    "node": "^18",
+    "npm": "not use, use pnpm instead",
+    "yarn": "not use, use pnpm instead"
   },
-  "packageManager": "pnpm@8.1.0",
+  "packageManager": "pnpm@8.9.2",
   "devDependencies": {
-    "@changesets/cli": "^2.26.1",
-    "@types/node": "^18.15.11",
+    "@changesets/cli": "^2.26.2",
+    "@types/node": "^18.18.6",
     "@xn-sakina/dora": "^1.0.0",
     "@xn-sakina/mental": "^4.0.2",
     "@xn-sakina/vary": "^1.1.1",
-    "prettier": "^2.8.7",
-    "rimraf": "^4.4.1",
+    "prettier": "^2.8.8",
+    "rimraf": "^5.0.5",
     "rome": "^12.0.0",
-    "tsx": "^3.12.6",
-    "typescript": "^5.0.3",
-    "vitest": "^0.30.1",
-    "zx": "^7.2.1"
+    "tsx": "^3.14.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6",
+    "zx": "^7.2.3"
   }
 }
