@@ -94,7 +94,7 @@ export class Image {
         this.logger.debug(
           `[ImageSizeDetector] try download image from ${url} to ${tmpFile.name}`,
         )
-        writeFileSync(tmpFile.name, await download(url))
+        writeFileSync(tmpFile.name, await download(url, { timeout: 10 * 1e3 }))
       } catch {
         this.logger.error(
           `[ImageSizeDetector] download image from ${url} failed, will drop this image`,
