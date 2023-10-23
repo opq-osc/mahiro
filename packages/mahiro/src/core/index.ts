@@ -110,6 +110,7 @@ import os from 'os'
 import { sleep } from '../utils'
 import { Image } from './image'
 import { IVersion, getVersionInfo } from '../utils/version'
+import { Search } from './search'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -195,6 +196,9 @@ export class Mahiro {
   // version
   version!: IVersion
 
+  // search
+  search!: Search
+
   constructor(opts: IMahiroOpts) {
     this.printLogo()
     this.prepareSystemCheck()
@@ -216,6 +220,7 @@ export class Mahiro {
     this.initPatcher()
     this.initRail()
     this.initBaka()
+    this.initSearch()
     await this.startNodeServer()
     this.registerOptionsInterceptors()
     this.registerAdminManager()
@@ -233,6 +238,11 @@ export class Mahiro {
     }
     // 2. check crash logs
     printCrashLogTips()
+  }
+  
+  private initSearch() {
+    this.logger.debug(`[Search] Init search`)
+    this.search = new Search({ mahiro: this })
   }
 
   private initSession() {
@@ -1604,6 +1614,13 @@ export class Mahiro {
       qq: useQQ,
     })
     return res
+  }
+
+  /**
+   * @deprecated Not implemented
+   */
+  async sendPrivateMessage() {
+    throw new Error('Not implemented')
   }
 
   private async startNodeServer() {
