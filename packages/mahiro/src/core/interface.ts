@@ -724,3 +724,14 @@ export const getImageUploadRetry = () => {
   }
   return 500
 }
+
+export interface IGetImageSizeOpts {
+  url?: string
+  base64?: string
+  filepath?: string
+}
+
+export interface IImageSize {
+  width: number
+  height: number
+}

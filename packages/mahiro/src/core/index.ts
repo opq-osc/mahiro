@@ -106,6 +106,7 @@ import { printCrashLogTips, saveCrashLog } from '../utils/crash'
 import { Baka } from './baka'
 import os from 'os'
 import { sleep } from '../utils'
+import { Image } from './image'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -185,6 +186,9 @@ export class Mahiro {
   // baka
   baka!: Baka
 
+  // image
+  image!: Image
+
   constructor(opts: IMahiroOpts) {
     this.printLogo()
     this.prepareSystemCheck()
@@ -195,6 +199,7 @@ export class Mahiro {
     this.logger.info('Mahiro is starting...')
     await this.checkOptsAndConnect()
     await this.connectDatabase()
+    this.initImage()
     this.initSession()
     this.initPatcher()
     this.initRail()
@@ -228,6 +233,11 @@ export class Mahiro {
   private initPatcher() {
     this.logger.debug(`[Patcher] Init patcher`)
     this.patcher = new Patcher({ mahiro: this })
+  }
+
+  private initImage() {
+    this.logger.debug(`[Image] Init image`)
+    this.image = new Image({ mahiro: this })
   }
 
   private initRail() {
@@ -1152,6 +1162,9 @@ export class Mahiro {
     throw new Error('Deprecated, use `mahiro.baka.getGroupListMap` instead')
   }
 
+  /**
+   * only for upload image file
+   */
   async uploadFile(opts: IMahiroUploadFileOpts) {
     const { file, commandId, qq } = opts
     const account = this.getAccount(qq)
@@ -1236,6 +1249,17 @@ export class Mahiro {
       )
       return
     }
+    const sizeInfo = await this.image.getImageSize({
+      url: fileUrl,
+      base64: Base64Buf,
+      filepath: filePath,
+    })
+    if (!sizeInfo?.width || !sizeInfo?.height) {
+      this.logger.error(
+        `[Upload File] Cannot get image size, account(${qq}), will drop this image`,
+      )
+      return
+    }
     const data: IUploadFile = {
       CgiCmd: ESendCmd.upload,
       CgiRequest: {
@@ -1251,6 +1275,9 @@ export class Mahiro {
           : {
               Base64Buf,
             }),
+        // size info
+        Width: sizeInfo.width,
+        Height: sizeInfo.height,
       },
     }
     const task = async () => {
@@ -1444,6 +1471,9 @@ export class Mahiro {
         qq: useQQ,
       })) as ISendMsgResponse<IResponseDataWithImage> | undefined
       const fileInfo = res?.ResponseData
+      this.logger.debug(
+        `[FastImage] Upload response file info: ${JSON.stringify(fileInfo)}}`,
+      )
       if (!fileInfo?.FileMd5?.length) {
         this.logger.error('[FastImage] Upload file failed, not get fileMd5')
         return

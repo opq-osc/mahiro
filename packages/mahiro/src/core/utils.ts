@@ -12,6 +12,9 @@ import cronstrue from 'cronstrue'
 import knex from 'knex'
 import * as fileType from 'mahiro/compiled/file-type'
 import fsExtra from 'fs-extra'
+import tmp from 'tmp-promise'
+import download from 'download'
+import imageSize from 'image-size'
 
 // keyv
 import Keyv from '@keyvhq/core'
@@ -39,6 +42,9 @@ export class Utils {
   KeyvRedis = KeyvRedis
   fileType = fileType
   fsExtra = fsExtra
+  tmp = tmp
+  download = download
+  imageSize = imageSize
 
   // utils
   isBase64 = isBase64

@@ -59,6 +59,16 @@ export interface IUploadFileRequest {
    * @version v6.9.6-0410
    */
   Base64Buf?: string
+  /**
+   * 图片宽度
+   * @version >= v6.9.21-17412
+   */
+  Width: number
+  /**
+   * 图片高度
+   * @version >= v6.9.21-17412
+   */
+  Height: number
 }
 
 export interface ISendMsg<
