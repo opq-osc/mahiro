@@ -2,6 +2,8 @@ import { join } from 'path'
 
 export interface IMahiroConfigs {
   requiredPythonMahiroVersion: string
+  // TODO: check opq version
+  minOPQVersion: string
 }
 
 export const getMahiroConfigs = () => {

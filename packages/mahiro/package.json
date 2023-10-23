@@ -76,6 +76,7 @@
   },
   "mahiroConfigs": {
     "requiredPythonMahiroVersion": "1.5.0",
-    "//why-need-tar": "knex > sqlite3 > tar"
+    "//why-need-tar": "knex > sqlite3 > tar",
+    "minOPQVersion": "6.9.21"
   }
 }

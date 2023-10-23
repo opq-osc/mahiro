@@ -109,6 +109,7 @@ import { Baka } from './baka'
 import os from 'os'
 import { sleep } from '../utils'
 import { Image } from './image'
+import { IVersion, getVersionInfo } from '../utils/version'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -191,14 +192,23 @@ export class Mahiro {
   // image
   image!: Image
 
+  // version
+  version!: IVersion
+
   constructor(opts: IMahiroOpts) {
     this.printLogo()
     this.prepareSystemCheck()
     this.opts = opts
   }
 
+  private async initVersionInfo() {
+    const version = (this.version = getVersionInfo())
+    this.logger.info('Mahiro version: ', chalk.bold.blue(`v${version.mahiro}`))
+  }
+
   async run() {
     this.logger.info('Mahiro is starting...')
+    await this.initVersionInfo()
     await this.checkOptsAndConnect()
     await this.connectDatabase()
     this.initImage()
@@ -283,6 +293,9 @@ export class Mahiro {
     }
   }
 
+  /**
+   * TODO: use post method get cluster info, but current post method must through the `qq` param
+   */
   private async getClusterUsers(url: string) {
     this.logger.info(`Get accounts from cluster info...`)
     const res = await axios.get(url)
