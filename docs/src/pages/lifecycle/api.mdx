@@ -280,6 +280,30 @@ mahiro.onGroupMessage('revoke', async (data) => {
   撤回自己消息需开启 Redis ，详见 [KV 存储](./kv#dbrediskv-redis) ；默认有效期默认为 2 分钟，过期后不可撤回。
 </Callout>
 
+
+### `baka.exitGroup`
+
+快捷退群：
+
+```ts
+mahiro.onGroupMessage('exit', async (data) => {
+  if (data.msg?.Content === 'exit') {
+    mahiro.baka.exitGroup({
+      to: data.exitTo
+    })
+  }
+})
+```
+
+手动退群：
+
+```ts
+mahiro.baka.exitGroup({
+  groupId,
+})
+```
+
+
 ### `baka.getGroupListMap`
 
 获取账号群组列表的映射。
@@ -339,26 +363,28 @@ mahiro.onGroupMessage('revoke', async (data) => {
   现在回传信息还不够全面，请酌情使用。
 </Callout>
 
-### `searchUser`
+### `search.getUinByUid`
+
+> 别名：`searchUser` / `getUserInfo` / `search.getNumberByString`
 
 根据用户 `Uid` 查个人信息。
 
 ```ts
 import { EAvatarSize } from 'mahiro'
 
-const user = await mahiro.searchUser({ qq, Uid })
+const user = await mahiro.search.getUinByUid({ qq, Uid })
 // 头像需指定尺寸后使用
 const avatarUrl = `${user.Head}${EAvatarSize.s_640}`
 ```
 
-> 别名：`getUserInfo`
+### `search.getUidByUin`
 
-### `baka.getUserInfoCache2LevelByUin`
+> 别名：`baka.getUserInfoCache2LevelByUin` / `search.getStringByNumber`
 
-获取某账号的元信息。
+尝试获取某账号的元信息。
 
 ```ts
-  const user = await mahiro.baka.getUserInfoCache2LevelByUin(userId)
+  const user = await mahiro.search.getUidByUin(userId)
   user?.SenderUid
 ```
 
