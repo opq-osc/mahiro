@@ -80,7 +80,7 @@ export const MahiroSubscribe = (opts: IMahiroSubscribeOpts = {}) => {
     logger.info(`[Mahiro Subscribe] init, redis connection string: ${redis}`)
 
     const { Keyv, KeyvRedis } = mahiro.utils
-    const redisIns = new Keyv({
+    const redisIns = new Keyv<string>({
       store: new KeyvRedis(redis),
       namespace: DB_NAMESPACE,
     })
