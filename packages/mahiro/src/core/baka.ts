@@ -3,6 +3,7 @@ import {
   IBakaOpts,
   IBanGroupMemberOpts,
   IDropGroupMessageOpts,
+  IExitGroupOpts,
   IGetGroupMemberListOpts,
   IGroupListOpts,
   IKickGroupMemberOpts,
@@ -11,6 +12,7 @@ import {
   OPQ_APIS,
   banGroupMemberSchema,
   dropSchema,
+  exitSchema,
   getGroupDataTTL,
   getMessageSnapshotTTL,
   kickGroupMemberSchema,
@@ -23,6 +25,7 @@ import {
   ICgiRequestUnion,
   ICgiRequestWithBanGroupMember,
   ICgiRequestWithDropMessage,
+  ICgiRequestWithExitGroup,
   ICgiRequestWithGetGroupList,
   ICgiRequestWithGetGroupMemberList,
   ICgiRequestWithKickGroupMember,
@@ -126,6 +129,48 @@ export class Baka {
         MsgRandom,
       },
       CgiCmd: ESendCmd.drop_group_message,
+      qq: useQQ,
+    })
+    return res
+  }
+
+  async exitGroup(data: IExitGroupOpts) {
+    let { to, qq, groupId } = data
+    // validate
+    this.logger.debug(`Exit group, to : ${JSON.stringify(to)}`)
+    // use `to`
+    if (!isNil(to)) {
+      try {
+        exitSchema.parse(to)
+      } catch (e) {
+        this.logger.error(`Validate to failed, error:`, e)
+        return
+      }
+    } else if (!isNil(groupId)) {
+      to = {
+        FromUin: groupId,
+      }
+    } else {
+      // never
+      this.logger.error(
+        `Exit Group validate to failed, You should use \`to\` or \`groupId\``,
+      )
+      return
+    }
+    const useQQ = this.mahiro.getUseQQ({
+      specifiedQQ: qq,
+    })
+    this.logger.info(`Exit group, use account ${useQQ}, groupId: ${to.FromUin}`)
+    const { FromUin } = to
+    const res = await this.sendBakaApi<
+      ICgiRequestWithExitGroup,
+      ESendCmd.sso_group_op
+    >({
+      CgiRequest: {
+        Uin: FromUin,
+        OpCode: ESsoGroupOp.exit_group,
+      },
+      CgiCmd: ESendCmd.sso_group_op,
       qq: useQQ,
     })
     return res

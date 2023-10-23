@@ -78,6 +78,7 @@ export enum EToType {
 export enum ESsoGroupOp {
   ban_group_member = 4691,
   kick_group_member = 2208,
+  exit_group = 4247,
 }
 
 export interface IBanMemberTo {
@@ -106,6 +107,10 @@ export type IDropTo = Required<
   Pick<IMsgHead, 'MsgSeq' | 'MsgRandom' | 'FromUin'>
 >
 
+export type IExitTo = Required<
+  Pick<IMsgHead, 'FromUin'>
+>
+
 export type IReplyTo = Required<
   Pick<IMsgHead, 'MsgSeq' | 'MsgTime' | 'MsgUid' | 'FromUin'>
 >
@@ -129,6 +134,11 @@ export interface ICgiRequestWithKickGroupMember {
   Uid: string
 }
 
+export interface ICgiRequestWithExitGroup {
+  OpCode: ESsoGroupOp.exit_group
+  Uin: number
+}
+
 export interface ICgiRequestWithGetGroupList {
   LastBuffer?: string
 }
@@ -143,6 +153,7 @@ export type ICgiRequestUnion =
   | ICgiRequestWithDropMessage
   | ICgiRequestWithBanGroupMember
   | ICgiRequestWithKickGroupMember
+  | ICgiRequestWithExitGroup
   | ICgiRequestWithGetGroupList
   | ICgiRequestWithGetGroupMemberList
 

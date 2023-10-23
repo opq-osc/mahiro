@@ -13,6 +13,7 @@ import {
   ICgiRequest,
   ICgiRequestUnion,
   IDropTo,
+  IExitTo,
   IKickMemberTo,
   IReplyTo,
   IResponseDataWithSearchUser,
@@ -621,8 +622,24 @@ export const dropSchema = z.object({
   FromUin: z.number(),
 })
 
+export const exitSchema = z.object({
+  FromUin: z.number(),
+})
+
 export interface IDropGroupMessageOpts {
   to: IDropTo
+  /**
+   * bot qq
+   */
+  qq?: number
+}
+
+export interface IExitGroupOpts {
+  to?: IExitTo
+  /**
+   * manual exit, should use `groupId`
+   */
+  groupId?: number
   /**
    * bot qq
    */
