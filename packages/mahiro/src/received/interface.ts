@@ -300,6 +300,11 @@ export interface IImage {
   Url: Url
 }
 
+/**
+ * received type
+ * @IAtUinLists - recevied object
+ * @IAtUinList  - send object
+ */
 export interface IAtUinLists {
   /**
    * 群昵称
@@ -311,6 +316,10 @@ export interface IAtUinLists {
    * @version v6.9.6-0410
    */
   Uin: number
+  /**
+   * @version v6.9.21-17412
+   */
+  Uid: string
 }
 
 export interface IVoice {

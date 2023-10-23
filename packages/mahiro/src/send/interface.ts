@@ -189,6 +189,11 @@ export enum IAt {
   all = 0,
 }
 
+/**
+ * send type
+ * @IAtUinLists - recevied object
+ * @IAtUinList  - send object
+ */
 export interface IAtUinList {
   /**
    * 可以为空 但是PC客户端显示不正常手机端正常
