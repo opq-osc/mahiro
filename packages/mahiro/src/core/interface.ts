@@ -478,6 +478,12 @@ export const asyncHookUtils = {
   },
 }
 
+export enum EMahiroUploadFileType {
+  image = 'image',
+  // TODO: support voice
+  // voice = 'voice',
+}
+
 export interface IMahiroUploadFileOpts {
   commandId: EUploadCommandId
   qq: number
@@ -485,6 +491,10 @@ export interface IMahiroUploadFileOpts {
    * 可以是 url 或者本地文件绝对路径，会自动区分
    */
   file: string
+  /**
+   * 上传文件类型
+   */
+  type: EMahiroUploadFileType
 }
 
 export interface IMahiroUse {

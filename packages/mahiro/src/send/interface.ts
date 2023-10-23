@@ -59,16 +59,6 @@ export interface IUploadFileRequest {
    * @version v6.9.6-0410
    */
   Base64Buf?: string
-  /**
-   * 图片宽度
-   * @version >= v6.9.21-17412
-   */
-  Width: number
-  /**
-   * 图片高度
-   * @version >= v6.9.21-17412
-   */
-  Height: number
 }
 
 export interface ISendMsg<
@@ -259,9 +249,25 @@ export interface IResponseDataWithVoice {
 }
 
 /**
+ * we will auto patch image size info to response data
+ */
+export interface IResponseDataWithImagePatchSizeInfo {
+  /**
+   * 图片宽度
+   * @version >= v6.9.21-17412
+   */
+  Width: number
+  /**
+   * 图片高度
+   * @version >= v6.9.21-17412
+   */
+  Height: number
+}
+
+/**
  * 发送图片消息的响应
  */
-export interface IResponseDataWithImage {
+export interface IResponseDataWithImage extends IResponseDataWithImagePatchSizeInfo {
   FileId: number
   FileMd5: string
   FileSize: number

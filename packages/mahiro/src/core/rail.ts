@@ -1,6 +1,7 @@
 import { consola } from 'consola'
 import type { Mahiro } from '.'
 import {
+  EMahiroUploadFileType,
   IApiMsg,
   IApiSendGroupJsonMessage,
   IApiSendGroupXmlMessage,
@@ -64,6 +65,7 @@ export class Rail {
         file: fastImage,
         commandId: EUploadCommandId.groupImage,
         qq: useQQ,
+        type: EMahiroUploadFileType.image
       })) as ISendMsgResponse<IResponseDataWithImage> | undefined
       const fileInfo = res?.ResponseData
       if (!fileInfo?.FileMd5?.length) {

@@ -48,6 +48,7 @@ import {
   ISendGroupMessageReturn,
   __unstable__use_dynamic_account,
   getImageUploadRetry,
+  EMahiroUploadFileType,
 } from './interface'
 import { z } from 'zod'
 import { consola } from 'consola'
@@ -67,6 +68,7 @@ import {
   IResponseDataWithSearchUser,
   IResponseDataWithImage,
   IResponseDataWithClusterInfo,
+  IResponseDataWithVoice,
 } from '../send/interface'
 import qs from 'qs'
 import { parse } from 'url'
@@ -1166,7 +1168,8 @@ export class Mahiro {
    * only for upload image file
    */
   async uploadFile(opts: IMahiroUploadFileOpts) {
-    const { file, commandId, qq } = opts
+    const { file, commandId, qq, type } = opts
+    const isImageType = type === EMahiroUploadFileType.image
     const account = this.getAccount(qq)
     if (!account.wsConnected) {
       this.logger.error(`WS not connected, upload file failed, account(${qq})`)
@@ -1249,17 +1252,6 @@ export class Mahiro {
       )
       return
     }
-    const sizeInfo = await this.image.getImageSize({
-      url: fileUrl,
-      base64: Base64Buf,
-      filepath: filePath,
-    })
-    if (!sizeInfo?.width || !sizeInfo?.height) {
-      this.logger.error(
-        `[Upload File] Cannot get image size, account(${qq}), will drop this image`,
-      )
-      return
-    }
     const data: IUploadFile = {
       CgiCmd: ESendCmd.upload,
       CgiRequest: {
@@ -1275,9 +1267,6 @@ export class Mahiro {
           : {
               Base64Buf,
             }),
-        // size info
-        Width: sizeInfo.width,
-        Height: sizeInfo.height,
       },
     }
     const task = async () => {
@@ -1290,6 +1279,44 @@ export class Mahiro {
           'response: ',
           JSON.stringify(json).slice(0, 100),
         )
+        const fileJson = json?.ResponseData as any as
+          | IResponseDataWithVoice
+          | IResponseDataWithImage
+        const isFileReal = fileJson?.FileMd5?.length && fileJson?.FileSize
+        if (isFileReal) {
+          if (isImageType) {
+            const imageSizeInfo = await this.image.getImageSize({
+              ...(hasFilePath
+                ? {
+                    filepath: filePath,
+                  }
+                : hasFileUrl
+                ? {
+                    url: fileUrl,
+                  }
+                : {
+                    base64: Base64Buf,
+                  }),
+            })
+            if (!imageSizeInfo?.height || !imageSizeInfo?.width) {
+              this.logger.error(
+                `[Upload File] Cannot get image size, account(${qq}): will drop this image`,
+              )
+              return
+            }
+            const imageFileJson = fileJson as IResponseDataWithImage
+            // patch image size
+            imageFileJson.Width = imageSizeInfo.width
+            imageFileJson.Height = imageSizeInfo.height
+          }
+        } else {
+          this.logger.error(
+            `[Upload File] Upload file cannot get file md5 or size, account(${qq}): ${JSON.stringify(
+              fileJson,
+            )}`,
+          )
+          return
+        }
         return json as ISendMsgResponse
       }
     }
@@ -1469,6 +1496,7 @@ export class Mahiro {
         file: fastImage,
         commandId: EUploadCommandId.groupImage,
         qq: useQQ,
+        type: EMahiroUploadFileType.image,
       })) as ISendMsgResponse<IResponseDataWithImage> | undefined
       const fileInfo = res?.ResponseData
       this.logger.debug(
@@ -1542,6 +1570,7 @@ export class Mahiro {
         file: fastImage,
         commandId: EUploadCommandId.friendImage,
         qq: useQQ,
+        type: EMahiroUploadFileType.image,
       })) as ISendMsgResponse<IResponseDataWithImage> | undefined
       const fileInfo = res?.ResponseData
       if (!fileInfo?.FileMd5?.length) {
