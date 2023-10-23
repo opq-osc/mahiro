@@ -17,15 +17,25 @@ export enum EMsgEvent {
    */
   ON_EVENT_QQNT_NEW_MSG = 'ON_EVENT_QQNT_NEW_MSG',
   /**
-   * 好友消息 / 包括群里单人的操作（比如有人撤回），也是这个
+   * 好友消息
    * @version v6.9.6
    */
   ON_EVENT_FRIEND_NEW_MSG = 'ON_EVENT_FRIEND_NEW_MSG',
+  /**
+   * 好友消息被撤回
+   * @version v6.9.21-17412
+   */
+  ON_EVENT_FRIEND_MSG_REVOKE = 'ON_EVENT_FRIEND_MSG_REVOKE',
   /**
    * 群消息
    * @version v6.9.6
    */
   ON_EVENT_GROUP_NEW_MSG = 'ON_EVENT_GROUP_NEW_MSG',
+  /**
+   * 群消息被撤回
+   * @version v6.9.21-17412
+   */
+  ON_EVENT_GROUP_MSG_REVOKE = 'ON_EVENT_GROUP_MSG_REVOKE',
   /**
    * 有人加群了
    * @version v6.9.6
@@ -68,12 +78,22 @@ export const MSG_EVENT_GROUP_MANAGER: EMsgEvent[] = [
   EMsgEvent.ON_EVENT_GROUP_SYSTEM_MSG_NOTIFY,
 ]
 
-export const VALID_MSG_EVENT: EMsgEvent[] = [
+export const MSG_EVENT_FRIEND: EMsgEvent[] = [
   EMsgEvent.ON_EVENT_FRIEND_NEW_MSG,
+  EMsgEvent.ON_EVENT_FRIEND_MSG_REVOKE,
+]
+
+export const MSG_EVENT_GROUP: EMsgEvent[] = [
   EMsgEvent.ON_EVENT_GROUP_NEW_MSG,
+  EMsgEvent.ON_EVENT_GROUP_MSG_REVOKE,
+  ...MSG_EVENT_GROUP_MANAGER,
+]
+
+export const VALID_MSG_EVENT: EMsgEvent[] = [
+  ...MSG_EVENT_FRIEND,
+  ...MSG_EVENT_GROUP,
   EMsgEvent.ON_EVENT_LOGIN_SUCCESS,
   EMsgEvent.ON_EVENT_NETWORK_CHANGE,
-  ...MSG_EVENT_GROUP_MANAGER,
 ]
 
 export interface ICurrentPacket<T extends IEventDataUnion = IEventData> {
