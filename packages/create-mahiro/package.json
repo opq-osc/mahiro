@@ -17,13 +17,13 @@
     "build:deps": "dora build"
   },
   "dependencies": {
-    "commander": "10.0.1",
+    "commander": "11.1.0",
     "mustache": "4.2.0"
   },
   "devDependencies": {
     "@clack/prompts": "0.6.3",
-    "@types/mustache": "^4.2.2",
-    "chalk": "^5.2.0",
+    "@types/mustache": "^4.2.4",
+    "chalk": "^5.3.0",
     "create-mahiro": "link:./",
     "mahiro": "workspace:*"
   }
