@@ -846,10 +846,13 @@ export class Database {
         : await panel.content()
       try {
         const css =
-          extract({
-            css: `@tailwind utilities;`,
-            code: content,
-          })?.css || ''
+          (
+            await extract({
+              css: `@tailwind utilities;`,
+              // prevent not use utilities class error
+              code: `<div class='flex'></div>${content}`,
+            })
+          )?.css || ''
         content = `<style>${css}</style>${content}`
       } catch {
         this.logger.warn(`[web] extract css failed: ${panel.name}`)

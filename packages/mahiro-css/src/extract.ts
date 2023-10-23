@@ -2,7 +2,7 @@ import postcss from 'postcss'
 import tailwind, { type Config as TailwindConfig } from 'tailwindcss'
 import deepmerge from 'deepmerge'
 
-export const extract = (opts: {
+export const extract = async (opts: {
   css: string
   code: string
   config?: TailwindConfig
@@ -24,8 +24,9 @@ export const extract = (opts: {
     config,
   )
 
-  const result = postcss([tailwind(tailwindConfig)]).process(css, {
+  const result = await postcss([tailwind(tailwindConfig)]).process(css, {
     map: false,
+    from: 'tailwind.css'
   })
 
   return {
