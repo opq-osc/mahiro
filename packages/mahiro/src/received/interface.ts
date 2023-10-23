@@ -182,7 +182,7 @@ export enum EMsgTypeWithGroupManager {
    * @member
    * @admin
    */
-  join = 33
+  join = 33,
 }
 
 export enum EStatusWithGroupManager {

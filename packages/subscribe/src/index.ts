@@ -234,7 +234,7 @@ export const MahiroSubscribe = (opts: IMahiroSubscribeOpts = {}) => {
           name: `自动添加:${groupId}`,
           group_id: groupId,
           expired_at,
-          distribute: false
+          distribute: false,
         })
         willSendExpiredAt = expired_at
         mahiro.logger.success(

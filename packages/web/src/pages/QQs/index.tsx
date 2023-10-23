@@ -229,7 +229,7 @@ export const QQs = () => {
                   wrapperCol={{
                     style: {
                       textAlign: 'center',
-                    }
+                    },
                   }}
                 >
                   <Form.Item label="账号">

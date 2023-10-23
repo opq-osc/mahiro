@@ -1,4 +1,4 @@
-import { Image, ImageProps } from "antd";
+import { Image, ImageProps } from 'antd'
 
 export const SafeImage = (props: Partial<ImageProps> = {}) => (
   <Image

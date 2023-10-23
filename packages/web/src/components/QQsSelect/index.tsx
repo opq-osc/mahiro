@@ -7,13 +7,9 @@ export interface IQQsSelectProps extends SelectProps {
   onChange?: (value: number[]) => void
 }
 
-export const QQsSelect = ({
-  value,
-  onChange,
-  ...props
-}: IQQsSelectProps) => {
+export const QQsSelect = ({ value, onChange, ...props }: IQQsSelectProps) => {
   const { data: originData, isFetching } = useQQsList()
-  const data = originData?.map(i => i.qq)
+  const data = originData?.map((i) => i.qq)
   const options = (data || []).map((i) => {
     const color = randomColor(i)
     return {
@@ -33,7 +29,7 @@ export const QQsSelect = ({
   })
 
   const filteredValue = value?.filter((i) => {
-    return options?.some(o => o?.value === i)
+    return options?.some((o) => o?.value === i)
   })
 
   return (

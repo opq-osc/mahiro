@@ -387,7 +387,6 @@ export interface IClusterUserInfo {
   TotalSend: string
 }
 
-
 export type IResponseDataUnion =
   | IResponseData
   | IResponseDataWithVoice

@@ -1275,7 +1275,7 @@ export class Mahiro {
       this.logger.info(`Retry upload file in ${retryTime}ms, account(${qq})`)
       // we retry 1 time only
       try {
-        // sleep 
+        // sleep
         await sleep(retryTime)
         const taskResult = await task()
         return taskResult
