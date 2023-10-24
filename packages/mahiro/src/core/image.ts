@@ -111,7 +111,7 @@ export class Image {
       const detectedImageType = await getImageTypeByBase64(base64)
       if (!detectedImageType) {
         this.logger.error(
-          `[ImageSizeDetector] base64: ${base64} is not a valid image`,
+          `[ImageSizeDetector] base64: ${base64.slice(0, 50)} is not a valid image`,
         )
         return
       }
