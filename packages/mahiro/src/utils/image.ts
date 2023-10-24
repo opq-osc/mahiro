@@ -1,4 +1,4 @@
-import * as fileType from 'file-type'
+import * as fileType from 'mahiro/compiled/file-type'
 import { isString } from 'lodash'
 import consola from 'consola'
 
