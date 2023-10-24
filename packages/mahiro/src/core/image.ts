@@ -3,6 +3,7 @@ import type { Mahiro } from '.'
 import { IGetImageSizeOpts, IImageSize } from './interface'
 import {
   VALID_EXTS,
+  detectUrlImageType,
   getImageTypeByBase64,
   hasValidImageExt,
 } from '../utils/image'
@@ -77,18 +78,19 @@ export class Image {
     let finalCleanup: () => void = noop
     // url
     if (url?.length) {
-      const hasValidExt = hasValidImageExt(url)
-      if (!hasValidExt) {
+      const imageExt = await detectUrlImageType(url)
+      this.logger.debug(
+        `[ImageSizeDetector] url: ${url} has ext suffix: ${imageExt} (from detectUrlImageType)`
+      )
+      if (!imageExt?.length) {
         this.logger.error(
-          `[ImageSizeDetector] url: ${url} has valid ext suffix, current only support ${VALID_EXTS.join(
+          `[ImageSizeDetector] url: ${url} has invalid ext suffix, current only support ${VALID_EXTS.join(
             ', ',
-          )} as image ext`,
+          )} image format`,
         )
         return
       }
-      const lastDotIndex = url.lastIndexOf('.')
-      const ext = url.slice(lastDotIndex) // .jpg
-      const { tmpFile, cleanup } = this.createTmpFile({ ext })
+      const { tmpFile, cleanup } = this.createTmpFile({ ext: imageExt })
       // try download and save
       try {
         this.logger.debug(

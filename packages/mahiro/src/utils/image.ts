@@ -1,6 +1,7 @@
 import * as fileType from 'mahiro/compiled/file-type'
 import { isString } from 'lodash'
 import consola from 'consola'
+import download from 'download'
 
 const logger = consola.withTag('utils/image') as typeof consola
 
@@ -44,4 +45,25 @@ export const hasValidImageExt = (str: string) => {
     return str.endsWith(`.${ext}`)
   })
   return hasValidExtSuffix
+}
+
+export const detectUrlImageType = async (url: string) => {
+  const hasDirectImageExt = hasValidImageExt(url)
+  if (hasDirectImageExt) {
+    const ext = url.split('.').pop() as EImageType
+    return ext
+  } else {
+    // try download
+    try {
+      const buffer = await download(url, { timeout: 10 * 1e3 })
+      const imageType = await fileType.fileTypeFromBuffer(buffer)
+      const ext = imageType?.ext as EImageType
+      if (ext) {
+        const isValidExt = VALID_EXTS.includes(ext)
+        if (isValidExt) {
+          return ext
+        }
+      }
+    } catch {}
+  }
 }
