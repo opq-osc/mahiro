@@ -239,7 +239,7 @@ export class Mahiro {
     // 2. check crash logs
     printCrashLogTips()
   }
-  
+
   private initSearch() {
     this.logger.debug(`[Search] Init search`)
     this.search = new Search({ mahiro: this })

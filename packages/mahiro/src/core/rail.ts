@@ -65,7 +65,7 @@ export class Rail {
         file: fastImage,
         commandId: EUploadCommandId.groupImage,
         qq: useQQ,
-        type: EMahiroUploadFileType.image
+        type: EMahiroUploadFileType.image,
       })) as ISendMsgResponse<IResponseDataWithImage> | undefined
       const fileInfo = res?.ResponseData
       if (!fileInfo?.FileMd5?.length) {

@@ -26,7 +26,7 @@ export const extract = async (opts: {
 
   const result = await postcss([tailwind(tailwindConfig)]).process(css, {
     map: false,
-    from: 'tailwind.css'
+    from: 'tailwind.css',
   })
 
   return {

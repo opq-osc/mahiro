@@ -80,7 +80,7 @@ export class Image {
     if (url?.length) {
       const imageExt = await detectUrlImageType(url)
       this.logger.debug(
-        `[ImageSizeDetector] url: ${url} has ext suffix: ${imageExt} (from detectUrlImageType)`
+        `[ImageSizeDetector] url: ${url} has ext suffix: ${imageExt} (from detectUrlImageType)`,
       )
       if (!imageExt?.length) {
         this.logger.error(
@@ -111,7 +111,10 @@ export class Image {
       const detectedImageType = await getImageTypeByBase64(base64)
       if (!detectedImageType) {
         this.logger.error(
-          `[ImageSizeDetector] base64: ${base64.slice(0, 50)} is not a valid image`,
+          `[ImageSizeDetector] base64: ${base64.slice(
+            0,
+            50,
+          )} is not a valid image`,
         )
         return
       }

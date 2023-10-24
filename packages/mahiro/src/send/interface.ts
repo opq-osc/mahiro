@@ -107,9 +107,7 @@ export type IDropTo = Required<
   Pick<IMsgHead, 'MsgSeq' | 'MsgRandom' | 'FromUin'>
 >
 
-export type IExitTo = Required<
-  Pick<IMsgHead, 'FromUin'>
->
+export type IExitTo = Required<Pick<IMsgHead, 'FromUin'>>
 
 export type IReplyTo = Required<
   Pick<IMsgHead, 'MsgSeq' | 'MsgTime' | 'MsgUid' | 'FromUin'>
@@ -283,7 +281,8 @@ export interface IResponseDataWithImagePatchSizeInfo {
 /**
  * 发送图片消息的响应
  */
-export interface IResponseDataWithImage extends IResponseDataWithImagePatchSizeInfo {
+export interface IResponseDataWithImage
+  extends IResponseDataWithImagePatchSizeInfo {
   FileId: number
   FileMd5: string
   FileSize: number
