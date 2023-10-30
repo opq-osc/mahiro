@@ -1,0 +1,23 @@
+# Sensitive words checker
+
+### 安装
+
+```bash
+  pnpm i -D @xn-sakina/mahiro-filter
+```
+
+### 使用
+
+```ts
+import { MahiroFilter } from '@xn-sakina/mahiro-filter'
+import path from 'path'
+
+mahiro.use(MahiroFilter({
+  // sensitive words data file path
+  dataPath: path.join(__dirname, './data.txt')
+}))
+```
+
+敏感词文件格式需以行为分割，每行一个敏感词。
+
+默认为检查发送和收到的消息，若含有敏感词会自动抛弃，配置项详见 TS 类型声明。

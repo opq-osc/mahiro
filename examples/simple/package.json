@@ -11,6 +11,7 @@
     "mahiro": "workspace:*",
     "typescript": "^5.0.3",
     "@xn-sakina/mahiro-subscribe": "workspace:*",
-    "@xn-sakina/mahiro-png2jpg": "workspace:*"
+    "@xn-sakina/mahiro-png2jpg": "workspace:*",
+    "@xn-sakina/mahiro-filter": "workspace:*"
   }
 }

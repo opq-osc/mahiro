@@ -1,0 +1,23 @@
+{
+  "name": "@xn-sakina/mahiro-filter",
+  "version": "15.0.1",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "rimraf dist && tsc --declarationMap false",
+    "tsc:check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "mahiro": "link:../mahiro"
+  },
+  "peerDependencies": {
+    "mahiro": "*"
+  },
+  "dependencies": {
+    "hoshino": "^1.0.0"
+  }
+}

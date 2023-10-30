@@ -77,6 +77,9 @@ importers:
       '@types/node':
         specifier: ^18.15.11
         version: registry.npmjs.org/@types/node@18.15.11
+      '@xn-sakina/mahiro-filter':
+        specifier: workspace:*
+        version: link:../../packages/filter
       '@xn-sakina/mahiro-png2jpg':
         specifier: workspace:*
         version: link:../../packages/png2jpg
@@ -140,6 +143,16 @@ importers:
         version: 'link:'
       mahiro:
         specifier: workspace:*
+        version: link:../mahiro
+
+  packages/filter:
+    dependencies:
+      hoshino:
+        specifier: ^1.0.0
+        version: registry.npmjs.org/hoshino@1.0.0
+    devDependencies:
+      mahiro:
+        specifier: link:../mahiro
         version: link:../mahiro
 
   packages/mahiro:
@@ -6170,6 +6183,94 @@ packages:
       - supports-color
     dev: true
 
+  registry.npmjs.org/@xn-sakina/hoshino-darwin-arm64@1.0.0:
+    resolution: {integrity: sha512-CKEygZesea0xEtp/rR2DvpSqh1rRFVazok+cYPoJZFzu3/T5vIhRNyJ/MSN1wJXdPBrbFFygylqtnqg5vLGagQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@xn-sakina/hoshino-darwin-arm64/-/hoshino-darwin-arm64-1.0.0.tgz}
+    name: '@xn-sakina/hoshino-darwin-arm64'
+    version: 1.0.0
+    engines: {node: '>=14'}
+    cpu: [arm64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@xn-sakina/hoshino-darwin-x64@1.0.0:
+    resolution: {integrity: sha512-DtTesS+YJoKq08dHwTuqNpeZ5Znn3hEOH5PiTfqZh1q7AmaWh4sPGsgAphefL3xVLE4jkCKiCts5IpZRVy0xwg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@xn-sakina/hoshino-darwin-x64/-/hoshino-darwin-x64-1.0.0.tgz}
+    name: '@xn-sakina/hoshino-darwin-x64'
+    version: 1.0.0
+    engines: {node: '>=14'}
+    cpu: [x64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@xn-sakina/hoshino-linux-arm64-gnu@1.0.0:
+    resolution: {integrity: sha512-psevEs4GRKvcZd4R5KboB/wDhOH2FXxVond82X17iaiDS85Qif/D+W6eGp5ATxyrycGNpvsRaa6EYiaBF3H5jg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@xn-sakina/hoshino-linux-arm64-gnu/-/hoshino-linux-arm64-gnu-1.0.0.tgz}
+    name: '@xn-sakina/hoshino-linux-arm64-gnu'
+    version: 1.0.0
+    engines: {node: '>=14'}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@xn-sakina/hoshino-linux-arm64-musl@1.0.0:
+    resolution: {integrity: sha512-BiBwxBA8PzPLSq5teaUjhSP+OqApesA7DLihy/GRWAw4EVb6PtEoIrMX3IRQtXcaFwXv2CFcFhpZfMV57J4WHw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@xn-sakina/hoshino-linux-arm64-musl/-/hoshino-linux-arm64-musl-1.0.0.tgz}
+    name: '@xn-sakina/hoshino-linux-arm64-musl'
+    version: 1.0.0
+    engines: {node: '>=14'}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@xn-sakina/hoshino-linux-x64-gnu@1.0.0:
+    resolution: {integrity: sha512-9f3IV5D0lGnRuG2ib2rV0VuteGyqZNYuGSxtGdDWQvMnpKdFR83sSSrlMCOss+7hFDisQz4YFbQhwuTC5fXaPg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@xn-sakina/hoshino-linux-x64-gnu/-/hoshino-linux-x64-gnu-1.0.0.tgz}
+    name: '@xn-sakina/hoshino-linux-x64-gnu'
+    version: 1.0.0
+    engines: {node: '>=14'}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@xn-sakina/hoshino-linux-x64-musl@1.0.0:
+    resolution: {integrity: sha512-aFLd6EsX1fPaBjpX/kMGyW+dkrsVFWbt3DvEzz8X+lwdnXSXfYGxboBwIg4BWQkapQX9nbmGoeRA4ZsVJ5XOQQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@xn-sakina/hoshino-linux-x64-musl/-/hoshino-linux-x64-musl-1.0.0.tgz}
+    name: '@xn-sakina/hoshino-linux-x64-musl'
+    version: 1.0.0
+    engines: {node: '>=14'}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@xn-sakina/hoshino-win32-arm64-msvc@1.0.0:
+    resolution: {integrity: sha512-5LL333Lp0UVdEhyy8Wf5LcobHAjKSJMzp4TwGMjGOrk+UfHQ38Vv598unw7Wh6Up1OWRef4/7+/+W3k5ZV+AJw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@xn-sakina/hoshino-win32-arm64-msvc/-/hoshino-win32-arm64-msvc-1.0.0.tgz}
+    name: '@xn-sakina/hoshino-win32-arm64-msvc'
+    version: 1.0.0
+    engines: {node: '>=14'}
+    cpu: [arm64]
+    os: [win32]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/@xn-sakina/hoshino-win32-x64-msvc@1.0.0:
+    resolution: {integrity: sha512-yR1SNEin9hOpo9+Dbkg5WofAVJddCbnv4YCpGilX0AGutzaMiNnICpWLgf5zR7LIw149jVvq/rwYJ/lRmFp/SA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@xn-sakina/hoshino-win32-x64-msvc/-/hoshino-win32-x64-msvc-1.0.0.tgz}
+    name: '@xn-sakina/hoshino-win32-x64-msvc'
+    version: 1.0.0
+    engines: {node: '>=14'}
+    cpu: [x64]
+    os: [win32]
+    requiresBuild: true
+    dev: false
+    optional: true
+
   registry.npmjs.org/@xn-sakina/mental@4.0.2:
     resolution: {integrity: sha512-bAS6pJxoGVZMdlWeDydfSwphowxarA1jgcO5bmvzTt4bNj9L+/lVOhdL6ci34rBeFppSJZVQVSVDyW4AIBm79w==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@xn-sakina/mental/-/mental-4.0.2.tgz}
     name: '@xn-sakina/mental'
@@ -11289,6 +11390,22 @@ packages:
     version: 1.2.0
     hasBin: true
     dev: true
+
+  registry.npmjs.org/hoshino@1.0.0:
+    resolution: {integrity: sha512-NP17h++yZF/GlTihaWAfEGqs3pOqF22HFCXEMeVIEPsdH0BNRNUrrLFCznUR4BhzpEB3po2ejXntpRnjJKlAIw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/hoshino/-/hoshino-1.0.0.tgz}
+    name: hoshino
+    version: 1.0.0
+    engines: {node: '>=14'}
+    optionalDependencies:
+      '@xn-sakina/hoshino-darwin-arm64': registry.npmjs.org/@xn-sakina/hoshino-darwin-arm64@1.0.0
+      '@xn-sakina/hoshino-darwin-x64': registry.npmjs.org/@xn-sakina/hoshino-darwin-x64@1.0.0
+      '@xn-sakina/hoshino-linux-arm64-gnu': registry.npmjs.org/@xn-sakina/hoshino-linux-arm64-gnu@1.0.0
+      '@xn-sakina/hoshino-linux-arm64-musl': registry.npmjs.org/@xn-sakina/hoshino-linux-arm64-musl@1.0.0
+      '@xn-sakina/hoshino-linux-x64-gnu': registry.npmjs.org/@xn-sakina/hoshino-linux-x64-gnu@1.0.0
+      '@xn-sakina/hoshino-linux-x64-musl': registry.npmjs.org/@xn-sakina/hoshino-linux-x64-musl@1.0.0
+      '@xn-sakina/hoshino-win32-arm64-msvc': registry.npmjs.org/@xn-sakina/hoshino-win32-arm64-msvc@1.0.0
+      '@xn-sakina/hoshino-win32-x64-msvc': registry.npmjs.org/@xn-sakina/hoshino-win32-x64-msvc@1.0.0
+    dev: false
 
   registry.npmjs.org/hosted-git-info@2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/hosted-git-info/-/hosted-git-info-2.8.9.tgz}
