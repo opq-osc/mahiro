@@ -32,7 +32,7 @@ import axios from 'axios'
 
 export class Database {
   private path!: string
-  private db!: ReturnType<typeof knex>
+  db!: ReturnType<typeof knex>
   private logger = consola.withTag('Database') as typeof consola
   // parent
   private mahiro!: Mahiro
