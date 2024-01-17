@@ -9,7 +9,8 @@
       "create-mahiro",
       "mahiro",
       "@xn-sakina/mahiro-png2jpg",
-      "@xn-sakina/mahiro-subscribe"
+      "@xn-sakina/mahiro-subscribe",
+      "@xn-sakina/mahiro-filter"
     ]
   ],
   "baseBranch": "main",

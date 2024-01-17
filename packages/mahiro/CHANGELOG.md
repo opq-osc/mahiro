@@ -1,5 +1,11 @@
 # mahiro
 
+## 15.0.2
+
+### Patch Changes
+
+- Public `mahiro.db.db`
+
 ## 15.0.1
 
 ### Patch Changes
