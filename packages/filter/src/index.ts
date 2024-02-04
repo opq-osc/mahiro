@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'fs'
 import { IMahiroUse } from 'mahiro'
-import { findAllMatch, findLeftFirstMatch } from 'hoshino'
+import { findAllMatch, findLeftFirstMatch, loadPatterns } from 'hoshino'
 import { isAbsolute } from 'path'
 
 export interface MahiroFilter {
@@ -27,6 +27,7 @@ export interface MahiroFilter {
 }
 
 let globalLines: string[] = []
+let isPatternLoaded = false
 
 export const MahiroFilter = (opts: MahiroFilter) => {
   const {
@@ -76,6 +77,10 @@ export const MahiroFilter = (opts: MahiroFilter) => {
 
     globalLines = lodash.uniq(lines)
     logger.info(`Loaded ${chalk.green(globalLines.length)} lines of words`)
+    if (!isPatternLoaded) {
+      isPatternLoaded = true
+      loadPatterns(globalLines)
+    }
 
     // received
     if (checkReceived) {
@@ -133,7 +138,6 @@ async function hasSensitiveWords(text: string, threshold: number) {
     if (checkOne) {
       const result = await findLeftFirstMatch({
         haystack: text,
-        patterns: globalLines,
       })
       if (result?.matched) {
         return true
@@ -141,7 +145,6 @@ async function hasSensitiveWords(text: string, threshold: number) {
     } else {
       const result = await findAllMatch({
         haystack: text,
-        patterns: globalLines,
       })
       return result?.length >= threshold
     }
