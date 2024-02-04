@@ -1,5 +1,11 @@
 # mahiro
 
+## 15.0.3
+
+### Patch Changes
+
+- Upgrade tsx and other deps
+
 ## 15.0.2
 
 ### Patch Changes
