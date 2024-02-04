@@ -24,7 +24,7 @@
     "npm": "not use, use pnpm instead",
     "yarn": "not use, use pnpm instead"
   },
-  "packageManager": "pnpm@8.14.0",
+  "packageManager": "pnpm@8.15.1",
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
     "@types/node": "^18.18.6",
