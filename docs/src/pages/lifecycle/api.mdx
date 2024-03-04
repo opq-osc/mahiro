@@ -303,6 +303,38 @@ mahiro.baka.exitGroup({
 })
 ```
 
+### `baka.modifyGroupMemberNickname`
+
+> 要求 OPQ 版本 >= `v6.9.28-21358`
+
+修改群成员昵称：
+
+```ts
+mahiro.baka.modifyGroupMemberNickname({
+  groupId,
+  userId,
+  // 传递空字符串清空昵称
+  newNickname: 'new nickname'
+})
+```
+
+<Callout type="info" emoji="ℹ️">
+  使用该功能需开启 Redis ，详见 [KV 存储](./kv#dbrediskv-redis)
+</Callout>
+
+### `baka.patpatGroupMember`
+
+> 要求 OPQ 版本 >= `v6.9.28-21358` 同时打开头像双击功能
+
+拍一拍：
+
+```ts
+mahiro.baka.patpatGroupMember({
+  groupId,
+  userId,
+})
+```
+
 
 ### `baka.getGroupListMap`
 
