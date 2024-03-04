@@ -111,6 +111,7 @@ import { sleep } from '../utils'
 import { Image } from './image'
 import { IVersion, getVersionInfo } from '../utils/version'
 import { Search } from './search'
+import { Ano } from './ano'
 
 export class Mahiro {
   opts!: IMahiroOpts
@@ -190,6 +191,9 @@ export class Mahiro {
   // baka
   baka!: Baka
 
+  // ano
+  ano!: Ano
+
   // image
   image!: Image
 
@@ -220,6 +224,7 @@ export class Mahiro {
     this.initPatcher()
     this.initRail()
     this.initBaka()
+    this.initAno()
     this.initSearch()
     await this.startNodeServer()
     this.registerOptionsInterceptors()
@@ -270,6 +275,11 @@ export class Mahiro {
   private initBaka() {
     this.logger.debug(`[Baka] Init baka`)
     this.baka = new Baka({ mahiro: this })
+  }
+
+  private initAno() {
+    this.logger.debug(`[Ano] Init ano`)
+    this.ano = new Ano({ mahiro: this })
   }
 
   static async start(opts: IMahiroOpts) {

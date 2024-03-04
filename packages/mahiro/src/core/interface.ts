@@ -595,6 +595,10 @@ export interface IRailOpts {
   mahiro: Mahiro
 }
 
+export interface IAnoOpts {
+  mahiro: Mahiro
+}
+
 export const replyToSchema = z.object({
   MsgSeq: z.number(),
   MsgTime: z.number(),
