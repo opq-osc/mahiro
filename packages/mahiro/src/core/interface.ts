@@ -749,6 +749,19 @@ export interface IModifyGroupMemberNicknameOpts {
   qq?: number
 }
 
+export interface IPatpatGroupMemberOpts {
+  groupId: number
+  userId: number
+  /**
+   * bot account
+   */
+  qq?: number
+  /**
+   * what is this ?
+   */
+  // NewTitle?: string
+}
+
 export interface IGroupListOpts {
   qq?: number
   /**

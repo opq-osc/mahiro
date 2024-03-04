@@ -9,6 +9,7 @@ import {
   IKickGroupMemberOpts,
   IMessageSnapshotGetterOpts,
   IModifyGroupMemberNicknameOpts,
+  IPatpatGroupMemberOpts,
   ISendApiOpts,
   OPQ_APIS,
   banGroupMemberSchema,
@@ -31,6 +32,7 @@ import {
   ICgiRequestWithGetGroupMemberList,
   ICgiRequestWithKickGroupMember,
   ICgiRequestWithModifyGroupMemberNickname,
+  ICgiRequestWithPatpatGroupMember,
   IGroupList,
   IGroupListMap,
   IGroupMemberList,
@@ -441,6 +443,38 @@ export class Baka {
         Nick: newNickname
       },
       CgiCmd: ESendCmd.sso_group_op,
+      qq: useQQ,
+    })
+    return res
+  }
+
+  /**
+   * @version v6.9.28-21358~
+   */
+  async patpatGroupMember(opts: IPatpatGroupMemberOpts) {
+    let { qq, userId, groupId } = opts
+    this.logger.debug(`Patpat group member, user: ${userId}, group: ${groupId}`)
+    const useQQ = this.mahiro.getUseQQ({
+      specifiedQQ: qq,
+    })
+    if (isNil(userId) || isNil(groupId)) {
+      this.logger.error(
+        `Validate to failed, You should provide \`userId\` and \`groupId\``,
+      )
+      return
+    }
+    this.logger.info(
+      `Patpat group member, user: ${userId}, group: ${groupId}, use account ${useQQ}`,
+    )
+    const res = await this.sendBakaApi<
+      ICgiRequestWithPatpatGroupMember,
+      ESendCmd.pat_pat_group_member
+    >({
+      CgiRequest: {
+        GroupCode: groupId,
+        Uin: userId
+      },
+      CgiCmd: ESendCmd.pat_pat_group_member,
       qq: useQQ,
     })
     return res

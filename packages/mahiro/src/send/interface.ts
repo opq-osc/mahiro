@@ -8,6 +8,7 @@ export enum ESendCmd {
   get_group_member_list = 'GetGroupMemberLists',
   drop_group_message = 'GroupRevokeMsg',
   sso_group_op = 'SsoGroup.Op',
+  pat_pat_group_member = 'SsoGroup.Op.Pat',
 }
 
 export interface ISearchUserRequest {
@@ -149,6 +150,16 @@ export interface ICgiRequestWithModifyGroupMemberNickname extends Required<ICgiR
   Nick: string
 }
 
+/**
+ * @version v6.9.28-21358~
+ */
+export interface ICgiRequestWithPatpatGroupMember extends Required<ICgiRequestWithGroupApiCompat> {
+  /**
+   * user `Uin`, not group `Uin`
+   */
+  Uin: number
+}
+
 export interface ICgiRequestWithExitGroup extends ICgiRequestWithGroupApiCompat {
   OpCode: ESsoGroupOp.exit_group
   Uin: number
@@ -172,6 +183,7 @@ export type ICgiRequestUnion =
   | ICgiRequestWithGetGroupList
   | ICgiRequestWithGetGroupMemberList
   | ICgiRequestWithModifyGroupMemberNickname
+  | ICgiRequestWithPatpatGroupMember
 
 export interface ICgiRequest {
   /**
