@@ -113,26 +113,33 @@ export type IReplyTo = Required<
   Pick<IMsgHead, 'MsgSeq' | 'MsgTime' | 'MsgUid' | 'FromUin'>
 >
 
-export interface ICgiRequestWithDropMessage {
+export interface ICgiRequestWithGroupApiCompat {
+  /**
+   * 群号，v6.9.28-21358 版本后与 Uin 等价，二选一即可
+   */
+  GroupCode?: number
+}
+
+export interface ICgiRequestWithDropMessage extends ICgiRequestWithGroupApiCompat {
   Uin: number
   MsgSeq: number
   MsgRandom: number
 }
 
-export interface ICgiRequestWithBanGroupMember {
+export interface ICgiRequestWithBanGroupMember extends ICgiRequestWithGroupApiCompat {
   OpCode: ESsoGroupOp.ban_group_member
   Uin: number
   Uid: string
   BanTime: number
 }
 
-export interface ICgiRequestWithKickGroupMember {
+export interface ICgiRequestWithKickGroupMember extends ICgiRequestWithGroupApiCompat {
   OpCode: ESsoGroupOp.kick_group_member
   Uin: number
   Uid: string
 }
 
-export interface ICgiRequestWithExitGroup {
+export interface ICgiRequestWithExitGroup extends ICgiRequestWithGroupApiCompat {
   OpCode: ESsoGroupOp.exit_group
   Uin: number
 }
@@ -141,7 +148,7 @@ export interface ICgiRequestWithGetGroupList {
   LastBuffer?: string
 }
 
-export interface ICgiRequestWithGetGroupMemberList {
+export interface ICgiRequestWithGetGroupMemberList extends ICgiRequestWithGroupApiCompat {
   Uin: number
   LastBuffer?: string
 }
