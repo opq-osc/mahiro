@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "mahiro ./index.ts"
+    "dev": "mahiro ./index.ts",
+    "test": "MAHIRO_DYNAMIC_ACCOUNT=1 mahiro ./test.ts"
   },
   "devDependencies": {
     "@types/node": "^18.15.11",
