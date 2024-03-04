@@ -742,6 +742,9 @@ export interface IKickGroupMemberOpts extends IKickGroupMemberQuickOpts {
 export interface IModifyGroupMemberNicknameOpts {
   groupId: number
   userId: number
+  /**
+   * 传递空字符串清空群昵称
+   */
   newNickname: string
   /**
    * bot account
