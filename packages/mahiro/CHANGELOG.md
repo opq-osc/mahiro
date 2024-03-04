@@ -1,5 +1,11 @@
 # mahiro
 
+## 16.0.0
+
+### Major Changes
+
+- See changelog docs
+
 ## 15.0.3
 
 ### Patch Changes
