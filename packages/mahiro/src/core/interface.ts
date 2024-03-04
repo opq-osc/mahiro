@@ -735,6 +735,16 @@ export interface IKickGroupMemberOpts extends IKickGroupMemberQuickOpts {
   qq?: number
 }
 
+export interface IModifyGroupMemberNicknameOpts {
+  groupId: number
+  userId: number
+  newNickname: string
+  /**
+   * bot account
+   */
+  qq?: number
+}
+
 export interface IGroupListOpts {
   qq?: number
   /**

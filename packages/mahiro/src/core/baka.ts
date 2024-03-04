@@ -8,6 +8,7 @@ import {
   IGroupListOpts,
   IKickGroupMemberOpts,
   IMessageSnapshotGetterOpts,
+  IModifyGroupMemberNicknameOpts,
   ISendApiOpts,
   OPQ_APIS,
   banGroupMemberSchema,
@@ -29,6 +30,7 @@ import {
   ICgiRequestWithGetGroupList,
   ICgiRequestWithGetGroupMemberList,
   ICgiRequestWithKickGroupMember,
+  ICgiRequestWithModifyGroupMemberNickname,
   IGroupList,
   IGroupListMap,
   IGroupMemberList,
@@ -41,7 +43,7 @@ import {
 } from '../send/interface'
 import qs from 'qs'
 import { IMsg, IMsgHead } from '../received/interface'
-import { isNil, uniqBy } from 'lodash'
+import { isNil, isString, uniqBy } from 'lodash'
 import { sleep } from '../utils'
 
 export class Baka {
@@ -373,6 +375,70 @@ export class Baka {
         Uin,
         Uid,
         OpCode: ESsoGroupOp.kick_group_member,
+      },
+      CgiCmd: ESendCmd.sso_group_op,
+      qq: useQQ,
+    })
+    return res
+  }
+
+  /**
+   * @version v6.9.28-21358~
+   */
+  async modifyGroupMemberNickname(opts: IModifyGroupMemberNicknameOpts) {
+    let { qq, userId, groupId, newNickname } = opts
+    // ensure has nickname
+    if (!isString(newNickname)) {
+      this.logger.error(`New nickname invalid, newNickname: ${newNickname}, please provide a string`)
+      return
+    }
+    this.logger.debug(`Modify group member nickname, newNickname: ${newNickname}, user: ${userId}, group: ${groupId}`)
+    const useQQ = this.mahiro.getUseQQ({
+      specifiedQQ: qq,
+    })
+    let Uid: string | undefined
+    if (!isNil(userId) && !isNil(groupId)) {
+      // first get from 2 level cache
+      const userInfo = await this.getUserInfoCache2LevelByUin(userId)
+      if (userInfo?.SenderUid?.length) {
+        this.logger.debug(
+          `Get user info from 2 level cache success, userId: ${userId}`,
+        )
+        Uid = userInfo.SenderUid
+      } else {
+        // we auto detect user uid
+        const groupMemberList = await this.getGroupMemberListMap({
+          groupId,
+          qq: useQQ,
+        })
+        const memberInfo = groupMemberList?.[userId]
+        if (!memberInfo?.Uid?.length) {
+          this.logger.error(
+            `Validate to failed, user not in group, userId: ${userId}, groupId: ${groupId}`,
+          )
+          return
+        }
+        Uid = memberInfo.Uid
+      }
+    } else {
+      // never
+      this.logger.error(
+        `Validate to failed, You should provide \`userId\` and \`groupId\``,
+      )
+      return
+    }
+    this.logger.info(
+      `Modify group member nickname, newNickname: ${newNickname}, user: ${userId}, group: ${groupId}, use account ${useQQ}`,
+    )
+    const res = await this.sendBakaApi<
+      ICgiRequestWithModifyGroupMemberNickname,
+      ESendCmd.sso_group_op
+    >({
+      CgiRequest: {
+        Uid,
+        OpCode: ESsoGroupOp.modify_group_member_nickname,
+        GroupCode: groupId,
+        Nick: newNickname
       },
       CgiCmd: ESendCmd.sso_group_op,
       qq: useQQ,

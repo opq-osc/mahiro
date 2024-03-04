@@ -79,6 +79,7 @@ export enum ESsoGroupOp {
   ban_group_member = 4691,
   kick_group_member = 2208,
   exit_group = 4247,
+  modify_group_member_nickname = 2300,
 }
 
 export interface IBanMemberTo {
@@ -139,6 +140,15 @@ export interface ICgiRequestWithKickGroupMember extends ICgiRequestWithGroupApiC
   Uid: string
 }
 
+/**
+ * @version v6.9.28-21358~
+ */
+export interface ICgiRequestWithModifyGroupMemberNickname extends Required<ICgiRequestWithGroupApiCompat> {
+  OpCode: ESsoGroupOp.modify_group_member_nickname
+  Uid: string
+  Nick: string
+}
+
 export interface ICgiRequestWithExitGroup extends ICgiRequestWithGroupApiCompat {
   OpCode: ESsoGroupOp.exit_group
   Uin: number
@@ -161,6 +171,7 @@ export type ICgiRequestUnion =
   | ICgiRequestWithExitGroup
   | ICgiRequestWithGetGroupList
   | ICgiRequestWithGetGroupMemberList
+  | ICgiRequestWithModifyGroupMemberNickname
 
 export interface ICgiRequest {
   /**
